@@ -1,0 +1,41 @@
+<!DOCTYPE html> <!-- Declares the document type and version of HTML (HTML5) -->
+<html>
+<head >
+    <!--<meta charset="UTF-8">  <!-- This ensures the page and form input use UTF-8 encoding -->
+    <title>Exam</title> <!-- Sets the title of the page, displayed on the browser tab -->
+
+    <script>
+        async function loadExam() { 
+            // Defines an asynchronous function to fetch the exam content
+            const response = await fetch('/exam'); 
+            // Sends a request to the server to get the exam content
+
+            const examText = await response.text(); 
+            // Converts the response into plain text
+
+            document.getElementById('exam-content').textContent = examText; 
+            // Inserts the fetched exam content into the <pre> element
+        }
+
+        window.onload = loadExam; 
+        // Calls loadExam() when the page finishes loading
+    </script>
+    
+</head>
+<body>
+    <h1>Exam Form</h1> <!-- Displays a heading for the exam form -->
+
+    <form action="/submit" method="post"> 
+        <!-- Creates a form that sends user input to the "/submit" endpoint via POST -->
+
+        <pre id="exam-content"></pre> 
+        <!-- Preformatted text block to display the exam content from the server -->
+
+        <!-- Input field where the user can type their answer -->
+        <input type="text" name="answer" placeholder="Your answer here" />
+
+        <!-- Submit button to send the user's answer to the server -->
+        <input type="submit" value="Submit Exam" />
+    </form>
+</body>
+</html>
