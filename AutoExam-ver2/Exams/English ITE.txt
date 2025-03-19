@@ -1,0 +1,209 @@
+1. What is the primary function of a motherboard?  
+   - Connects and integrates all computer components  
+   - Stores data permanently  
+   - Provides power to the system  
+   - Cools the processor  
+   - Connects external devices  
+
+2. Which component is responsible for executing instructions in a computer?  
+   - CPU (Central Processing Unit)  
+   - RAM (Random Access Memory)  
+   - GPU (Graphics Processing Unit)  
+   - PSU (Power Supply Unit)  
+   - SSD (Solid State Drive)  
+
+3. What type of memory is used for temporary storage while the computer is running?  
+   - RAM (Random Access Memory)  
+   - ROM (Read-Only Memory)  
+   - HDD (Hard Disk Drive)  
+   - SSD (Solid State Drive)  
+   - Cache Memory  
+
+4. Which storage device provides the fastest data access speeds?  
+   - SSD (Solid State Drive)  
+   - HDD (Hard Disk Drive)  
+   - USB Flash Drive  
+   - CD-ROM  
+   - Tape Drive  
+
+5. Which type of power connector is used for internal hard drives?  
+   - SATA Power Connector  
+   - USB Type-A  
+   - HDMI Connector  
+   - VGA Connector  
+   - Ethernet Connector  
+
+6. Which computer port is primarily used to connect external displays?  
+   - HDMI (High-Definition Multimedia Interface)  
+   - USB Type-C  
+   - RJ-45  
+   - PCIe  
+   - PS/2  
+
+7. What is the primary purpose of a heatsink?  
+   - Dissipates heat from components  
+   - Stores electrical energy  
+   - Converts AC to DC power  
+   - Enhances network connectivity  
+   - Increases data storage capacity  
+
+8. Which component determines the number of USB, SATA, and PCIe slots available on a motherboard?  
+   - Chipset  
+   - RAM  
+   - PSU  
+   - CPU  
+   - CMOS Battery  
+
+9. Which type of memory retains data even when the power is turned off?  
+   - ROM (Read-Only Memory)  
+   - RAM (Random Access Memory)  
+   - Cache Memory  
+   - Virtual Memory  
+   - DRAM  
+
+10. Which connector is most commonly used for wired Ethernet networks?  
+    - RJ-45  
+    - RJ-11  
+    - USB-C  
+    - HDMI  
+    - Thunderbolt  
+
+11. Which device is responsible for converting AC power from a wall outlet into usable DC power for a computer?  
+    - PSU (Power Supply Unit)  
+    - GPU (Graphics Processing Unit)  
+    - NIC (Network Interface Card)  
+    - UPS (Uninterruptible Power Supply)  
+    - RAM  
+
+12. Which type of expansion slot is commonly used for high-performance graphics cards?  
+    - PCIe (Peripheral Component Interconnect Express)  
+    - AGP (Accelerated Graphics Port)  
+    - ISA (Industry Standard Architecture)  
+    - SATA  
+    - USB  
+
+13. What is the purpose of the CMOS battery on a motherboard?  
+    - Maintains BIOS settings and system time  
+    - Powers the CPU  
+    - Provides additional RAM storage  
+    - Increases GPU performance  
+    - Speeds up USB data transfers  
+
+14. Which computer component houses the operating system and user files?  
+    - Hard Drive (HDD/SSD)  
+    - RAM  
+    - CPU  
+    - GPU  
+    - PSU  
+
+15. What does BIOS stand for?  
+    - Basic Input Output System  
+    - Binary Integrated Operating System  
+    - Built-In Operating Software  
+    - Backup Input Output Setup  
+    - Bus Interface Optimization System  
+
+16. Which device allows a computer to communicate over a network?  
+    - Network Interface Card (NIC)  
+    - Sound Card  
+    - CPU  
+    - SSD  
+    - PSU  
+
+17. Which component is used to cool the CPU?  
+    - Fan or Liquid Cooling System  
+    - RAM  
+    - PSU  
+    - HDD  
+    - BIOS  
+
+18. Which type of display panel provides the best colors?  
+    - OLED  
+    - IPS (In-Plane Switching)  
+    - TN (Twisted Nematic)  
+    - VA (Vertical Alignment)  
+    - CRT  
+
+19. Which connector is used to transfer both video and audio signals?  
+    - DisplayPort  
+    - VGA  
+    - DVI  
+    - PS/2  
+    - Ethernet  
+
+20. Which component processes graphics in a computer?  
+    - GPU (Graphics Processing Unit)  
+    - CPU  
+    - RAM  
+    - PSU  
+    - Sound Card  
+
+21. What does SATA stand for?  
+    - Serial Advanced Technology Attachment  
+    - System Automated Transfer Adapter  
+    - Storage And Transfer Architecture  
+    - Software Automated Technology Access  
+    - Serial Access to Transmissions  
+
+22. Which device stores the operating system on most modern computers?  
+    - SSD (Solid State Drive)  
+    - HDD (Hard Disk Drive)  
+    - RAM  
+    - BIOS  
+    - GPU  
+
+23. What is the function of a power supply unit (PSU)?  
+    - Converts AC to DC power  
+    - Cools the system  
+    - Stores files permanently  
+    - Boosts network speeds  
+    - Displays graphics  
+
+24. What is the most common RAM type used in modern PCs?  
+    - DDR4  
+    - DDR3  
+    - DDR2  
+    - SDRAM  
+    - SRAM  
+
+25. Which bus connects the CPU to the RAM?  
+    - Front Side Bus (FSB)  
+    - PCIe  
+    - SATA  
+    - USB  
+    - Ethernet  
+
+26. What does GPU stand for?  
+    - Graphics Processing Unit  
+    - General Processing Utility  
+    - Graphical Power Unit  
+    - Gaming Performance Upgrade  
+    - Graphite Processor Unit  
+
+27. Which storage device is typically used for backup storage?  
+    - External HDD  
+    - RAM  
+    - PSU  
+    - CPU  
+    - NIC  
+
+28. What is the primary function of a computer case?  
+    - Protects internal components  
+    - Increases processing speed  
+    - Connects network devices  
+    - Converts power  
+    - Manages storage  
+
+29. What is a primary feature of an NVMe SSD?  
+    - High-speed data transfer  
+    - Uses optical storage  
+    - Requires additional power cables  
+    - Uses magnetic storage  
+    - Built-in Wi-Fi  
+
+30. Which port is used for connecting audio devices?  
+    - 3.5mm Audio Jack  
+    - USB Type-C  
+    - HDMI  
+    - DVI  
+    - RJ-45  
