@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer  # Import necessary classes to create an HTTP server
+import socket  # Import library to handle IP addresses
 import urllib.parse  # Import library to handle URL-encoded data (used in POST requests)
 import os  # Import library for handling file paths
 import datetime  # Import library to handle date and time
@@ -7,17 +8,27 @@ import re
 import consts
 
 class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requests
-
+#=============================================================================================
+#   Global variables
     source_exam = None
     question_answer_dict = None
     exmam_file_path = None
+    left_to_right = None
 
+
+#=============================================================================================
+    def log_message(self, format, *args):
+        # Override the default log_message method to suppress logging
+        pass
+
+#==================================================================================================
     def do_GET(self):  # Handle GET requests (when the user opens the exam page)
         if self.path == '/':  # If the user accesses the root URL ('/')
             self.send_response(200)  # Send HTTP 200 (OK) response
             self.send_header("Content-Type", "text/html; charset=utf-8")  # Set content type to UTF-8 encoded HTML
             self.end_headers()  # End HTTP headers
 
+            
             # Use content if available, otherwise read and cache it
             if not ExamHandler.source_exam:
                 ExamHandler.source_exam = self.read_exam_txt_file()
@@ -31,17 +42,39 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
             
             html_form = self.build_exam_html_from_txt(shuffled_exam)  # Build the html exam form from the text file
 
+            try:
+                self.wfile.write(html_form.encode('utf-8'))  # Send HTML to the client
+            except ConnectionAbortedError:
+                print(self.client_address[0] +  "  disconnected before the response was fully sent.")
 
-            self.wfile.write(html_form.encode('utf-8'))  # Send HTML to the client
+        elif self.path == '/favicon.ico':  # Handle requests for favicon.ico
+            self.send_response(204)  # Send HTTP 204 (No Content) response
+            self.end_headers()
 
-
-
+        elif self.path == '/thank-you':
+            self.send_response(200)
+            self.end_headers()
+           
         else:  # If the URL is not '/', return a 404 error
             self.send_response(404)  # Send HTTP 404 (Not Found)
             self.end_headers()  # End HTTP headers
 
-# =======================================================================================
-   
+#==================================================================================================
+    def is_hebrew_text(self,lines):
+        for line in lines:
+            for char in line:
+                if "\u0590" <= char <= "\u05FF":  # Hebrew Unicode range
+                    return True
+        return False
+    
+    def set_text_direction(self, exam_content):
+        if self.is_hebrew_text(exam_content):  # Check if the exam contains Hebrew text
+            ExamHandler.left_to_right = 'dir="rtl"'  # Hebrew Text direction
+        else:
+            ExamHandler.left_to_right = ''  # Default text direction
+
+#==================================================================================================
+
     def count_correct_answers_percent(self, submitted_answers):
         """
         Count the percentage of correct answers in the submitted exam."""
@@ -50,8 +83,8 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
         for question, answer in submitted_answers.items():
             question = question[question.index(consts.start_of_question_mark):]
             if question in ExamHandler.question_answer_dict \
-                and ExamHandler.question_answer_dict[question] == answer:
-                correct_answers += 1
+                and ExamHandler.question_answer_dict[question] == \
+                    answer:correct_answers += 1
 
         total_questions = len(ExamHandler.question_answer_dict)
                                                      # for one digit after dot add  *100,1)
@@ -99,54 +132,64 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
         with open(exam_file_path, 'r', encoding="utf-8") as file:  # Open the file with UTF-8 encoding
             exam_content = file.readlines()  # Read all lines from the file
         return exam_content
+
+#========================================================================================    
     
-
     def build_exam_html_from_txt(self, exam_content):
-        # Build HTML form for the exam
+    # Build HTML form for the exam
+        html_form = consts.html_pre_exam_page # Add the pre-exam notification page
 
-            """
-            html_form = consts.html_start_with_JS
-            html_form += "<h1>Exam-" + consts.exam_txt_file_name[:-4]
-            html_form += "<form action='/submit' method='post' onsubmit='return validateForm()'>"  # Form to submit answers
-            """
-            html_form = "<html><head><meta charset='UTF-8'><title>Exam</title></head><body>"
-            html_form += "<h1>Exam-" + consts.exam_txt_file_name[:-4]  + "</h1><form action='/submit' method='post'>"  # Form to submit answers
+        if ExamHandler.left_to_right == None: # Set text direction if in Hebrew
+            self.set_text_direction(exam_content)
 
+        html_form += '<html ' + ExamHandler.left_to_right + '>'
+        html_form += consts.html_start
+        html_form += consts.html_js
+        html_form += consts.html_middle
 
-            question_number = 0  # Counter for questions
-            current_question = ""  # Store the current question
-            answers = []  # List to store answer options
+        question_number = 0  # Counter for questions
+        current_question = ""  # Store the current question
+        answers = []  # List to store answer options
 
-            for line in exam_content:  # Process each line from the exam file
-                line = line.strip()  # Remove leading and trailing whitespace
-                if not line:
-                    continue  # Skip empty lines
+        for line in exam_content:  # Process each line from the exam file
+            line = line.strip()  # Remove leading and trailing whitespace
+            if not line:
+                continue  # Skip empty lines
 
-                if line.endswith(consts.end_of_question_mark):  # If the line is a question
-                    if current_question and answers:  # If there's a previous question, add it to the form
-                        html_form += f"<p><b>{current_question}</b></p>"  # Display the question
-                        for answer in answers:  # List answers as radio buttons
-                            html_form += f"<input type='radio' name='{current_question}' value='{answer}'> {answer}<br>"
+            if line.endswith(consts.end_of_question_mark):  # If the line is a question
+                if current_question and answers:  # If there's a previous question, add it to the form
+                    html_form += f"<fieldset><legend><b>{current_question}</b></legend>"  # Display the question
+                    for answer in answers:  # List answers as radio buttons
+                        html_form += f"<input type='radio' name='{current_question}' value='{answer}'> {answer}<br>"
+                    html_form += "</fieldset>"
 
-                    question_number += 1  # Increment question counter
-                    current_question = line  # Store new question
-                    answers = []  # Reset answer list
-                else:
-                    answers.append(line)  # Add line as an answer option
-            
+                question_number += 1  # Increment question counter
+                current_question = line  # Store new question
+                answers = []  # Reset answer list
+            else:
+                answers.append(line)  # Add line as an answer option
 
-            # Add the last question and answers to the form
-            if current_question and answers:
-                html_form += f"<p><b>{current_question}</b></p>"
-                for answer in answers:
-                    html_form += f"<input type='radio' name='{current_question}' value='{answer}'> {answer}<br>"
+        # Add the last question and answers to the form
+        if current_question and answers:
+            html_form += f"<fieldset><legend><b>{current_question}</b></legend>"
+            for answer in answers:
+                html_form += f"<input type='radio' name='{current_question}' value='{answer}'> {answer}<br>"
+            html_form += "</fieldset>"
 
-            # Add user details fields and submit button
-            html_form += consts.user_details_textboxes
-            html_form += consts.submit_button
+        # Add user details fields and submit button
+        if ExamHandler.left_to_right == '':
+            html_form += consts.user_name_eng
+        else:
+            html_form += consts.user_name_heb
 
-            return html_form
+        html_form += consts.user_details_textboxes
+        html_form += consts.submit_button
 
+        html_form += "</form></body></html>"
+
+        return html_form
+
+#==================================================================================================
     def do_POST(self):  # Handle POST requests (when the exam is submitted)
         if self.path == '/submit':  # Check if the request is to submit answers
             content_length = int(self.headers['Content-Length'])  # Get the length of the submitted data
@@ -155,37 +198,61 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
 
             first_name = form_data.get('first_name', [None])[0]  # Get first name
             second_name = form_data.get('second_name', [None])[0]  # Get second name
+            cheating_attempts = form_data.get('cheating_attempts', [0])[0]  # Get cheating attempts
+            minutes = form_data.get('minutes', [0])[0]  # Get minutes
+            seconds = form_data.get('seconds', [0])[0]  # Get seconds
+            exam_timer = f"{minutes}:{seconds}"  # Format exam timer
+
+            exam_I_P = self.client_address[0]  # Gets the IP address of the client 
+
+            # ...existing code...
+            try:
+                netbios_name = socket.gethostbyaddr(exam_I_P)[0]  # Gets the NetBIOS name (hostname) of the client
+            except socket.herror:
+                netbios_name = "Unknown"  # Fallback if the hostname cannot be resolved
+            # ...use netbios_name as needed...
+
 
             # Extract questions and selected answers
             submitted_answers = {}
             for question, answers in form_data.items():
-                if question not in ['first_name', 'second_name', 'class', 'e-mail']:  # Ignore personal info fields
+                # Ignore personal and hidden info fields
+                if question not in ['first_name', 'second_name', 'class', 'e-mail',\
+                                    'cheating_attempts','minutes','seconds']:  
                     submitted_answers[question] = answers[0]  # Get the selected answer
 
 
             grade = self.count_correct_answers_percent(submitted_answers)
 
             # Format response for the user
-            response_html = f"<html><body><meta charset='UTF-8'><h2>{first_name} {second_name}, your exam was submitted successfully!</h2><h3>Your Answers:</h3><ul>"
+            response_html = f"<html {ExamHandler.left_to_right}><body><meta charset='UTF-8'><h2>{first_name} {second_name},\
+            your exam was submitted successfully!</h2><h3>Your Answers:</h3><ul>"
             for question, answer in submitted_answers.items():
                 response_html += f"<li><b>{question}</b>: {answer}</li>"
             
             response_html += f"<h1>Your grade is: {grade}%</h1>"
             response_html += "</ul></body></html>"
-
+          
             # Save the feedback to an HTML file
-            self.save_feedback(first_name, second_name, response_html, grade)
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(response_html.encode('utf-8'))
-
-    def save_feedback(self, first_name, second_name, response_html, grade):
+            self.save_feedback(first_name, second_name, response_html, grade, exam_timer, exam_I_P, netbios_name,cheating_attempts)
+            
+            try:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(response_html.encode('utf-8'))
+            except ConnectionAbortedError:
+                print(f"Client {self.client_address[0]} disconnected before the response was fully sent.")        
+            
+#==================================================================================================         
+#==================================================================================================
+    def save_feedback(self, first_name, second_name, response_html, grade,\
+                       exam_timer, exam_I_P,netbios_name, cheating_attempts):
         # Get the current date
         current_date = datetime.datetime.now().strftime("%Y-%m-%d")
         
         # Create the folder name
-        folder_name = consts.exam_txt_file_name[:-4] + " " + current_date
+        folder_name = consts.exam_txt_file_name + " " + current_date
         folder_name = os.path.join(os.path.dirname(__file__), folder_name)
 
         # Create the folder if it doesn't exist
@@ -201,12 +268,14 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(response_html)
         
-        # Summarize students' grades
+        # Summarize studet details
         summary_file_path = os.path.join(folder_name, consts.grades_file_name)
         with open(summary_file_path, 'a', encoding='utf-8') as summary_file:
-            summary_file.write(f"{current_time}:    {first_name} {second_name}- {grade}\n")
-
-    
+            summary_file.write(f"{current_time}:    {first_name} {second_name}- {grade} \
+            Cheat Attepts-{cheating_attempts}     I.P-{exam_I_P} PC_Name-{netbios_name}   Duration-{exam_timer} \n")
+        
+        print(f"{current_time}:    {first_name} {second_name}- {grade} \
+        Cheat Attepts-{cheating_attempts}  I.P-{exam_I_P} PC_Name-{netbios_name} Duration-{exam_timer} \n")
 
     def shuffle_exam_lines(self, lines: list[str]) -> list[str]:
         """
@@ -257,7 +326,7 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
         shuffled_lines = []
         for index, (question, answers) in enumerate(questions, start=1):
             # Rewrite question number to maintain correct numbering
-            question_text = re.sub(r"^\d+", str(index), question, 1)
+            question_text = re.sub(r"^\d+", str(index), question, count=1)
             shuffled_lines.append(question_text)
             shuffled_lines.extend(answers)
             shuffled_lines.append("")  # Add a blank line for readability
@@ -266,11 +335,28 @@ class ExamHandler(BaseHTTPRequestHandler):  # Define a class to handle HTTP requ
 
 
 #==================================================================================================
+def get_local_ip():
+        """
+        Get the local IP address of the machine running the server.
+        """
+        try:
+            # Create a socket connection to an external server
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # Use Google's public DNS server
+            local_ip = s.getsockname()[0]
+            s.close()
+        except Exception as e:
+            local_ip = "127.0.0.1"  # Fallback to localhost if there's an error
+            print(f"Error getting local IP address: {e}")
+        
+        return local_ip
 #==================================================================================================
 def run():  # Function to start the server
-    server_address = ('', 8000)  # Server listens on all available network interfaces, port 8000
+    server_address = ('', consts.server_port)  # Server listens on all available network interfaces, port taken from consts.py
     httpd = HTTPServer(server_address, ExamHandler)  # Create an HTTP server instance
-    print('Server running on port 8000...')  # Print server status message
+
+    print("Server socket", get_local_ip() + ":" + str(consts.server_port))  # Print the server address
+    print("Exam name:", consts.exam_txt_file_name)  # Print the exam file name
     httpd.serve_forever()  # Keep the server running indefinitely
 
 if __name__ == '__main__':  # Run the server when the script is executed

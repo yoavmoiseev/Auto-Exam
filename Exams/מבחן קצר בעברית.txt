@@ -1,0 +1,27 @@
+1. מהי הפונקציה העיקרית של לוח אם?  
+   - מחבר ומשלב את כל רכיבי המחשב  
+   - מאחסן נתונים לצמיתות  
+   - מספק חשמל למערכת  
+   - מקרר את המעבד  
+   - מחבר התקנים חיצוניים  
+
+2. איזה רכיב אחראי על ביצוע פקודות במחשב?  
+   - מעבד (CPU - Central Processing Unit)  
+   - זיכרון RAM (Random Access Memory)  
+   - כרטיס מסך (GPU - Graphics Processing Unit)  
+   - ספק כוח (PSU - Power Supply Unit)  
+   - כונן SSD (Solid State Drive)  
+
+3. איזה סוג זיכרון משמש לאחסון זמני בזמן שהמחשב פועל?  
+   - זיכרון RAM (Random Access Memory)  
+   - זיכרון ROM (Read-Only Memory)  
+   - כונן קשיח HDD (Hard Disk Drive)  
+   - כונן SSD (Solid State Drive)  
+   - זיכרון מטמון (Cache Memory)  
+
+4. איזה התקן אחסון מספק את מהירויות הגישה לנתונים הגבוהות ביותר?  
+   - כונן SSD (Solid State Drive)  
+   - כונן קשיח HDD (Hard Disk Drive)  
+   - כונן USB Flash  
+   - כונן CD-ROM  
+   - כונן סרט מגנטי (Tape Drive)  
