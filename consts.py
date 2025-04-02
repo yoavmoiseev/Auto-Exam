@@ -1,77 +1,40 @@
 # constant values for server.py
-import tkinter as tk
-from tkinter import messagebox
-import os  # Import library for handling file paths 
-
-#================================================================================================
-def select_exam_file(exams_folder_name = "Exams"):
-    """Opens a GUI form where the user can select a file from the 'Exams' folder."""
-    exams_folder = os.path.join(os.path.dirname(__file__), exams_folder_name)  # Path to 'Exams' folder
-
-    # Check if the folder exists
-    if not os.path.exists(exams_folder):
-        messagebox.showerror("Error", f"Folder '{exams_folder}' not found!")
-        return None
-
-    # Get the list of .txt files in the folder
-    exam_files = [f for f in os.listdir(exams_folder) if f.endswith('.txt')]
-
-    if not exam_files:
-        messagebox.showwarning("No Exams Found", "No exam files found in the 'Exams' folder.")
-        return None
-
-    # Function to handle selection
-    def on_select():
-        """Handles the selection of a file and closes the window."""
-        selected_index = listbox.curselection()
-        if not selected_index:
-            messagebox.showwarning("No Selection", "Please select an exam file.")
-            return
-        selected_file.set(exam_files[selected_index[0]])  # Store selected file
-        root.destroy()  # Close window
-
-    # Create the main GUI window
-    root = tk.Tk()
-    root.title("Select Exam File")
-    root.geometry("300x250")
-
-    # Create a StringVar to store the selected file
-    selected_file = tk.StringVar()
-
-    # Create and pack a label
-    tk.Label(root, text="Select an Exam File:", font=("Arial", 12)).pack(pady=10)
-
-    # Create and pack a listbox
-    listbox = tk.Listbox(root, selectmode=tk.SINGLE, font=("Arial", 10), height=len(exam_files))
-    for file in exam_files:
-        listbox.insert(tk.END, file)
-    listbox.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
-
-    # Create and pack a select button
-    tk.Button(root, text="Select", command=on_select).pack(pady=10)
-
-    # Run the event loop
-    root.mainloop()
-
-    # Return the full file path if a file was selected
-    return os.path.join(exams_folder, selected_file.get()) if selected_file.get() else None
-#================================================================================================
+import os  # Import library for handling file paths
+import select_exam_gui # Tkinter GUI for selecting exam files
 
 # Constants
+
+# Port number for the server,
+server_port = 8000 # change for multiple instances
+
 exam_folder_name = "Exams"  # Name of the folder containing exam files
-exam_full_path = select_exam_file(exam_folder_name)
+
+# Tkinter GUI for selecting an exam file from the specified folder
+exam_full_path = select_exam_gui.select_exam_file(exam_folder_name)
+
+# Get the file name without the path and extension
 exam_txt_file_name = os.path.basename(exam_full_path)[:-4]
 
-server_port = 8000
+# Use regular expressions to identify the question format in the exam file
+# d+ - one or more digits
+# \. - a period (dot) character
+# \s - whitespace character (space, tab, newline, etc.)
+# .* - zero or more characters (any character except newline)
+# \? - a question mark character
+# The pattern matches lines that start with a number followed by:
+# a period, a space, and then a question mark.
+# Current question format-  '1. What is a motherboard?'
+question_pattern = r"^\d+\.\s.*\?"
 
 grades_file_name = 'GRADES.txt'
 
+# The question format in the exam file
 start_of_question_mark = "."
 end_of_question_mark = '?'
 
-
+# HTML form with warning messages before starting the exam
 html_pre_exam_page = """
-            <!-- Notification Page before starting the exam -->
+            <!-- Warrning page before starting the exam -->
                             
             <div id="notification">
                 <h1 style="font-weight: bold; font-size: 50px; text-align: center;">
@@ -101,7 +64,7 @@ html_pre_exam_page = """
 
             """
 
-
+# HTML form with exam questions and user details
 html_start = """
         <head>
             <meta charset='UTF-8'>
@@ -114,8 +77,11 @@ html_start = """
             <script>
             """
 
+# JavaScript code for the exam form
+# This code is responsible for handling the exam timer and form validation
 js_script_file_name = "script.js"
 
+# Read the JavaScript file and store its content in a variable
 def read_js(file_name = js_script_file_name):
     """
     Read the JS file and return it as a string.
@@ -129,31 +95,30 @@ def read_js(file_name = js_script_file_name):
         js_content = file.read()  # Read file content
     return js_content
 
-
+# Add the JavaScript code to the HTML form
 html_js = read_js()
 
-         
-
+# Combine the HTML and JavaScript code       
 html_middle = """</script>
             </head><body> 
 
-            <h1>Exam-""" + exam_txt_file_name + """</h1>
+            <h1>""" + exam_txt_file_name + """</h1>
         
             <form action='/submit' method='post' onsubmit='return validateForm()'>
             """
-
+# User details textboxes for English exam from
 user_name_eng = """
                 <br>
                 <label style='font-size: 20px; margin-right: 20px;'>First Name: <input type='text' name='first_name' required></label>
                 <label style='font-size: 20px; margin-right: 20px;'>Last Name: <input type='text' name='second_name' required></label>
                 """
-
+# User details textboxes for Hebrew exam form
 user_name_heb = """
                 <br>
                 <label style='font-size: 20px; margin-right: 20px;'>שם פרטי: <input type='text' name='first_name' required></label>
                 <label style='font-size: 20px; margin-right: 20px;'>שם משפחה: <input type='text' name='second_name' required></label>
                 """
-              
+# Values that should be passed to the server when the exam is submitted             
 user_details_textboxes = """                
                 <!-- Hidden input fields for transfering values from client to server -->
                 <input type='hidden' id='cheating_attempts_input' name='cheating_attempts'> 
@@ -165,7 +130,9 @@ user_details_textboxes = """
                 <br><br>
                 """
 
-
+# The Submit button then sends the form data to the server for processing
+# The form uses the POST method to send the data to the server at the '/submit' endpoint
+# The form includes a JavaScript function to validate the input before submission
 submit_button = """
                     <input type='submit' value='Submit Exam' style='font-size: 15px; font-weight: bold; padding: 15px 30px; background-color: red; color: white; border-radius: 20px; cursor: pointer;'>
                     </form></body></html>

@@ -3,130 +3,122 @@
 //=============Global variables====================================================================
 Cheating_attempts = 0; // Counter for cheating attempts
 
-
 //=============Functions====================================================================
-// Blocks the exmam subbmit until all questions are answered
+// Blocks the exam submission until all questions are answered
 function validateForm() {
-    var questions = document.getElementsByTagName('fieldset');
-    
-    for (var i = 0; i < questions.length; i++) {
-        var inputs = questions[i].getElementsByTagName('input');
-        var answered = false;
-        for (var j = 0; j < inputs.length; j++) {
-            if (inputs[j].checked) {
-                answered = true;
-                break;
+    // Get all fieldsets (each representing a question)
+    var questions = document.getElementsByTagName('fieldset'); 
+    // Loop through each question
+    for (var i = 0; i < questions.length; i++) { 
+        // Get all input elements (answers) within the question
+        var inputs = questions[i].getElementsByTagName('input'); 
+        var answered = false; // Flag to check if the question is answered
+        // Loop through all answers for the current question
+        for (var j = 0; j < inputs.length; j++) { 
+            if (inputs[j].checked) { // Check if the current answer is selected
+                answered = true; // Mark the question as answered
+                break; // Exit the loop as we found an answer
             }
         }
-        if (!answered) {
-            alert('Please answer all questions before submitting the exam.');
-            return false;
+        if (!answered) { // If the question is not answered
+            // Show an alert to the user
+            alert('Please answer all questions before submitting the exam.'); 
+            Cheating_attempts--; // Do not count this as a cheating attempt
+            return false; // Prevent form submission
         }
     }
 
-    send_values();
-    return true;
+    send_values(); // Call the function to send form values to the server
+    return true; // Allow form submission
 }
 
 //=================================================================================
-//=================================================================================     
-
-function send_values()
-// Send the values toserver! All these values should be manualy excluded from question list
-{    
-    document.getElementById('minutes_input').value = document.getElementById('minutes').innerHTML;
-    document.getElementById('seconds_input').value = document.getElementById('seconds').innerHTML;
-    document.getElementById('cheating_attempts_input').value = Cheating_attempts; // Set the value of the hidden input field
+// Sends the values to the server. 
+// All these values should be manually excluded from the question list
+function send_values() {  
+    // Set the hidden input field for minutes  
+    document.getElementById('minutes_input').value = document.getElementById('minutes').innerHTML; 
+    // Set the hidden input field for seconds
+    document.getElementById('seconds_input').value = document.getElementById('seconds').innerHTML; 
+    // Set the hidden input field for cheating attempts
+    document.getElementById('cheating_attempts_input').value = Cheating_attempts; 
 }
 
 //=================================================================================
-// Function to load the exam form dynamically
+// Function to load the exam in two steps:
+// 1. Show a notification to the student
+// 2. Load the exam after the student submits the notification
 function loadExam() {
-    document.getElementById('notification').style.display = 'none'; // Hide the notification
-    document.getElementById('exam-form').style.display = 'block'; // Show the exam form
+    // Hide the notification element
+    document.getElementById('notification').style.display = 'none'; 
+    // Show the exam form
+    document.getElementById('exam-form').style.display = 'block'; 
 
     startTimer(); // Start the timer
 }
 
-
 //=================================================================================
-//=================================================================================
-// Stopper, on page buttom, dispalying the time spent on the exam    
-var timer;
-    var totalSeconds = 0;
+// Timer functionality to display the time spent on the exam
+var timer; // Variable to store the timer interval
+var totalSeconds = 0; // Counter for total seconds elapsed
 
-    function startTimer() {
-        timer = setInterval(setTime, 1000);
-    }
+function startTimer() {
+    timer = setInterval(setTime, 1000); // Call the setTime function every second
+}
 
-    function setTime() {
-        ++totalSeconds;
-        document.getElementById("seconds").innerHTML = pad(totalSeconds % 60);
-        document.getElementById("minutes").innerHTML = pad(parseInt(totalSeconds / 60));
-    }
+function setTime() {
+    ++totalSeconds; // Increment the total seconds counter
+    // Update the seconds display (modulo 60 for seconds)
+    document.getElementById("seconds").innerHTML = pad(totalSeconds % 60); 
+    // Update the minutes display (total seconds divided by 60)
+    document.getElementById("minutes").innerHTML = pad(parseInt(totalSeconds / 60)); 
+}
 
-    function pad(val) {
-        var valString = val + "";
-        if (valString.length < 2) {
-            return "0" + valString;
-        } else {
-            return valString;
-        }
+function pad(val) {
+    // Function to add a leading zero to single-digit numbers
+    var valString = val + ""; // Convert the value to a string
+    if (valString.length < 2) { // If the string length is less than 2
+        return "0" + valString; // Add a leading zero
+    } else {
+        return valString; // Return the value as is
     }
-//=================================================================================
-function beep(duration=2000){
-    //play beep alert sound. duration in milisec
-    let ctx = new AudioContext(), osc = ctx.createOscillator();
-    osc.connect(ctx.destination);
-    osc.start();
-    setTimeout(() => osc.stop(), duration); 
 }
 
 //=================================================================================
-//========== Evets listeners=======================================================
-// Starts when the page is loaded
-window.onload = function() {
-    //Should start when the page is loaded
-    //Blocked by browser until the user interacts with the page
-    //use loadExam() instead  
-    
-    
-      
-};
-    
+// Function to play a beep sound for a specified duration
+function beep(duration = 2000) {
+    let ctx = new AudioContext(), // Create a new audio context
+        osc = ctx.createOscillator(); // Create an oscillator for generating sound
+    osc.connect(ctx.destination); // Connect the oscillator to the audio output
+    osc.start(); // Start the oscillator
+    setTimeout(() => osc.stop(), duration); // Stop the oscillator after the specified duration
+}
 
 //=================================================================================
-// Trying to prevent the user from using DevTools
+// Prevent the user from using DevTools
 document.addEventListener("keydown", function(event) {
     // Check for F12, Ctrl+Shift+I, Ctrl+Shift+J, and Ctrl+U
     if (
-        event.key === "F12" || 
+        event.key === "F12" || // Check if the F12 key is pressed
+        // Check for Ctrl+Shift+I or Ctrl+Shift+J
         (event.ctrlKey && event.shiftKey && (event.key === "I" || event.key === "J")) || 
-        (event.ctrlKey && event.key === "U")
+        (event.ctrlKey && event.key === "U") // Check for Ctrl+U
     ) {
         event.preventDefault(); // Prevent the default action
-        alert("DevTools is disabled during the exam!");
+        alert("DevTools is disabled during the exam!"); // Show an alert to the user
     }
 });
 
-// Prevent the user from right-clicking- DevTools
+// Prevent the user from right-clicking (to disable DevTools)
 document.addEventListener("contextmenu", function(event) {
-    event.preventDefault();
-    alert("Right-click is disabled during the exam!");
+    event.preventDefault(); // Prevent the default context menu
+    alert("Right-click is disabled during the exam!"); // Show an alert to the user
 });
 
-
 //=================================================================================
-//Event triggered when the page loose focus
-//Prevent the user from switching tabs
+// Event triggered when the page loses focus
+// Prevent the user from switching tabs
 window.onblur = function() {
-   
-
-    // If the user lives the page- count it as a cheating attempt
-    Cheating_attempts++;
-
-    beep(2000)
-
-
+    Cheating_attempts++; // Increment the cheating attempts counter
+    beep(2000); // Play a beep sound for 2 seconds
 };
-    
