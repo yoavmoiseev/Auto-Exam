@@ -4,9 +4,26 @@ from tkinter import messagebox  # Import tkinter for GUI elements
 import os  # Import library for handling file paths 
 
 #================================================================================================
-def select_exam_file(exams_folder_name = "Exams"):
+def add_max_questions_field(root):
+    """Adds a field to the GUI for the user to input the maximum number of questions.
+       Returns the StringVar associated with the entry field."""
+    # Create a frame to hold the label and entry field on the same line
+    frame = tk.Frame(root)
+    frame.pack(pady=5, padx=10, fill=tk.X)
+
+    # Create a label for the max questions field
+    tk.Label(frame, text="Limit the number of exam questions:", font=("Arial", 10)).pack(side="left", padx=5)
+
+    # Create an entry widget for the user to input the max number of questions
+    max_questions_var = tk.StringVar(value="1000")  # Default value is '1000'
+    max_questions_entry = tk.Entry(frame, textvariable=max_questions_var, font=("Arial", 10), width=5)
+    max_questions_entry.pack(side="left")
+    
+    return max_questions_var
+#================================================================================================
+def select_exam_file(exams_folder_name="Exams"):
     """Opens a GUI form where the user can select a file from the 'Exams' folder.
-        returns the full path of the selected file.
+       Returns the full path of the selected file and the max questions value.
     """
     exams_folder = os.path.join(os.path.dirname(__file__), exams_folder_name)  # Path to 'Exams' folder
 
@@ -29,16 +46,29 @@ def select_exam_file(exams_folder_name = "Exams"):
         if not selected_index:
             messagebox.showwarning("No Selection", "Please select an exam file.")
             return
+
+        # Validate the max questions field
+        try:
+            max_questions = int(max_questions_var.get())  # Try to convert to an integer
+            if max_questions <= 0:  # Ensure the value is positive
+                raise ValueError("Max questions must be a positive integer.")
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid positive integer for max questions.")
+            return
+
         selected_file.set(exam_files[selected_index[0]])  # Store selected file
         root.destroy()  # Close window
 
     # Create the main GUI window
     root = tk.Tk()
     root.title("Select Exam File")
-    root.geometry("300x250")
+    root.geometry("300x300")  # Adjusted height to accommodate the new field
 
     # Create a StringVar to store the selected file
     selected_file = tk.StringVar()
+
+    # Add the max questions field
+    max_questions_var = add_max_questions_field(root)
 
     # Create and pack a label
     tk.Label(root, text="Select an Exam File:", font=("Arial", 12)).pack(pady=10)
@@ -55,6 +85,7 @@ def select_exam_file(exams_folder_name = "Exams"):
     # Run the event loop
     root.mainloop()
 
-    # Return the full file path if a file was selected
-    return os.path.join(exams_folder, selected_file.get()) if selected_file.get() else None
+    # Return the full file path and max questions value
+    return os.path.join(exams_folder, selected_file.get()) if selected_file.get() else None, \
+        int(max_questions_var.get())  # Return the max questions value
 #================================================================================================

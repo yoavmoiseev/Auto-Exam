@@ -15,6 +15,7 @@ class ExamHandler(BaseHTTPRequestHandler):
     question_answer_dict = None
     exam_file_path = None
     text_direction = None
+    refresh_counter = {} # Counter for cheating attempts, Dictionary with IP as key and number of refreshes as value
 
     # =============================================================================================
     def log_message(self, format, *args):
@@ -90,8 +91,10 @@ class ExamHandler(BaseHTTPRequestHandler):
             if question in ExamHandler.question_answer_dict and \
                     ExamHandler.question_answer_dict[question] == answer:
                 correct_answers += 1
-        # calculate the total number of questions
-        total_questions = len(ExamHandler.question_answer_dict)
+        # number of questions- minimum between examinotor setted limit
+        #  and maximal number of questions in file
+        total_questions = min(consts.limited_questions_number, \
+                              len(ExamHandler.question_answer_dict))
         # calculate the percentage and round it to the nearest integer
         return round((correct_answers / total_questions) * 100) 
     # =============================================================================================
@@ -123,25 +126,30 @@ class ExamHandler(BaseHTTPRequestHandler):
             return file.readlines() # list of strings 
 
     # =============================================================================================
-    def _add_exam_questions_and_answers(self, exam_content):
+    def _add_exam_questions_and_answers(self, exam_content,\
+                                         max_num_questions = consts.limited_questions_number):
         """Add the exam questions and answers to the HTML form."""
         html_form = ""
         current_question = ""
         answers = []
+        questions_count = 0
 
         for line in exam_content:
             line = line.strip()  # Remove leading and trailing whitespaces
-            if not line:
+            if not line: # Skip empty lines
                 continue
 
             # Check if the line is a question
             if line.endswith(consts.end_of_question_mark):
                 if current_question and answers:  # If the current question has answers
                     html_form += self._build_question_html(current_question, answers)
-
+                
                 current_question = line
                 answers = []
-            else:
+                questions_count += 1
+                if questions_count > max_num_questions:  # Limit the number of questions
+                    break
+            else: # If it is an answer
                 answers.append(line)
 
         # Add the last question and its answers
@@ -186,6 +194,21 @@ class ExamHandler(BaseHTTPRequestHandler):
         """Handle POST requests (when the exam is submitted)."""
         if self.path == '/submit':
             self._handle_exam_submission()
+        # Handle refresh notification from the client
+        elif self.path == '/notify-refresh':
+            self._handle_refresh_notification()
+        elif self.path == '/exam-started':
+            self._handle_exam_started_notification()
+
+    #=====================================================================================
+    def get_client_netbios_name(self, client_ip):
+        """Get the NetBIOS name of the client using its IP address."""    
+        try:
+                netbios_name = socket.gethostbyaddr(client_ip)[0]
+        except socket.herror:
+            netbios_name = "Unknown"
+        return netbios_name
+
     #=====================================================================================
     def _handle_exam_submission(self):
         """Handles the student submitted exam page."""
@@ -207,10 +230,7 @@ class ExamHandler(BaseHTTPRequestHandler):
         exam_timer = f"{minutes}:{seconds}"
         # Get the client's IP address and NetBIOS name
         client_ip = self.client_address[0]
-        try:
-            netbios_name = socket.gethostbyaddr(client_ip)[0]
-        except socket.herror:
-            netbios_name = "Unknown"
+        netbios_name = self.get_client_netbios_name(client_ip)
        
         # Build a dictionary of the submitted question answer pairs
         submitted_answers = {
@@ -254,6 +274,32 @@ class ExamHandler(BaseHTTPRequestHandler):
         response_html += f"<h1>Your grade is: {grade}%</h1></ul></body></html>"
         return response_html
     #============================================================================================
+    def _format_exam_details_string(self, curr_time, first_name, second_name, grade, exam_timer, client_ip, netbios_name, cheating_attempts):
+        """Format the exam details string."""
+        try:
+            # Get the number of refresh attempts for the client IP
+            refresh_counter = ExamHandler.refresh_counter[client_ip][1]
+        except KeyError:
+            # If the client IP is not in the refresh counter, set it to 0
+            refresh_counter = 0
+
+        # Convert the time strings into datetime objects
+        start_time = datetime.datetime.strptime(ExamHandler.refresh_counter[client_ip][0], "%H:%M:%S")
+        current_time = datetime.datetime.strptime(datetime.datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+
+        # Convert exam_timer (e.g., "10:30") into a timedelta
+        minutes, seconds = map(int, exam_timer.split(":"))
+        exam_duration = datetime.timedelta(minutes=minutes, seconds=seconds)
+
+        # Calculate the time gap
+        time_gap = current_time - start_time - exam_duration
+        time_gap_seconds = time_gap.total_seconds()
+
+        return (f"{curr_time}: {first_name} {second_name}-{grade}  "
+                f"Refreshes-{refresh_counter} Cheat Attempts-{cheating_attempts} IP-{client_ip} "
+                f"PC_Name-{netbios_name} Duration-{exam_timer} Time Gap-{time_gap}\n")
+
+    #============================================================================================
     def _save_feedback(self, first_name, second_name, response_html, grade,\
                         exam_timer, client_ip, netbios_name, cheating_attempts):
         """Save the exam feedback and summary to files."""
@@ -271,16 +317,16 @@ class ExamHandler(BaseHTTPRequestHandler):
 
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(response_html)
+
+        exam_details = self._format_exam_details_string(current_time, first_name,\
+            second_name, grade, exam_timer, client_ip, netbios_name, cheating_attempts)
+        
         # File that contains the summary of all students' grades
         summary_file_path = os.path.join(folder_name, consts.grades_file_name)
         with open(summary_file_path, 'a', encoding='utf-8') as summary_file:
-            summary_file.write(f"{current_time}: {first_name} {second_name}-{grade}  "
-                               f"Cheat Attempts-{cheating_attempts} IP-{client_ip} "
-                               f"PC_Name-{netbios_name} Duration-{exam_timer}\n")
+            summary_file.write(exam_details)
         # Print notification to console at exam subbmit
-        print(f"{current_time}: {first_name} {second_name}-{grade} "
-              f"Cheat Attempts-{cheating_attempts} IP-{client_ip} "
-              f"PC_Name-{netbios_name} Duration-{exam_timer}")
+        print(exam_details)
 
     # =============================================================================================
     def _shuffle_exam_lines(self, lines):
@@ -329,6 +375,43 @@ class ExamHandler(BaseHTTPRequestHandler):
 
         return shuffled_lines
 
+    def _handle_exam_started_notification(self):
+        """Handle notifications when the exam is started."""
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        notification_data = urllib.parse.parse_qs(post_data.decode())
+
+        # Print notification about exam start time and client IP
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")  # Get the current timestamp
+     
+        #!!!!!!!!!!!!!!!!!  
+        # Save the exam start time for the client IP
+        client_ip = self.client_address[0]
+        if client_ip not in ExamHandler.refresh_counter:
+            ExamHandler.refresh_counter[client_ip] = [current_time, -1]  # Initialize with -1 refreshes and current time
+            print(f"{current_time}: Exam started-   {self.client_address[0]}")
+
+        # Send a response to acknowledge the notification
+        self.send_response(200)
+        self.end_headers()
+
+    # =============================================================================================
+    def _handle_refresh_notification(self):
+        """Handle notifications when the page is refreshed."""
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        notification_data = urllib.parse.parse_qs(post_data.decode())
+
+        # Increment cheating attempts for the client
+        client_ip = self.client_address[0]
+        if client_ip in ExamHandler.refresh_counter:
+            ExamHandler.refresh_counter[client_ip][1] += 1  # Increment the refresh count 
+            print(f"Page refresh from  {self.client_address[0]} PC_Name- {self.get_client_netbios_name(client_ip)}")
+
+        # Send a response to acknowledge the notification
+        self.send_response(200)
+        self.end_headers()
+
 
 # =============================================================================================
 def get_local_ip():
@@ -353,7 +436,9 @@ def run():
     httpd = HTTPServer(server_address, ExamHandler)
 
     print(f"Server socket: {get_local_ip()}:{consts.server_port}")
-    print(f"Exam name: {consts.exam_txt_file_name}")
+
+    curret_time= datetime.datetime.now().strftime('%H:%M:%S')
+    print(f"{curret_time}:  Exam name: {consts.exam_txt_file_name}")
     httpd.serve_forever()
 
 

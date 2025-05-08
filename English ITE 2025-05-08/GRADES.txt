@@ -1,0 +1,4 @@
+13-57-10: PageRefreshes Only-0  Refreshes-3 Cheat Attempts-0 IP-10.0.0.65 PC_Name-S6 Duration-00:45 Time Gap-0:00:14
+13-58-14: Cheat Attemps-33  Refreshes-0 Cheat Attempts-4 IP-10.0.0.79 PC_Name-S7 Duration-02:35 Time Gap-0:00:01
+13-59-01: James Bond-67  Refreshes-0 Cheat Attempts-0 IP-10.0.0.96 PC_Name-S8 Duration-03:43 Time Gap-0:00:00
+14-02-23: Yoav Moiseev-0  Refreshes-0 Cheat Attempts-5 IP-127.0.0.1 PC_Name-YM Duration-01:33 Time Gap-0:00:01

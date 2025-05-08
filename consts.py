@@ -10,10 +10,17 @@ server_port = 8000 # change for multiple instances
 exam_folder_name = "Exams"  # Name of the folder containing exam files
 
 # Tkinter GUI for selecting an exam file from the specified folder
-exam_full_path = select_exam_gui.select_exam_file(exam_folder_name)
+get_data_from_gui = select_exam_gui.select_exam_file(exam_folder_name)
+exam_full_path = get_data_from_gui[0]  # Full path of the selected exam file
+# The examinator can limit the number of questions that will be 
+# presented to user from the entire exam file.
+# The question selection is random from the entire exam file questions list.
+limited_questions_number = get_data_from_gui[1]  # Number of questions to be selected
 
 # Get the file name without the path and extension
 exam_txt_file_name = os.path.basename(exam_full_path)[:-4]
+
+
 
 # Use regular expressions to identify the question format in the exam file
 # d+ - one or more digits

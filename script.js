@@ -54,6 +54,7 @@ function loadExam() {
     // Show the exam form
     document.getElementById('exam-form').style.display = 'block'; 
 
+    send_exam_start_notification(); // Send a notification to the server
     startTimer(); // Start the timer
 }
 
@@ -95,17 +96,33 @@ function beep(duration = 2000) {
 }
 
 //=================================================================================
+// Send an exam start notification to the server
+function send_exam_start_notification() {
+    // Use the navigator.sendBeacon method to send a notification to the server
+    navigator.sendBeacon('/exam-started', JSON.stringify({
+        message: "exam-started",
+        timestamp: new Date().toISOString() // Add a timestamp for the event
+    }));
+}
+
+//=================================================================================
 // Prevent the user from using DevTools
+// Prevent the user from using DevTools and certain key combinations
+//  !!!!!!!!!! to be continued !!!!!!!!!!!
 document.addEventListener("keydown", function(event) {
-    // Check for F12, Ctrl+Shift+I, Ctrl+Shift+J, and Ctrl+U
+    // Check for F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+A, and Ctrl+C
     if (
         event.key === "F12" || // Check if the F12 key is pressed
-        // Check for Ctrl+Shift+I or Ctrl+Shift+J
-        (event.ctrlKey && event.shiftKey && (event.key === "I" || event.key === "J")) || 
-        (event.ctrlKey && event.key === "U") // Check for Ctrl+U
+        (event.ctrlKey && event.shiftKey && (event.key === "I" || event.key === "J")) || // Check for Ctrl+Shift+I or Ctrl+Shift+J
+        (event.ctrlKey && event.key === "u") || // Check for Ctrl+u
+        (event.ctrlKey && event.key === "U") || // Check for Ctrl+u
+        (event.ctrlKey && event.key === "a") || // Check for Ctrl+a
+        (event.ctrlKey && event.key === "A") || // Check for Ctrl+A
+        (event.ctrlKey && event.key === "c") || // Check for Ctrl+c
+        (event.ctrlKey && event.key === "C")  // Check for Ctrl+C
     ) {
         event.preventDefault(); // Prevent the default action
-        alert("DevTools is disabled during the exam!"); // Show an alert to the user
+        alert("This action is disabled during the exam!"); // Show an alert to the user
     }
 });
 
@@ -115,6 +132,16 @@ document.addEventListener("contextmenu", function(event) {
     alert("Right-click is disabled during the exam!"); // Show an alert to the user
 });
 
+
+//=================================================================================
+// Event triggered when the page is refreshed or closed
+window.addEventListener("beforeunload", function () {
+    // Use the navigator.sendBeacon method to send a notification to the server
+    navigator.sendBeacon('/notify-refresh', JSON.stringify({
+        message: "/notify-refresh",
+        timestamp: new Date().toISOString() // Add a timestamp for the event
+    }));
+});
 //=================================================================================
 // Event triggered when the page loses focus
 // Prevent the user from switching tabs
