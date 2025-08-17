@@ -1,0 +1,124 @@
+<html dir="rtl"><body><meta charset='UTF-8'><h2>יואב מוייסיב,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. מהי הפונקציה העיקרית של לוח אם?</b>                <pre dir='ltr'>מאחסן נתונים לצמיתות</pre></li><li><b>2. איזה רכיב אחראי על ביצוע פקודות במחשב?</b>                <pre dir='ltr'>כונן SSD (Solid State Drive)</pre></li><li><b>3. מה לדעתך היתרונות המרכזיים של שפת פיתון לעומת שפות תכנות אחרות</b>                <pre dir='ltr'>import socket
+import os
+import datetime
+import random
+import re
+import consts
+
+class Exam():
+    # =============================================================================================
+    # Global variables
+    source_exam = None
+    local_ip = None
+    question_answer_dict = None
+    exam_file_path = None
+    text_direction = None
+    # Counter for cheating attempts
+    cheat_counter = {} # Dictionary with IP as key and number of refreshes as value
+    
+    # =============================================================================================
+    def __init__(self):
+        """The Constructor. Prepares all common data for future objects """
+        # init only once
+        if Exam.source_exam != None:
+            return
+        # Initialize exam data 
+        # Read the exam file 
+        Exam.source_exam = Exam._read_exam_file(Exam)
+        # Adds open question addition if not entrend by file creator
+        Exam.source_exam = Exam.format_exam(Exam,Exam.source_exam)
+
+        # build the question-answer dictionary
+        Exam.question_answer_dict = Exam._build_question_answer_dict\
+                (self, Exam.source_exam)
+        
+        # verify if the current exam file is correctly formatted
+        Exam._build_exam_html(Exam, Exam.source_exam)
+        Exam._shuffle_exam_lines(Exam, Exam.source_exam)
+
+        Exam.local_ip = Exam.get_local_ip()
+        print(f"Server socket: {Exam.local_ip}:{consts.server_port}")
+            
+        curret_time= datetime.datetime.now().strftime('%H:%M:%S')
+        print(f"{curret_time}:  Exam name: {consts.exam_txt_file_name}")
+
+    # =============================================================================================
+    def format_exam(self, lines):
+        """
+        Automaticly finds and mark open questions by adding a specific answear
+        """
+        try:
+            while True:
+                lines.remove('\n') # Removes empty lines from from lines list
+        except:
+            pass
+
+        i = 0
+        while i < (len(lines)-1):
+            lines[i] = Exam.remove_spaces(Exam, lines[i])
+            lines[i+1] = Exam.remove_spaces(Exam, lines[i+1])
+            # Two sequence open questions- No between answears lines
+            if re.match(consts.question_pattern, lines[i]) and\
+                re.match(consts.question_pattern, lines[i+1]):
+                lines.insert(i+1,consts.open_exam[0])    
+            i += 1
+            
+        # if the last question has also NO answear line
+        if re.match(consts.question_pattern, lines[-1]):
+            lines.insert(len(lines),consts.open_exam[0])    
+
+        return lines
+    # =============================================================================================
+    def remove_spaces(self, line):
+        """remove leading whitespaces"""      
+        try:
+            while line[0] ==' ':
+                line = line[1:]
+        except:
+            print("Failed to remove leadig white-spaces", line)    
+        return line
+    # =============================================================================================
+    def is_hebrew_text(self, lines):
+        """Check if the given lines contain Hebrew text."""
+        for line in lines:
+            for char in line:
+                if "\u0590" <= char <= "\u05FF":  # Hebrew Unicode range
+                    return True
+        return False
+    # =============================================================================================
+    def set_text_direction(self, exam_content):
+        """Set the text direction based on the presence of Hebrew text."""
+        if Exam.is_hebrew_text(Exam, exam_content):
+            Exam.text_direction = 'dir="rtl"'
+        else:
+            Exam.text_direction = '' # left-to-right
+
+    # =============================================================================================
+    def remove_number(self, question):
+        """Remove the question number from the question string."""
+        try: # remove the question number
+            return question[question.index(consts.start_of_question_mark):]
+        except ValueError: # if the question mark missing
+            print(f"Invalid question format-  : {question}")
+            return question
+    # ============================================================================================
+    def count_correct_answers_percent(self, submitted_answers):
+        """Calculate the percentage of correct answers.
+           Compares the submitted answers to the correct answers."""
+        correct_answers = 0
+        for question, answer in submitted_answers.items(): # check each submitted answer
+            question = Exam.remove_number(Exam, question) # remove the question number
+            if question in Exam.question_answer_dict:
+                # An open question
+                if Exam.question_answer_dict[question] in consts.open_exam:
+                    return -1  # includes open questions, can NOT be checked
+                # Multiple choice
+                elif Exam.question_answer_dict[question] == answer:
+                    correct_answers += 1
+        # number of questions- minimum between examinotor setted limit
+        #  and maximal number of questions in file
+        total_questions = min(consts.limited_questions_number, \
+                              len(Exam.question_answer_dict))
+        # calculate the percentage and round it to the nearest integer
+        return round((correct_answers / total_questions) * 100) 
+    # =============================================================================================</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

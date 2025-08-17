@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox  # Import tkinter for GUI elements
 import os  # Import library for handling file paths 
+import consts
 
 #================================================================================================
 def add_max_questions_field(root):
@@ -20,6 +21,42 @@ def add_max_questions_field(root):
     max_questions_entry.pack(side="left")
     
     return max_questions_var
+#================================================================================================
+def port_number_field(root):
+    """Adds a field to the GUI for the user to input the port number.
+    With different port numbers several instance of exams can run"""
+    # Create a frame to hold the label and entry field on the same line
+    frame = tk.Frame(root)
+    frame.pack(pady=5, padx=10, fill=tk.X)
+
+    # Create a label for the port namber
+    tk.Label(frame, text="Port Number:", font=("Arial", 10)).pack(side="left", padx=5)
+
+    # Create an entry widget for the user to input the max number of questions
+    port_number_var = tk.StringVar(value="8000")  # Default value is '8000'
+    port_number_entry = tk.Entry(frame, textvariable=port_number_var, font=("Arial", 10), width=5)
+    port_number_entry.pack(side="left")
+    
+    return port_number_var
+#================================================================================================
+def shuffle_questions(root):
+    """Check-box for Shuffle Exam option"""
+    # Create a frame to hold the label and entry field on the same line
+    frame = tk.Frame(root)
+    frame.pack(pady=5, padx=10, fill=tk.X)
+
+    # Create a label for Shuffle exam
+    tk.Label(frame, text="Shuffle Exam:", font=("Arial", 10)).pack(side="left", padx=5)
+
+    # Create a BooleanVar to track the state of the checkbox
+    shuffle_var = tk.BooleanVar(value=True)  # Default checked (True)
+
+    # Create a Checkbutton and bind it to the BooleanVar
+    shuffle_entry = tk.Checkbutton(frame, variable=shuffle_var)
+    shuffle_entry.pack(side="left")
+
+    # Return the BooleanVar so its value can be accessed
+    return shuffle_var
 #================================================================================================
 def select_exam_file(exams_folder_name="Exams"):
     """Opens a GUI form where the user can select a file from the 'Exams' folder.
@@ -55,6 +92,19 @@ def select_exam_file(exams_folder_name="Exams"):
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid positive integer for max questions.")
             return
+        
+        # Validate the port number field
+        try:
+            port_number = int(port_number_var.get())  # Try to convert to an integer
+            if port_number <= 0:  # Ensure the value is positive
+                raise ValueError("Port number must be a positive integer.")
+            else:
+                consts.server_port = port_number
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Enter a positive integer for Port Number.")
+            return   
+
+        print("!!!!!!!!!!!!!!!!TBD- shuffle_var.select")
 
         selected_file.set(exam_files[selected_index[0]])  # Store selected file
         root.destroy()  # Close window
@@ -62,13 +112,20 @@ def select_exam_file(exams_folder_name="Exams"):
     # Create the main GUI window
     root = tk.Tk()
     root.title("Select Exam File")
-    root.geometry("300x300")  # Adjusted height to accommodate the new field
+    root.geometry("300x600")  # Adjusted height to accommodate the new field
 
     # Create a StringVar to store the selected file
     selected_file = tk.StringVar()
 
     # Add the max questions field
     max_questions_var = add_max_questions_field(root)
+
+    # Add the port-number field
+    port_number_var = port_number_field(root)
+
+    # Add the shuffle-exam check-botton
+    shuffle_var = shuffle_questions(root)
+    
 
     # Create and pack a label
     tk.Label(root, text="Select an Exam File:", font=("Arial", 12)).pack(pady=10)
@@ -87,5 +144,6 @@ def select_exam_file(exams_folder_name="Exams"):
 
     # Return the full file path and max questions value
     return os.path.join(exams_folder, selected_file.get()) if selected_file.get() else None, \
-        int(max_questions_var.get())  # Return the max questions value
+        int(max_questions_var.get()), shuffle_var.get() # Return the max questions value,
+                                                   # shuffle option value
 #================================================================================================

@@ -1,0 +1,731 @@
+<html dir="rtl"><body><meta charset='UTF-8'><h2>יואב מוייסיב,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. כיצד שימוש נכון בפונקציות יכול לשפר את מבנה ואיכות הקוד בפיתון?</b>   :                <pre>from http.server import BaseHTTPRequestHandler, HTTPServer
+import socket
+import urllib.parse
+import datetime
+import consts
+import Exam
+
+# Create first instance
+Ex = Exam.Exam()
+
+class ExamHandler(BaseHTTPRequestHandler):
+    # =============================================================================================
+    # =============================================================================================
+    def log_message(self, format, *args):
+        """Override the default log_message method to suppress logging."""
+        pass
+
+    # =============================================================================================
+    def do_GET(self):
+        """Handle GET requests (when the user opens the exam page)."""
+        if self.path == '/': # the main exam page
+            self._handle_exam_page_request()
+        elif self.path == '/favicon.ico': # Dissable favicon requests
+            self._handle_favicon_request()
+        else:
+            self._handle_404_request() # page not found
+    # =============================================================================================
+    def _handle_exam_page_request(self):
+        """Serve the exam page to the client."""
+        self.send_response(200) # OK
+        self.send_header("Content-Type", "text/html; charset=utf-8") # HTML content
+        self.end_headers() # end of headers
+
+        # shuffle the questions and answers in the exam
+        shuffled_exam = Ex._shuffle_exam_lines(Ex.source_exam)
+
+        # build the HTML form of the exam
+        html_form = Ex._build_exam_html(shuffled_exam)
+
+        try: # send the HTML form to the client
+            self.wfile.write(html_form.encode('utf-8'))
+        except ConnectionAbortedError:
+            print(f"{self.client_address[0]} disconnected before the response was fully sent.")
+    # =============================================================================================
+    def _handle_favicon_request(self):
+        """Handle requests for favicon.ico."""
+        self.send_response(204) # No Content
+        self.end_headers()
+    # =============================================================================================
+    def _handle_404_request(self): # page not found
+        """Handle requests for unknown URLs."""
+        self.send_response(404)
+        self.end_headers()
+    # =============================================================================================
+    def do_POST(self):
+        """Handle POST requests (when the exam is submitted)."""
+        if self.path == '/submit':
+            self._handle_exam_submission()
+        # Handle refresh notification from the client
+        elif self.path == '/notify-refresh':
+            self._handle_refresh_notification()
+        elif self.path == '/exam-started':
+            self._handle_exam_started_notification()
+        elif self.path == '/check_exam_file':
+            """Handle requests to check the exam file."""
+            # Send a simple HTTP 200 OK response
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Exam file check OK')
+    #=====================================================================================
+    def _handle_exam_submission(self):
+        """Handles the student submitted exam page."""
+        # Get the length of the POST data
+        content_length = int(self.headers['Content-Length']) 
+        # Get the POST data
+        post_data = self.rfile.read(content_length)
+        # Parse the POST data 
+        form_data = urllib.parse.parse_qs(post_data.decode())
+
+        # Get the user's from HTML form
+        first_name = form_data.get('first_name', [None])[0]
+        second_name = form_data.get('second_name', [None])[0]
+        # Get the exam duration
+        minutes = form_data.get('minutes', [0])[0]
+        seconds = form_data.get('seconds', [0])[0]
+        exam_timer = f"{minutes}:{seconds}"
+        # Get the client's IP address and NetBIOS name
+        try:
+            client_ip = self.client_address[0]
+        except:
+            print("No network connection!")
+            client_ip = "127.0.0.1"
+
+        netbios_name = Ex.get_client_netbios_name(client_ip)
+       
+        # Build a dictionary of the submitted question answer pairs
+        submitted_answers = {
+            question: answers[0]
+            for question, answers in form_data.items()
+            # Skip the user's details and hidden fields
+            if question not in ['first_name', 'second_name', 'class', 'e-mail',\
+                                  'minutes', 'seconds']
+        }
+
+        # Calculate the grade            
+        grade = Ex.count_correct_answers_percent(submitted_answers)
+        if grade < 0: # Open question exam
+            grade = consts.open_exam_grade
+        else: # Multiple choice
+            grade = str(grade) + " %"
+        # Build the HTML response for the user
+        response_html = Ex._build_response_html(first_name, second_name, submitted_answers, grade)
+        # Save the feedback to: folder named as the exam name + date, 
+        # add student details to summary file
+        Ex._save_feedback(first_name, second_name, response_html, grade,\
+                             exam_timer, client_ip, netbios_name)
+
+        try:# Send the response to the client
+            self.send_response(200) # OK        
+            self.send_header("Content-Type", "text/html; charset=utf-8") # Support Hebrew encoding  
+            self.end_headers() # End of headers
+            # Send the response html to the client
+            self.wfile.write(response_html.encode('utf-8'))
+        except ConnectionAbortedError: # Handle client disconnection
+            print(f"Client {self.client_address[0]}\
+                   disconnected before the response was fully sent.")
+    #=================================================================================================
+    def _handle_exam_started_notification(self):
+        """Handle notifications when the exam is started."""
+        self.headers['Content-Length']
+        # Get the current timestamp
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")  
+        # Save the exam start time for the client IP
+        client_ip = self.client_address[0]  #MUST be self or ExamHandler
+        if client_ip not in Ex.cheat_counter:
+            Ex.cheat_counter[client_ip] = [current_time, -1]  # Initialize with -1 refreshes and current time
+            print(f"{current_time}: Exam started-   {self.client_address[0]}")
+
+        # Send a response to acknowledge the notification
+        self.send_response(200)
+        self.end_headers()
+
+    # =============================================================================================
+    def _handle_refresh_notification(self):
+        """Handle notifications when the page is refreshed."""
+        content_length = int(self.headers['Content-Length'])
+        self.rfile.read(content_length)
+        # Increment cheating attempts for the client
+        client_ip = self.client_address[0] # MUST be self or ExamHandler
+        if client_ip in Ex.cheat_counter:
+            Ex.cheat_counter[client_ip][1] += 1  # Increment the refresh count 
+            if Ex.cheat_counter[client_ip][1] > 0:
+                print(f"Cheat attempt from-  {self.client_address[0]} PC_Name- {Ex.get_client_netbios_name(client_ip)}")
+
+        # Send a response to acknowledge the notification
+        self.send_response(200)
+        self.end_headers()
+# =============================================================================================
+# =============================================================================================
+def run(): 
+    """Start the server."""
+    server_address = ('', consts.server_port)
+    httpd = HTTPServer(server_address, ExamHandler)
+    httpd.serve_forever()
+
+if __name__ == '__main__':
+    run()</pre></li><li><b>2. איזה התקן אחסון מספק את מהירויות הגישה לנתונים הגבוהות ביותר?</b>   :                <pre>כונן סרט מגנטי (Tape Drive)</pre></li><li><b>3. מהי הפונקציה העיקרית של לוח אם?</b>   :                <pre>מאחסן נתונים לצמיתות</pre></li><li><b>4. האם לדעתך כל תלמיד צריך ללמוד תכנות (למשל בפייתון) בבית הספר?</b>   :                <pre># constant values for server.py
+import os  # Import library for handling file paths
+import select_exam_gui # Tkinter GUI for selecting exam files
+
+# Constants
+# Should be overrided by GUI
+source_exam = None
+
+# Port number for the server,
+# Can be overrided by GUI 
+server_port = 8000 # change for multiple instances
+
+open_exam = ["Programming task:", "Open Question/Multiple lines question/task:", "Type your answer here"]
+
+exam_folder_name = "Exams"  # Name of the folder containing exam files
+
+# Tkinter GUI for selecting an exam file from the specified folder
+get_data_from_gui = select_exam_gui.select_exam_file(exam_folder_name)
+exam_full_path = get_data_from_gui[0]  # Full path of the selected exam file
+# The examinator can limit the number of questions that will be 
+# presented to user from the entire exam file.
+# The question selection is random from the entire exam file questions list.
+limited_questions_number = get_data_from_gui[1]  # Number of questions to be selected
+
+# Get the file name without the path and extension
+exam_txt_file_name = os.path.basename(exam_full_path)[:-4]
+
+question_format_description = """
+!!!You can NOT procced with this exam file!!!
+There are incorrectly formatted questions in the exam file!!!
+The question should start with NUMBER and DOT- '1. Write three reason for...'
+Answears can NOT start with number and dot
+Multipule lines questions should include
+  Programming task:    text on second line!"""
+
+# Use regular expressions to identify the question format in the exam file
+# d+ - one or more digits
+# \. - a period (dot) character
+# \s - whitespace character (space, tab, newline, etc.)
+# .* - zero or more characters (any character except newline)
+# \? - a question mark character
+# The pattern matches lines that start with a number followed by:
+# a period, a space, and then a question mark.
+# Current question format-  '1. What is a motherboard?'
+question_pattern = r"^\d+\.\s.*"   #r"^\d+\.\s.*\?"
+
+grades_file_name = 'GRADES.txt'
+
+open_exam_grade = "unknown yet, exam will be evaluated later"
+
+exam_submitted = "your exam was submitted successfully"
+
+# The question format in the exam file
+start_of_question_mark = "."
+
+question_answear_delimiter = '   :'  
+
+# HTML form with warning messages before starting the exam
+html_pre_exam_page = """
+            <!-- Warrning page before starting the exam -->
+                            
+            <div id="notification">
+                <h1 style="font-weight: bold; font-size: 50px; text-align: center;">
+                    """ + exam_txt_file_name + """ 
+                </h1>
+                    
+                <p style="color: red; font-weight: bold; font-size: 18px; text-align: center;">
+                    Do NOT leave the exam page until the exam is submitted, otherwise, the exam will be dismissed
+                </p>
+                <p style="color: red; font-weight: bold; font-size: 18px; text-align: center;">
+                    НЕ покидайте страницу экзамена, пока он не будет отправлен, иначе он будет аннулирован
+                </p>
+                            <p style="color: red; font-weight: bold; font-size: 24px; text-align: center; direction: rtl;">
+                     אל תעזוב את דף הבחינה עד שהבחינה תוגש, אחרת היא תבוטל
+                </p>
+
+                </p>
+                            <p style="color: red; font-weight: bold; font-size: 20px; text-align: center; direction: rtl;">
+                       השתמש ב-CTRL + SHIF ימני או SHIFT שמאלי לסרוגים לשינוי כיוון הטקסט הנכתב  
+                 </p>
+
+
+                
+                <button onclick="loadExam()" style="display: block; margin: 50px auto; font-size: 50px; padding: 20px 40px; background-color: red; color: white; border: none; border-radius: 10px; cursor: pointer;">
+                    Start the Exam
+                </button>
+
+
+            </div>
+
+            <!-- Exam Form Section (Initially Hidden) -->
+            <div id="exam-form" style="display: none;">
+
+            """
+
+# HTML form with exam questions and user details
+html_start = """
+        <head>
+            <meta charset='UTF-8'>
+            <title>Exam</title>
+            <style>
+            body {
+                background-color: lightgray;
+            }
+            </style>
+            <script>
+            """
+
+# JavaScript code for the exam form
+# This code is responsible for handling the exam timer and form validation
+js_script_file_name = "script.js"
+
+# Read the JavaScript file and store its content in a variable
+def read_js(file_name = js_script_file_name):
+    """
+    Read the JS file and return it as a string.
+    :param file_name: Name of the JS file
+    :return: JS file content as a string
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # Get the script's directory
+    abs_path = os.path.join(script_dir, file_name)  # Join script directory with file name
+    
+    with open(abs_path, 'r', encoding="utf-8") as file:
+        js_content = file.read()  # Read file content
+    return js_content
+
+# Add the JavaScript code to the HTML form
+html_js = read_js()
+
+# Combine the HTML and JavaScript code       
+html_middle = """</script>
+            </head><body> 
+
+            <h1>""" + exam_txt_file_name + """</h1>
+        
+            <form action='/submit' method='post' onsubmit='return validateForm()'>
+            """
+# User details textboxes for English exam from
+user_name_eng = """
+                <br>
+                <label style='font-size: 20px; margin-right: 20px;'>First Name: <input type='text' name='first_name' required></label>
+                <label style='font-size: 20px; margin-right: 20px;'>Last Name: <input type='text' name='second_name' required></label>
+                """
+# User details textboxes for Hebrew exam form
+user_name_heb = """
+                <br>
+                <label style='font-size: 20px; margin-right: 20px;'>שם פרטי: <input type='text' name='first_name' required></label>
+                <label style='font-size: 20px; margin-right: 20px;'>שם משפחה: <input type='text' name='second_name' required></label>
+                """
+# Values that should be passed to the server when the exam is submitted             
+user_details_textboxes = """                
+                <!-- Hidden input fields for transfering values from client to server --> 
+                <input type='hidden' id='minutes_input' name='minutes'>
+                <input type='hidden' id='seconds_input' name='seconds'>
+
+                <br><br>
+                <div>Time: <span id="minutes">00</span>:<span id="seconds">00</span></div>
+                <br><br>
+                """
+
+# The Submit button then sends the form data to the server for processing
+# The form uses the POST method to send the data to the server at the '/submit' endpoint
+# The form includes a JavaScript function to validate the input before submission
+submit_button = """
+                    <input type='submit' value='Submit Exam' style='font-size: 15px; font-weight: bold; padding: 15px 30px; background-color: red; color: white; border-radius: 20px; cursor: pointer;'>
+                    </form></body></html>
+                """
+
+
+
+
+</pre></li><li><b>5. כתוב תוכנית בפיתון שמבצעת ניתוח בסיסי של משפט שהמשתמש מכניס?</b>   :                <pre>import socket
+import os
+import datetime
+import random
+import re
+import consts
+
+class Exam():
+    # =============================================================================================
+    # Global variables
+    source_exam = None
+    local_ip = None
+    question_answer_dict = None
+    exam_file_path = None
+    text_direction = None
+    # Counter for cheating attempts
+    cheat_counter = {} # Dictionary with IP as key and number of refreshes as value
+    
+    # =============================================================================================
+    def __init__(self):
+        """The Constructor. Prepares all common data for future objects """
+        # init only once
+        if Exam.source_exam != None:
+            return
+        # Initialize exam data 
+        # Read the exam file 
+        Exam.source_exam = Exam._read_exam_file(Exam)
+        # Adds open question addition if not entrend by file creator
+        Exam.source_exam = Exam.format_exam(Exam,Exam.source_exam)
+
+        # build the question-answer dictionary
+        Exam.question_answer_dict = Exam._build_question_answer_dict\
+                (self, Exam.source_exam)
+        
+        # verify if the current exam file is correctly formatted
+        Exam._build_exam_html(Exam, Exam.source_exam)
+        Exam._shuffle_exam_lines(Exam, Exam.source_exam)
+
+        Exam.local_ip = Exam.get_local_ip()
+        print(f"Server socket: {Exam.local_ip}:{consts.server_port}")
+            
+        curret_time= datetime.datetime.now().strftime('%H:%M:%S')
+        print(f"{curret_time}:  Exam name: {consts.exam_txt_file_name}")
+
+    # =============================================================================================
+    def format_exam(self, lines):
+        """
+        Automaticly finds and mark open questions by adding a specific answear
+        """
+        try:
+            while True:
+                lines.remove('\n') # Removes empty lines from from lines list
+        except:
+            pass
+
+        i = 0
+        while i < (len(lines)-1):
+            lines[i] = Exam.remove_spaces(Exam, lines[i])
+            lines[i+1] = Exam.remove_spaces(Exam, lines[i+1])
+            # Two sequence open questions- No between answears lines
+            if re.match(consts.question_pattern, lines[i]) and\
+                re.match(consts.question_pattern, lines[i+1]):
+                lines.insert(i+1,consts.open_exam[0])    
+            i += 1
+            
+        # if the last question has also NO answear line
+        if re.match(consts.question_pattern, lines[-1]):
+            lines.insert(len(lines),consts.open_exam[0])    
+
+        return lines
+    # =============================================================================================
+    def remove_spaces(self, line):
+        """remove leading whitespaces"""      
+        try:
+            while line[0] ==' ':
+                line = line[1:]
+        except:
+            print("Failed to remove leadig white-spaces", line)    
+        return line
+    # =============================================================================================
+    def is_hebrew_text(self, lines):
+        """Check if the given lines contain Hebrew text."""
+        for line in lines:
+            for char in line:
+                if "\u0590" <= char <= "\u05FF":  # Hebrew Unicode range
+                    return True
+        return False
+    # =============================================================================================
+    def set_text_direction(self, exam_content):
+        """Set the text direction based on the presence of Hebrew text."""
+        if Exam.is_hebrew_text(Exam, exam_content):
+            Exam.text_direction = 'dir="rtl"'
+        else:
+            Exam.text_direction = '' # left-to-right
+
+    # =============================================================================================
+    def remove_number(self, question):
+        """Remove the question number from the question string."""
+        try: # remove the question number
+            return question[question.index(consts.start_of_question_mark):]
+        except ValueError: # if the question mark missing
+            print(f"Invalid question format-  : {question}")
+            return question
+    # ============================================================================================
+    def count_correct_answers_percent(self, submitted_answers):
+        """Calculate the percentage of correct answers.
+           Compares the submitted answers to the correct answers."""
+        correct_answers = 0
+        for question, answer in submitted_answers.items(): # check each submitted answer
+            question = Exam.remove_number(Exam, question) # remove the question number
+            if question in Exam.question_answer_dict:
+                # An open question
+                if Exam.question_answer_dict[question] in consts.open_exam:
+                    return -1  # includes open questions, can NOT be checked
+                # Multiple choice
+                elif Exam.question_answer_dict[question] == answer:
+                    correct_answers += 1
+        # number of questions- minimum between examinotor setted limit
+        #  and maximal number of questions in file
+        total_questions = min(consts.limited_questions_number, \
+                              len(Exam.question_answer_dict))
+        # calculate the percentage and round it to the nearest integer
+        return round((correct_answers / total_questions) * 100) 
+    # =============================================================================================
+    def _build_question_answer_dict(self, lines):
+        """Build a dictionary of questions and their first answers."""
+        question_answer_dict = {}
+        current_question = None
+
+        for line in lines: # Do NOT delete these lines
+            line = line.strip() # remove leading and trailing whitespaces
+            if not line:
+                continue
+            
+            # Use specific pattern to identify questions
+            # Current question format-  '1. What is the primary function of a motherboard?'
+            if re.match(consts.question_pattern, line): # check if the line is a question
+                # if the line is a question, set it as the current question
+                current_question = line[line.index(consts.start_of_question_mark):]
+            # if the current question is not in the dictionary, add it
+            elif current_question and current_question not in question_answer_dict:
+                question_answer_dict[current_question] = line
+            
+        return question_answer_dict
+
+    # =============================================================================================
+    def _read_exam_file(self):
+        """Read the exam file and return its content as a list of lines."""
+        with open(consts.exam_full_path, 'r', encoding="utf-8") as file:
+            return file.readlines() # list of strings 
+
+    # =============================================================================================
+    def _add_exam_questions_and_answers(self, exam_content,\
+                                         max_num_questions = consts.limited_questions_number):
+        """Add the exam questions and answers to the HTML form."""
+        html_form = ""
+        current_question = ""
+        answers = []
+        questions_count = 0
+
+        for line in exam_content:
+            line = line.strip()  # Remove leading and trailing whitespaces
+            if not line: # Skip empty lines
+                continue
+
+            # Check if the line is a question
+            if re.match(consts.question_pattern, line): # check if the line is a question 
+                if current_question and answers:  # If the current question has answers
+                    html_form += Exam._build_question_html(Exam, current_question, answers)
+                
+                current_question = line
+                answers = []
+                questions_count += 1
+                if questions_count > max_num_questions:  # Limit the number of questions
+                    break
+            else: # If it is an answer
+                answers.append(line)
+
+        # Add the last question and its answers
+        if current_question and answers:
+            html_form += Exam._build_question_html(Exam, current_question, answers)
+
+        return html_form
+    # =============================================================================================
+    def _build_exam_html(self, exam_content):
+        """Build the HTML form for the exam. Uses the "consts.py" file for the HTML template."""
+        # Warrning page before starting the exam
+        html_form = consts.html_pre_exam_page
+
+        # Set the text direction based on the exam language
+        if Exam.text_direction is None:
+            Exam.set_text_direction(Exam, exam_content)
+        html_form += f'<html {Exam.text_direction}>'
+        # add the page/form code from the consts.py file  
+        html_form += consts.html_start + consts.html_js + consts.html_middle
+
+        # Add the exam questions and answers
+        html_form += Exam._add_exam_questions_and_answers(Exam, exam_content)
+        # Fit user details label to language
+        html_form += consts.user_name_eng if Exam.text_direction == '' else consts.user_name_heb
+        # Add the user details textboxes and submit button
+        html_form += consts.user_details_textboxes + consts.submit_button
+        html_form += "</form></body></html>" # End of form
+
+        return html_form
+    
+    #======================================================================================
+    def _build_question_html(self, question, answers):
+        """Generate the HTML code for a single question and its answers."""
+        question_html = f"<fieldset><legend><b>{question}</b></legend>"
+
+        try:
+            for answer in answers:
+                if Exam.question_answer_dict[Exam.remove_number(Exam, question)] \
+                        in consts.open_exam: # open questions exam
+                        if answer not in consts.open_exam:
+                            question_html += f"<b>{answer}</b><br>"                    
+                else: 
+                    question_html += f"<input type='radio' name='{question}' value='{answer}'> {answer}<br>"
+            
+            if Exam.question_answer_dict[Exam.remove_number(Exam, question)] \
+                            in consts.open_exam: # programming task
+                    # add a textbox for the code
+                    question_html += f"<textarea name='{question}' rows='4' cols='80'></textarea><br>"
+           
+        except KeyError:
+            print(consts.question_format_description)
+            print("Incorrect formatted question-",question)
+
+        question_html += "</fieldset>"
+        return question_html # type string
+
+    #=====================================================================================
+    def get_client_netbios_name(self, client_ip):
+        """Get the NetBIOS name of the client using its IP address."""    
+        try:
+            netbios_name = socket.gethostbyaddr(client_ip)[0]
+        except socket.herror:
+            netbios_name = "Unknown"
+        return netbios_name
+
+   #=================================================================================================
+    def _build_response_html(self, first_name, second_name, submitted_answers, grade):
+        """Build the results HTML page for the student."""
+        # F-string, allows to use variables incide the string using- {}
+        response_html = f"<html {Exam.text_direction}><body><meta charset='UTF-8'>"
+        response_html += f"<h2>{first_name} {second_name},\
+              {consts.exam_submitted}</h2>"
+        response_html += "<h3>Your Answers:</h3><ul>"
+        # Build the HTML response with the submitted answers
+        # Loop through the submitted answers and add them to the HTML response
+        for question, answer in submitted_answers.items():
+            # Adds student questions and answears to final/evaluation page
+            response_html += f"<li><b>{question}</b>{consts.question_answear_delimiter}\
+                <pre>{answer}</pre></li>"
+        # Add the grade to the HTML response
+        response_html += f"<h1>Your grade is {grade}</h1></ul></body></html>"
+        return response_html
+    #============================================================================================
+    def _format_exam_details_string(self, curr_time, first_name, second_name,\
+                                     grade, exam_timer, client_ip, netbios_name):
+        """Format the exam details string."""
+        try:
+            # Get the number of refresh attempts for the client IP
+            cheat_counter = Exam.cheat_counter[client_ip][1]
+        except KeyError:
+            # If the client IP is not in the refresh counter, set it to 0
+            cheat_counter = 0
+
+        # Convert the time strings into datetime objects
+        try:
+            start_time = datetime.datetime.strptime(Exam.cheat_counter[client_ip][0], "%H:%M:%S")
+        except KeyError:
+                        print("ERROR- NO start time")
+                        start_time= datetime.datetime.now().strftime('%H:%M:%S')
+
+        current_time = datetime.datetime.strptime(datetime.datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+
+        # Convert exam_timer (e.g., "10:30") into a timedelta
+        minutes, seconds = map(int, exam_timer.split(":"))
+        exam_duration = datetime.timedelta(minutes=minutes, seconds=seconds)
+
+        # Calculate the time gap
+        try:
+            time_gap = current_time - start_time - exam_duration
+            time_gap_seconds = time_gap.total_seconds()
+        except:
+            print("Error getting time values!")
+            time_gap="0"
+        return (f"{curr_time}: {first_name} {second_name}-{grade}  "
+                f"Cheat Attempts-{cheat_counter} IP-{client_ip} "
+                f"PC_Name-{netbios_name} Duration-{exam_timer} Time Gap-{time_gap}\n")
+
+    #============================================================================================
+    def _save_feedback(self, first_name, second_name, response_html, grade,\
+                        exam_timer, client_ip, netbios_name):
+        """Save the exam feedback and summary to files."""
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        folder_name = os.path.join(os.path.dirname(__file__),\
+                                    f"{consts.exam_txt_file_name} {current_date}")
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+        current_time = datetime.datetime.now().strftime("%H-%M-%S")
+        # Save the student's feedback as HTML file named as the student name and time
+        file_name = f"{first_name}_{second_name}_{current_time}.html"
+        file_path = os.path.join(folder_name, file_name)
+
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(response_html)
+
+        exam_details = Exam._format_exam_details_string(Exam, current_time, first_name,\
+            second_name, grade, exam_timer, client_ip, netbios_name)
+        
+        # File that contains the summary of all students' grades
+        summary_file_path = os.path.join(folder_name, consts.grades_file_name)
+        with open(summary_file_path, 'a', encoding='utf-8') as summary_file:
+            summary_file.write(exam_details)
+        # Print notification to console at exam subbmit
+        print("Exam subbmited " + exam_details)
+
+
+    # =============================================================================================
+    def _shuffle_exam_lines(self, lines):
+        """Shuffle the order of questions and answers in the exam."""
+        # Tupple (question-str, answers[list of str])
+        questions = []  # ("What is 2 + 2?", ["3", "4", "5"])
+        current_question = None
+        current_answers = [] # List of str
+        # Iterate through the lines of the exam file
+        for line in lines:
+            line = line.strip() # Remove leading and trailing whitespaces
+            if not line: # Skip empty lines
+                continue
+            # Check if the line is a question, format- '1. What is a motherboard'
+            if re.match(consts.question_pattern, line): 
+                if current_question: # If there is a current question
+                    # Add the question and its answers to the list
+                    questions.append((current_question, current_answers))
+                current_question = line
+                current_answers = []
+            else: # If it is an answer
+                # Add the answer to the current question's answers
+                current_answers.append(line)
+        # Add the last question and its answers to the list
+        # If there is a current question, add it to the list
+        if current_question:
+            # Tupple (question-str, answers[list of str]) to the list of questions
+            questions.append((current_question, current_answers))
+
+        # Shuffle the questions and answers
+        for i in range(len(questions)):
+            # Shuffle the answers for each question
+            question, answers = questions[i] # Unpack the question and answers from tuple
+            # Do Not shuffel the answers for programming questions
+            # Check if the question is a programming question
+            try:
+                formated_question = Exam.remove_number(self, question)                    
+                if Exam.question_answer_dict\
+                    [formated_question] not in consts.open_exam:
+                    random.shuffle(answers) # Shuffle the answers
+            except KeyError:
+                print(consts.question_format_description)
+                print(question)
+            questions[i] = (question, answers)
+
+        random.shuffle(questions)
+
+        shuffled_lines = []
+        for index, (question, answers) in enumerate(questions, start=1):
+            # Uses regular expression to replace the question number with the index 
+            question_text = re.sub(r"^\d+", str(index), question, count=1)
+            shuffled_lines.append(question_text)
+            shuffled_lines.extend(answers) # Add every answer as new element to the list
+            shuffled_lines.append("")
+
+        return shuffled_lines
+    #==========================================================================================================
+    def get_local_ip():
+        """Get the local IP address of the machine running the server."""
+        try:
+            # Create a UDP socket to get the local IP address
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80)) # Connect to a public DNS server (Google's)
+            local_ip = s.getsockname()[0]
+            s.close()
+        except:
+            local_ip = "127.0.0.1"
+            print(f"No internet connection!")
+        return local_ip
+    # =============================================================================================
+</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

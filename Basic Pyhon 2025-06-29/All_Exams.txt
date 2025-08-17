@@ -1,0 +1,100 @@
+############################################################################
+
+Student details: Name-Yoav  Last name-Moiseev  Submitting time-11-15-53  Cheating attemps-0'
+'1. What is the output of the following Python code  `print(2 + 3 *  4)`? '
+' 14
+----------------------------------------------------------------------------
+2. What is the data type returned by the `input()` function? '
+' String
+----------------------------------------------------------------------------
+3. What will happen if we run the following code? '
+' Type Eroor
+----------------------------------------------------------------------------
+4. Which of the following is a valid variable name in Python? '
+' my_value
+----------------------------------------------------------------------------
+5. In your opinion, what are the main advantages of the Python programming language compared to other programming languages? '
+' Easy to learn and use
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Yoav  Last name-Moiseev  Submitting time-11-25-44  Cheating attemps-2'
+'1. In your opinion, what are the main advantages of the Python programming language compared to other programming languages? '
+' very simple
+----------------------------------------------------------------------------
+2.  Write a Python program that prints all the numbers from 1 to 10 using a  '
+' for i in range(1,11):
+print(i)
+----------------------------------------------------------------------------
+3. How can proper use of functions improve the structure and quality of Python code? '
+' modularity, clean code, readability
+----------------------------------------------------------------------------
+4. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)? '
+' Web, AI
+----------------------------------------------------------------------------
+5. What is the data type returned by the `input()` function? '
+' String
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Nevsio  Last name-Verno  Submitting time-11-30-35  Cheating attemps-7'
+'1. What is the output of the following Python code  `print(2 + 3 *  4)`? '
+' 14
+----------------------------------------------------------------------------
+2. What is the purpose of the `if` statement in programming, Provide a basic example? '
+' to compare values
+if (a > 5):
+print('to big!')
+----------------------------------------------------------------------------
+3. Which of the following is a valid variable name in Python? '
+' my-var
+----------------------------------------------------------------------------
+4. What will happen if we run the following code? '
+' 7
+----------------------------------------------------------------------------
+5. Write a Python program that asks the user for their name and prints: "Hello [name]!"? '
+' name = input("Input your name")
+print(f"Hello {name}!")
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Third  Last name-Try  Submitting time-11-38-04  Cheating attemps-9'
+'1. What is a project you would like to build using Python, and what tools/libraries would you need for it? '
+' Read and write to files: OS library
+----------------------------------------------------------------------------
+2. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)? '
+' Web
+----------------------------------------------------------------------------
+3. Which of the following is a valid variable name in Python? '
+' class
+----------------------------------------------------------------------------
+4.        Write a Python program that asks the user for a number, and if the number is even – prints "Even", otherwise – "Odd". '
+' number = int(input("Insert number-"))
+if (number % 2 == 0):
+    print("Odd")
+else
+    print('Even')
+
+----------------------------------------------------------------------------
+5. How can proper use of functions improve the structure and quality of Python code? '
+' readability, manageability, modularity
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-יואב  Last name-מוייסיב  Submitting time-14-51-04  Cheating attemps-1'
+'1.          Write a Python program that asks the user for a number and prints its square. '
+' number = int(input())
+print(number*number)
+----------------------------------------------------------------------------
+2. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)? '
+' Web, AI
+----------------------------------------------------------------------------
+3. In your opinion, what are the main advantages of the Python programming language compared to other programming languages? '
+' פשטות
+----------------------------------------------------------------------------
+4. Explain in simple words the difference between `=` and `==` in Python. '
+' = השווה, == הסמה
+----------------------------------------------------------------------------
+5. What is a project you would like to build using Python, and what tools/libraries would you need for it? '
+' חישובים מטמטאים- נשתמש ב import math
+----------------------------------------------------------------------------

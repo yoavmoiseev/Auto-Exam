@@ -1,0 +1,26 @@
+<html ><body><meta charset='UTF-8'><h2>James Bond,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)?</b>                <pre align = 'left' dir ='ltr'  >def _handle_favicon_request(self):
+        """Handle requests for favicon.ico."""
+        self.send_response(204) # No Content
+        self.end_headers()
+</pre></li><li><b>2. What will happen if we run the following code?</b>                <pre align = 'left' dir ='ltr'  >    def _handle_404_request(self): # page not found
+        """Handle requests for unknown URLs."""
+        self.send_response(404)
+        self.end_headers()
+    # =============================================================================================
+    def do_POST(self):
+        """Handle POST requests (when the exam is submitted)."""
+        if self.path == '/submit':
+            self._handle_exam_submission()
+        # Handle refresh notification from the client
+        elif self.path == '/notify-refresh':
+            self._handle_refresh_notification()
+        elif self.path == '/exam-started':
+            self._handle_exam_started_notification()
+        elif self.path == '/check_exam_file':
+            """Handle requests to check the exam file."""
+            # Send a simple HTTP 200 OK response
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Exam file check OK')
+</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

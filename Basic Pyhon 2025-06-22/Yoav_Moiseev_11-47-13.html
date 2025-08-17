@@ -1,0 +1,50 @@
+<html ><body><meta charset='UTF-8'><h2>Yoav Moiseev,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. Write a Python program that asks the user for their name and prints: "Hello [name]!"?</b>                <pre align = 'left' dir ='ltr'  >####################################################
+## 2. Variables and Collections
+####################################################
+
+# Python has a print function
+print("I'm Python. Nice to meet you!")  # => I'm Python. Nice to meet you!
+
+# By default the print function also prints out a newline at the end.
+# Use the optional argument end to change the end string.
+print("Hello, World", end="!")  # => Hello, World!
+
+# Simple way to get input data from console
+input_string_var = input("Enter some data: ") # Returns the data as a string
+
+# There are no declarations, only assignments.
+# Convention is to use lower_case_with_underscores
+some_var = 5
+some_var  # => 5
+</pre></li><li><b>2. In your opinion, what are the main advantages of the Python programming language compared to other programming languages?</b>                <pre align = 'left' dir ='ltr'  ># Accessing a previously unassigned variable is an exception.
+# See Control Flow to learn more about exception handling.
+some_unknown_var  # Raises a NameError
+
+# if can be used as an expression
+# Equivalent of C's '?:' ternary operator
+"yay!" if 0 > 1 else "nay!"  # => "nay!"
+</pre></li><li><b>3. How can proper use of functions improve the structure and quality of Python code?</b>                <pre align = 'left' dir ='ltr'  ># Lists store sequences
+li = []
+# You can start with a prefilled list
+other_li = [4, 5, 6]
+
+# Add stuff to the end of a list with append
+li.append(1)    # li is now [1]
+li.append(2)    # li is now [1, 2]
+li.append(4)    # li is now [1, 2, 4]
+li.append(3)    # li is now [1, 2, 4, 3]
+# Remove from the end with pop
+li.pop()        # => 3 and li is now [1, 2, 4]
+# קצת הערות בשפתנו
+li.append(3)    # li is now [1, 2, 4, 3] again.
+</pre></li><li><b>4. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)?</b>                <pre align = 'left' dir ='ltr'  ># You can look at ranges with slice syntax.
+# The start index is included, the end index is not
+# (It's a closed/open range for you mathy types.)
+li[1:3]   # Return list from index 1 to 3 => [2, 4]
+li[2:]    # Return list starting from index 2 => [4, 3]
+li[:3]    # Return list from beginning until index 3  => [1, 2, 4]
+li[::2]   # Return list selecting every second entry => [1, 4]
+li[::-1]  # Return list in reverse order => [3, 4, 2, 1]
+# Use any combination of these to make advanced slices
+# li[start:end:step]
+</pre></li><li><b>5. What is the data type returned by the `input()` function?</b>                <pre align = 'left' dir ='ltr'  >String</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

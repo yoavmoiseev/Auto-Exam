@@ -1,0 +1,73 @@
+<html ><body><meta charset='UTF-8'><h2>Yoav Moiseev,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. What is a project you would like to build using Python, and what tools/libraries would you need for it?</b>                <pre align = 'left' dir ='ltr'  >####################################################
+## 1. Primitive Datatypes and Operators
+####################################################
+
+# You have numbers
+3  # => 3
+
+# Math is what you would expect
+1 + 1   # => 2
+8 - 1   # => 7
+10 * 2  # => 20
+35 / 5  # => 7.0
+
+# Integer division rounds down for both positive and negative numbers.
+5 // 3       # => 1
+-5 // 3      # => -2
+5.0 // 3.0   # => 1.0 # works on floats too
+-5.0 // 3.0  # => -2.0</pre></li><li><b>2. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)?</b>                <pre align = 'left' dir ='ltr'  ># The result of division is always a float
+10.0 / 3  # => 3.3333333333333335
+
+# Modulo operation
+7 % 3   # => 1
+# i % j have the same sign as j, unlike C
+-7 % 3  # => 2
+
+# Exponentiation (x**y, x to the yth power)
+2**3  # => 8
+
+# Enforce precedence with parentheses
+1 + 3 * 2    # => 7
+(1 + 3) * 2  # => 8
+
+# Boolean values are primitives (Note: the capitalization)
+True   # => True
+False  # => False
+
+# negate with not
+not True   # => False
+not False  # => True</pre></li><li><b>3. What is the output of the following Python code  `print(2 + 3 *  4)`?</b>                <pre  >14</pre></li><li><b>4. How can proper use of functions improve the structure and quality of Python code?</b>                <pre align = 'left' dir ='ltr'  ># Boolean Operators
+# Note "and" and "or" are case-sensitive
+True and False  # => False
+False or True   # => True
+
+# True and False are actually 1 and 0 but with different keywords
+True + True # => 2
+True * 8    # => 8
+False - 5   # => -5
+
+# Comparison operators look at the numerical value of True and False
+0 == False  # => True
+2 > True    # => True
+2 == True   # => False
+-5 != False # => True</pre></li><li><b>5. Explain in simple words the difference between `=` and `==` in Python.</b>                <pre align = 'left' dir ='ltr'  ># None, 0, and empty strings/lists/dicts/tuples/sets all evaluate to False.
+# All other values are True
+bool(0)     # => False
+bool("")    # => False
+bool([])    # => False
+bool({})    # => False
+bool(())    # => False
+bool(set()) # => False
+bool(4)     # => True
+bool(-6)    # => True
+
+# Using boolean logical operators on ints casts them to booleans for evaluation,
+# but their non-cast value is returned. Don't mix up with bool(ints) and bitwise
+# and/or (&,|)
+bool(0)     # => False
+bool(2)     # => True
+0 and 2     # => 0
+bool(-5)    # => True
+bool(2)     # => True
+-5 or 0     # => -5
+</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

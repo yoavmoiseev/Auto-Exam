@@ -3,24 +3,39 @@ import os  # Import library for handling file paths
 import select_exam_gui # Tkinter GUI for selecting exam files
 
 # Constants
+# Should be overrided by GUI
+source_exam = None
 
 # Port number for the server,
+# Can be overrided by GUI 
 server_port = 8000 # change for multiple instances
+
+open_exam = ["Programming task:", "Open Question/Multiple lines question/task:", "Type your answer here"]
 
 exam_folder_name = "Exams"  # Name of the folder containing exam files
 
 # Tkinter GUI for selecting an exam file from the specified folder
 get_data_from_gui = select_exam_gui.select_exam_file(exam_folder_name)
+
 exam_full_path = get_data_from_gui[0]  # Full path of the selected exam file
 # The examinator can limit the number of questions that will be 
 # presented to user from the entire exam file.
 # The question selection is random from the entire exam file questions list.
+
 limited_questions_number = get_data_from_gui[1]  # Number of questions to be selected
+
+shuffle_exam = get_data_from_gui[2]
 
 # Get the file name without the path and extension
 exam_txt_file_name = os.path.basename(exam_full_path)[:-4]
 
-
+question_format_description = """
+!!!You can NOT procced with this exam file!!!
+There are incorrectly formatted questions in the exam file!!!
+The question should start with NUMBER and DOT- '1. Write three reason for...'
+Answears can NOT start with number and dot
+Multipule lines questions should include
+  Programming task:    text on second line!"""
 
 # Use regular expressions to identify the question format in the exam file
 # d+ - one or more digits
@@ -31,13 +46,21 @@ exam_txt_file_name = os.path.basename(exam_full_path)[:-4]
 # The pattern matches lines that start with a number followed by:
 # a period, a space, and then a question mark.
 # Current question format-  '1. What is a motherboard?'
-question_pattern = r"^\d+\.\s.*\?"
+question_pattern = r"^\d+\.\s.*"   #r"^\d+\.\s.*\?"
 
 grades_file_name = 'GRADES.txt'
 
+all_exams_txt = 'All_Exams.txt'
+
+open_exam_grade = "unknown yet, exam will be evaluated later"
+
+exam_submitted = "your exam was submitted successfully"
+
 # The question format in the exam file
 start_of_question_mark = "."
-end_of_question_mark = '?'
+
+global_delimiter = "############################################################################\n\n"
+local_delimiter =  "\n----------------------------------------------------------------------------\n"
 
 # HTML form with warning messages before starting the exam
 html_pre_exam_page = """
@@ -54,9 +77,15 @@ html_pre_exam_page = """
                 <p style="color: red; font-weight: bold; font-size: 18px; text-align: center;">
                     НЕ покидайте страницу экзамена, пока он не будет отправлен, иначе он будет аннулирован
                 </p>
-                            <p style="color: red; font-weight: bold; font-size: 18px; text-align: center; direction: rtl;">
+                            <p style="color: red; font-weight: bold; font-size: 24px; text-align: center; direction: rtl;">
                      אל תעזוב את דף הבחינה עד שהבחינה תוגש, אחרת היא תבוטל
                 </p>
+
+                </p>
+                            <p style="color: red; font-weight: bold; font-size: 20px; text-align: center; direction: rtl;">
+                       השתמש ב-CTRL + SHIF ימני או SHIFT שמאלי לסרוגים לשינוי כיוון הטקסט הנכתב  
+                 </p>
+
 
                 
                 <button onclick="loadExam()" style="display: block; margin: 50px auto; font-size: 50px; padding: 20px 40px; background-color: red; color: white; border: none; border-radius: 10px; cursor: pointer;">
@@ -127,8 +156,7 @@ user_name_heb = """
                 """
 # Values that should be passed to the server when the exam is submitted             
 user_details_textboxes = """                
-                <!-- Hidden input fields for transfering values from client to server -->
-                <input type='hidden' id='cheating_attempts_input' name='cheating_attempts'> 
+                <!-- Hidden input fields for transfering values from client to server --> 
                 <input type='hidden' id='minutes_input' name='minutes'>
                 <input type='hidden' id='seconds_input' name='seconds'>
 

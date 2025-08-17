@@ -1,0 +1,17 @@
+<html dir="rtl"><body><meta charset='UTF-8'><h2>יואב מוייסיב,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. שפת פייתון מדגישה קריאות פשוטה של הקוד. האם זה הופך אותה לפחות מתאימה לפרויקטים מורכבים</b>                <p dir ='ltr'><pre> # =============================================================================================
+    def _handle_refresh_notification(self):
+        """Handle notifications when the page is refreshed."""
+        content_length = int(self.headers['Content-Length'])
+        self.rfile.read(content_length)
+        # Increment cheating attempts for the client
+        client_ip = self.client_address[0] # MUST be self or ExamHandler
+        if client_ip in Ex.cheat_counter:
+            Ex.cheat_counter[client_ip][1] += 1  # Increment the refresh count 
+            if Ex.cheat_counter[client_ip][1] > 0:
+                print(f"Cheat attempt from-  {self.client_address[0]} PC_Name- {Ex.get_client_netbios_name(client_ip)}")
+
+        # Send a response to acknowledge the notification
+        self.send_response(200)
+        self.end_headers()
+# =============================================================================================
+# =============================================================================================</pre></p></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

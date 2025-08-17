@@ -1,0 +1,115 @@
+<html dir="rtl"><body><meta charset='UTF-8'><h2>יואב מוייסיב,              your exam was submitted successfully</h2><h3>Your Answers:</h3><ul><li><b>1. האם קל ללמוד תכנות בפייתון גם בלי רקע קודם במחשבים? נמק והסבר מדוע כן או לא?</b>                <pre 'dir ='ltr' align = 'left' > #=====================================================================================
+    def _handle_exam_submission(self):
+        """Handles the student submitted exam page."""
+        # Get the length of the POST data
+        content_length = int(self.headers['Content-Length']) 
+        # Get the POST data
+        post_data = self.rfile.read(content_length)
+        # Parse the POST data 
+        form_data = urllib.parse.parse_qs(post_data.decode())
+
+        # Get the user's from HTML form
+        first_name = form_data.get('first_name', [None])[0]
+        second_name = form_data.get('second_name', [None])[0]
+        # Get the exam duration
+        minutes = form_data.get('minutes', [0])[0]
+        seconds = form_data.get('seconds', [0])[0]
+        exam_timer = f"{minutes}:{seconds}"
+        # Get the client's IP address and NetBIOS name
+        try:
+            client_ip = self.client_address[0]
+        except:
+            print("No network connection!")
+            client_ip = "127.0.0.1"
+
+        netbios_name = Ex.get_client_netbios_name(client_ip)
+       
+        # Build a dictionary of the submitted question answer pairs
+        submitted_answers = {
+            question: answers[0]
+            for question, answers in form_data.items()
+            # Skip the user's details and hidden fields
+            if question not in ['first_name', 'second_name', 'class', 'e-mail',\
+                                  'minutes', 'seconds']
+        }
+
+        # Calculate the grade            
+        grade = Ex.count_correct_answers_percent(submitted_answers)
+        if grade < 0: # Open question exam
+            grade = consts.open_exam_grade
+        else: # Multiple choice
+            grade = str(grade) + " %"
+        # Build the HTML response for the user
+        response_html = Ex._build_response_html(first_name, second_name, submitted_answers, grade)
+        # Save the feedback to: folder named as the exam name + date, 
+        # add student details to summary file
+        Ex._save_feedback(first_name, second_name, response_html, grade,\
+                             exam_timer, client_ip, netbios_name)
+
+        try:# Send the response to the client
+            self.send_response(200) # OK        
+            self.send_header("Content-Type", "text/html; charset=utf-8") # Support Hebrew encoding  
+            self.end_headers() # End of headers
+            # Send the response html to the client
+            self.wfile.write(response_html.encode('utf-8'))
+        except ConnectionAbortedError: # Handle client disconnection
+            print(f"Client {self.client_address[0]}\
+                   disconnected before the response was fully sent.")
+</pre></li><li><b>2. שפת פייתון מדגישה קריאות פשוטה של הקוד. האם זה הופך אותה לפחות מתאימה לפרויקטים מורכבים</b>                <pre 'dir ='ltr' align = 'left' > #=====================================================================================
+    def _handle_exam_submission(self):
+        """Handles the student submitted exam page."""
+        # Get the length of the POST data
+        content_length = int(self.headers['Content-Length']) 
+        # Get the POST data
+        post_data = self.rfile.read(content_length)
+        # Parse the POST data 
+        form_data = urllib.parse.parse_qs(post_data.decode())
+
+        # Get the user's from HTML form
+        first_name = form_data.get('first_name', [None])[0]
+        second_name = form_data.get('second_name', [None])[0]
+        # Get the exam duration
+        minutes = form_data.get('minutes', [0])[0]
+        seconds = form_data.get('seconds', [0])[0]
+        exam_timer = f"{minutes}:{seconds}"
+        # Get the client's IP address and NetBIOS name
+        try:
+            client_ip = self.client_address[0]
+        except:
+            print("No network connection!")
+            client_ip = "127.0.0.1"
+
+        netbios_name = Ex.get_client_netbios_name(client_ip)
+       
+        # Build a dictionary of the submitted question answer pairs
+        submitted_answers = {
+            question: answers[0]
+            for question, answers in form_data.items()
+            # Skip the user's details and hidden fields
+            if question not in ['first_name', 'second_name', 'class', 'e-mail',\
+                                  'minutes', 'seconds']
+        }
+
+        # Calculate the grade            
+        grade = Ex.count_correct_answers_percent(submitted_answers)
+        if grade < 0: # Open question exam
+            grade = consts.open_exam_grade
+        else: # Multiple choice
+            grade = str(grade) + " %"
+        # Build the HTML response for the user
+        response_html = Ex._build_response_html(first_name, second_name, submitted_answers, grade)
+        # Save the feedback to: folder named as the exam name + date, 
+        # add student details to summary file
+        Ex._save_feedback(first_name, second_name, response_html, grade,\
+                             exam_timer, client_ip, netbios_name)
+
+        try:# Send the response to the client
+            self.send_response(200) # OK        
+            self.send_header("Content-Type", "text/html; charset=utf-8") # Support Hebrew encoding  
+            self.end_headers() # End of headers
+            # Send the response html to the client
+            self.wfile.write(response_html.encode('utf-8'))
+        except ConnectionAbortedError: # Handle client disconnection
+            print(f"Client {self.client_address[0]}\
+                   disconnected before the response was fully sent.")
+</pre></li><li><b>3. מה לדעתך היתרונות המרכזיים של שפת פיתון לעומת שפות תכנות אחרות</b>                <pre 'dir ='ltr' align = 'left' >רק עברית</pre></li><li><b>4. תאר סיטואציה שבה תיקנת באג בקוד שלך. כיצד מצאת אותו ומה למדת מהתהליך?</b>                <pre 'dir ='ltr' align = 'left' > אין אף אות באנגלית</pre></li><li><b>5. האם לדעתך כל תלמיד צריך ללמוד תכנות (למשל בפייתון) בבית הספר?</b>                <pre 'dir ='ltr' align = 'left' > ייש אות אחת באנגלית c פה</pre></li><h1>Your grade is unknown yet, exam will be evaluated later</h1></ul></body></html>

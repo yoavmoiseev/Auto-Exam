@@ -1,7 +1,7 @@
 //=============JS code for the html exam page====================================================================
 
 //=============Global variables====================================================================
-Cheating_attempts = 0; // Counter for cheating attempts
+let legal_alarm = false; // Flag to check if all questions are answered
 
 //=============Functions====================================================================
 // Blocks the exam submission until all questions are answered
@@ -12,18 +12,30 @@ function validateForm() {
     for (var i = 0; i < questions.length; i++) { 
         // Get all input elements (answers) within the question
         var inputs = questions[i].getElementsByTagName('input'); 
+        var textareas = questions[i].getElementsByTagName('textarea'); // Get textareas for open questions
         var answered = false; // Flag to check if the question is answered
-        // Loop through all answers for the current question
+
+        // Check if any input (radio/checkbox) is checked
         for (var j = 0; j < inputs.length; j++) { 
-            if (inputs[j].checked) { // Check if the current answer is selected
-                answered = true; // Mark the question as answered
-                break; // Exit the loop as we found an answer
+            if (inputs[j].checked) { 
+                answered = true; 
+                break; 
             }
         }
+
+        // If not answered by input, check if any textarea is filled
+        if (!answered && textareas.length > 0) {
+            for (var t = 0; t < textareas.length; t++) {
+                if (textareas[t].value.trim() !== "") {
+                    answered = true;
+                    break;
+                }
+            }
+        }
+
         if (!answered) { // If the question is not answered
-            // Show an alert to the user
+            legal_alarm = true; // Set the legal alarm flag
             alert('Please answer all questions before submitting the exam.'); 
-            Cheating_attempts--; // Do not count this as a cheating attempt
             return false; // Prevent form submission
         }
     }
@@ -31,7 +43,6 @@ function validateForm() {
     send_values(); // Call the function to send form values to the server
     return true; // Allow form submission
 }
-
 //=================================================================================
 // Sends the values to the server. 
 // All these values should be manually excluded from the question list
@@ -40,8 +51,7 @@ function send_values() {
     document.getElementById('minutes_input').value = document.getElementById('minutes').innerHTML; 
     // Set the hidden input field for seconds
     document.getElementById('seconds_input').value = document.getElementById('seconds').innerHTML; 
-    // Set the hidden input field for cheating attempts
-    document.getElementById('cheating_attempts_input').value = Cheating_attempts; 
+
 }
 
 //=================================================================================
@@ -106,7 +116,16 @@ function send_exam_start_notification() {
 }
 
 //=================================================================================
-// Prevent the user from using DevTools
+// Function to send a notification when the user tries to cheat or refresh the page
+function send_cheating_notification () {
+    // Use the navigator.sendBeacon method to send a notification to the server
+    navigator.sendBeacon('/notify-refresh', JSON.stringify({
+        message: "/notify-refresh",
+        timestamp: new Date().toISOString() // Add a timestamp for the event
+    }));
+}
+
+//=================================================================================
 // Prevent the user from using DevTools and certain key combinations
 //  !!!!!!!!!! to be continued !!!!!!!!!!!
 document.addEventListener("keydown", function(event) {
@@ -136,16 +155,24 @@ document.addEventListener("contextmenu", function(event) {
 //=================================================================================
 // Event triggered when the page is refreshed or closed
 window.addEventListener("beforeunload", function () {
-    // Use the navigator.sendBeacon method to send a notification to the server
-    navigator.sendBeacon('/notify-refresh', JSON.stringify({
-        message: "/notify-refresh",
-        timestamp: new Date().toISOString() // Add a timestamp for the event
-    }));
+    send_cheating_notification(); // Send a notification to the server
 });
 //=================================================================================
 // Event triggered when the page loses focus
 // Prevent the user from switching tabs
 window.onblur = function() {
-    Cheating_attempts++; // Increment the cheating attempts counter
+    if (legal_alarm === false) { // do Not consider the "fill all questions" alarm
+    send_cheating_notification(); // Send a notification to the server
+    }
+    legal_alarm = false; // Reset the legal alarm flag
     beep(2000); // Play a beep sound for 2 seconds
 };
+//=================================================================================
+// Periodically check if onblur is working
+setInterval(() => {
+    if (window.onblur === false || window.onblur === null) {
+        send_cheating_notification(); // Send a notification to the server
+    }
+}, 5000);
+//=================================================================================
+
