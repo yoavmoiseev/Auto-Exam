@@ -28,7 +28,7 @@ async function handlePreExamSubmit(e) {
     const lastName = document.getElementById('last-name').value.trim();
     
     if (!firstName || !lastName) {
-        alert('Please enter your first and last name');
+        alert(window.i18n?.t('enter_name_error') || 'Please enter your first and last name');
         return;
     }
     
@@ -80,11 +80,11 @@ async function handlePreExamSubmit(e) {
             // Initialize proctoring
             initializeProctoring();
         } else {
-            alert('Error: ' + data.message);
+            alert((window.i18n?.t('error_generic') || 'Error') + ': ' + data.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert(window.i18n?.t('error_occurred') || 'An error occurred');
     }
 }
 
@@ -348,11 +348,11 @@ async function submitExam(answers) {
             showExamResults(data.score, data.message);
             logEvent('exam_submitted', { score: data.score });
         } else {
-            alert('Error submitting exam: ' + data.message);
+            alert((window.i18n?.t('error_submitting_exam') || 'Error submitting exam') + ': ' + data.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while submitting the exam');
+        alert(window.i18n?.t('error_submitting_exam_generic') || 'An error occurred while submitting the exam');
     }
 }
 

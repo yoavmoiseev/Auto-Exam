@@ -92,22 +92,22 @@ function startExam(examName) {
 }
 
 function deleteExam(examName) {
-    if (confirm('Are you sure you want to delete: ' + examName + '?')) {
+    if (confirm(window.i18n?.t('confirm_delete_exam', {exam_name: examName}) || 'Are you sure you want to delete: ' + examName + '?')) {
         fetch('/api/delete-exam/' + encodeURIComponent(examName), {
             method: 'DELETE'
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Exam deleted successfully');
+                alert(window.i18n?.t('exam_deleted_successfully') || 'Exam deleted successfully');
                 loadExams();
             } else {
-                alert('Error: ' + data.message);
+                alert((window.i18n?.t('error_generic') || 'Error') + ': ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error deleting exam');
+            alert(window.i18n?.t('error_deleting_exam') || 'Error deleting exam');
         });
     }
 }

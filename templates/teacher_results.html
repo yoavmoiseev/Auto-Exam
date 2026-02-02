@@ -11,10 +11,10 @@
             <thead>
                 <tr>
                     <th data-i18n="exam_name">Exam Name</th>
-                    <th>Date & Time</th>
-                    <th>Students</th>
-                    <th>Files</th>
-                    <th>Actions</th>
+                    <th data-i18n="date_time">Date & Time</th>
+                    <th data-i18n="students">Students</th>
+                    <th data-i18n="files">Files</th>
+                    <th data-i18n="actions">Actions</th>
                 </tr>
             </thead>
             <tbody id="results-list">
@@ -26,15 +26,28 @@
         
         <div style="margin-top: 20px; text-align: center;" id="download-all-section">
             <button class="btn btn-lg btn-success" onclick="downloadAllZip()" style="display:none;" id="download-all-btn">
-                📦 Download ALL in ZIP
+                📦 <span data-i18n="download_all_zip">Download ALL in ZIP</span>
+            </button>
+            <button class="btn btn-lg btn-danger" onclick="deleteAllFolders()" style="display:none; margin-left: 15px;" id="delete-all-btn">
+                🗑️ <span data-i18n="delete_all_results">Delete All</span>
             </button>
         </div>
     </div>
 </div>
 
 <script>
-// Load results on page load
-document.addEventListener('DOMContentLoaded', loadResults);
+// Load results on page load - wait for i18n
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for i18n to be ready
+    function checkAndLoad() {
+        if (window.i18n && window.i18n.isReady) {
+            loadResults();
+        } else {
+            setTimeout(checkAndLoad, 100);
+        }
+    }
+    checkAndLoad();
+});
 
 async function loadResults() {
     try {
@@ -49,10 +62,24 @@ async function loadResults() {
             data.folders.forEach(folder => {
                 const row = document.createElement('tr');
                 
-                // Exam name
+                // Exam name (with trash icon)
                 const examCell = document.createElement('td');
-                examCell.textContent = folder.exam_name;
                 examCell.style.fontWeight = 'bold';
+                
+                // Trash button
+                const trashBtn = document.createElement('button');
+                trashBtn.innerHTML = '🗑️';
+                trashBtn.className = 'btn-trash';
+                trashBtn.title = 'Delete folder';
+                trashBtn.onclick = () => deleteFolder(folder.folder_name);
+                examCell.appendChild(trashBtn);
+                
+                // Exam name text
+                const examText = document.createElement('span');
+                examText.textContent = folder.exam_name;
+                examText.style.marginLeft = '8px';
+                examCell.appendChild(examText);
+                
                 row.appendChild(examCell);
                 
                 // Date & Time
@@ -62,7 +89,8 @@ async function loadResults() {
                 
                 // Student count
                 const studentsCell = document.createElement('td');
-                studentsCell.textContent = `${folder.student_count} students`;
+                const studentsText = (window.i18n && window.i18n.t) ? window.i18n.t('students_count') : 'students';
+                studentsCell.textContent = `${folder.student_count} ${studentsText}`;
                 row.appendChild(studentsCell);
                 
                 // Files info
@@ -70,7 +98,8 @@ async function loadResults() {
                 const fileInfo = [];
                 if (folder.has_grades) fileInfo.push('GRADES.txt');
                 if (folder.has_all_exams) fileInfo.push('All_Exams.txt');
-                fileInfo.push(`${folder.html_count} HTML`);
+                const htmlText = (window.i18n && window.i18n.t) ? window.i18n.t('html_count') : 'HTML';
+                fileInfo.push(`${folder.html_count} ${htmlText}`);
                 filesCell.textContent = fileInfo.join(', ');
                 filesCell.style.fontSize = '12px';
                 row.appendChild(filesCell);
@@ -82,7 +111,8 @@ async function loadResults() {
                 // View Grades button
                 if (folder.has_grades) {
                     const gradesBtn = document.createElement('button');
-                    gradesBtn.textContent = '📊 GRADES';
+                    const gradesText = (window.i18n && window.i18n.t) ? window.i18n.t('grades_button') : '📊 GRADES';
+                    gradesBtn.textContent = gradesText;
                     gradesBtn.className = 'btn btn-sm btn-primary';
                     gradesBtn.onclick = () => viewFile(folder.folder_name, 'GRADES.txt');
                     actionsCell.appendChild(gradesBtn);
@@ -91,7 +121,8 @@ async function loadResults() {
                 // View All Exams button
                 if (folder.has_all_exams) {
                     const allExamsBtn = document.createElement('button');
-                    allExamsBtn.textContent = '📝 All';
+                    const allText = (window.i18n && window.i18n.t) ? window.i18n.t('all_exams_button') : '📝 All';
+                    allExamsBtn.textContent = allText;
                     allExamsBtn.className = 'btn btn-sm btn-secondary';
                     allExamsBtn.onclick = () => viewFile(folder.folder_name, 'All_Exams.txt');
                     actionsCell.appendChild(allExamsBtn);
@@ -99,7 +130,8 @@ async function loadResults() {
                 
                 // Download ZIP button
                 const zipBtn = document.createElement('button');
-                zipBtn.textContent = '📦 ZIP';
+                const zipText = (window.i18n && window.i18n.t) ? window.i18n.t('zip_button') : '📦 ZIP';
+                zipBtn.textContent = zipText;
                 zipBtn.className = 'btn btn-sm btn-success';
                 zipBtn.onclick = () => downloadZip(folder.folder_name);
                 actionsCell.appendChild(zipBtn);
@@ -109,17 +141,21 @@ async function loadResults() {
                 tbody.appendChild(row);
             });
             
-            // Show Download ALL button
+            // Show Download ALL and Delete ALL buttons
             document.getElementById('download-all-btn').style.display = 'inline-block';
+            document.getElementById('delete-all-btn').style.display = 'inline-block';
         } else {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No results available</td></tr>';
+            const noResultsText = (window.i18n && window.i18n.t) ? window.i18n.t('no_results') : 'No results available';
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center">${noResultsText}</td></tr>`;
             document.getElementById('download-all-btn').style.display = 'none';
+            document.getElementById('delete-all-btn').style.display = 'none';
         }
     } catch (error) {
         console.error('Error loading results:', error);
         document.getElementById('results-list').innerHTML = 
             '<tr><td colspan="5" class="text-center">Error loading results</td></tr>';
         document.getElementById('download-all-btn').style.display = 'none';
+        document.getElementById('delete-all-btn').style.display = 'none';
     }
 }
 
@@ -137,6 +173,69 @@ function downloadAllZip() {
     // Download all folders as one big ZIP
     window.location.href = '/api/results/download-all-zip';
 }
+
+async function deleteFolder(folderName) {
+    const confirmMsg = window.i18n?.t('confirm_delete_folder') || `Are you sure you want to delete the folder "${folderName}"? This action cannot be undone.`;
+    
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/results/${folderName}/delete`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(window.i18n?.t('folder_deleted') || 'Folder deleted successfully');
+            loadResults(); // Reload the list
+        } else {
+            alert(window.i18n?.t('error') + ': ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting folder:', error);
+        alert(window.i18n?.t('error') + ': ' + error.message);
+    }
+}
+
+async function deleteAllFolders() {
+    const confirmMsg = window.i18n?.t('confirm_delete_all') || 'Are you sure you want to delete ALL result folders? This action cannot be undone!';
+    
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    // Double confirmation
+    const doubleConfirm = window.i18n?.t('confirm_delete_all_double') || 'This will permanently delete ALL exam results. Are you absolutely sure?';
+    if (!confirm(doubleConfirm)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/results/delete-all', {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(window.i18n?.t('all_folders_deleted') || 'All folders deleted successfully');
+            loadResults(); // Reload the list
+        } else {
+            alert(window.i18n?.t('error') + ': ' + (data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting all folders:', error);
+        alert(window.i18n?.t('error') + ': ' + error.message);
+    }
+}
+
+// Reload results when language changes
+window.addEventListener('languageChanged', function() {
+    loadResults();
+});
 </script>
 
 <style>
@@ -184,6 +283,29 @@ function downloadAllZip() {
 
 .btn-success:hover {
     background-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-trash {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+    vertical-align: middle;
+    transition: transform 0.2s;
+}
+
+.btn-trash:hover {
+    transform: scale(1.3);
 }
 </style>
 

@@ -35,7 +35,7 @@ function validateForm() {
 
         if (!answered) { // If the question is not answered
             legal_alarm = true; // Set the legal alarm flag
-            alert('Please answer all questions before submitting the exam.'); 
+            alert(window.i18n?.t('answer_all_questions_exam') || 'Please answer all questions before submitting the exam.'); 
             return false; // Prevent form submission
         }
     }
@@ -141,14 +141,14 @@ document.addEventListener("keydown", function(event) {
         (event.ctrlKey && event.key === "C")  // Check for Ctrl+C
     ) {
         event.preventDefault(); // Prevent the default action
-        alert("This action is disabled during the exam!"); // Show an alert to the user
+        alert(window.i18n?.t('action_disabled_exam') || 'This action is disabled during the exam!'); // Show an alert to the user
     }
 });
 
 // Prevent the user from right-clicking (to disable DevTools)
 document.addEventListener("contextmenu", function(event) {
     event.preventDefault(); // Prevent the default context menu
-    alert("Right-click is disabled during the exam!"); // Show an alert to the user
+    alert(window.i18n?.t('rightclick_disabled_exam') || 'Right-click is disabled during the exam!'); // Show an alert to the user
 });
 
 

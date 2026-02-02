@@ -62,6 +62,19 @@ def ensure_directories():
 
 
 # ==========================================
+# ROUTES - STATIC FILES
+# ==========================================
+
+@app.route('/video/<filename>')
+def serve_video(filename):
+    """Serve video files"""
+    video_path = os.path.join(os.path.dirname(__file__), 'video', filename)
+    if os.path.exists(video_path):
+        return send_file(video_path, mimetype='video/mp4')
+    return "Video not found", 404
+
+
+# ==========================================
 # ROUTES - AUTHENTICATION
 # ==========================================
 
@@ -385,6 +398,77 @@ def api_download_all_folders_zip():
         import traceback
         traceback.print_exc()
         return f"Error creating ZIP: {str(e)}", 500
+
+
+@app.route('/api/results/<folder_name>/delete', methods=['DELETE'])
+@login_required
+def api_delete_result_folder(folder_name):
+    """Delete a specific exam result folder"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path to folder
+        folder_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results',
+            folder_name
+        )
+        
+        if not os.path.exists(folder_path):
+            return jsonify({'success': False, 'message': 'Folder not found'}), 404
+        
+        # Delete the folder and all its contents
+        import shutil
+        shutil.rmtree(folder_path)
+        
+        return jsonify({'success': True, 'message': 'Folder deleted successfully'})
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/results/delete-all', methods=['DELETE'])
+@login_required
+def api_delete_all_result_folders():
+    """Delete all exam result folders for current teacher"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path to results folder
+        results_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results'
+        )
+        
+        if not os.path.exists(results_path):
+            return jsonify({'success': False, 'message': 'No results folder found'}), 404
+        
+        # Delete all subfolders in results
+        import shutil
+        deleted_count = 0
+        
+        for item in os.listdir(results_path):
+            item_path = os.path.join(results_path, item)
+            if os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+                deleted_count += 1
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Deleted {deleted_count} folders',
+            'deleted_count': deleted_count
+        })
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 # ==========================================

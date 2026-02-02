@@ -293,7 +293,7 @@
         <div class="card">
             <div class="card-header">
                 <h2 style="margin: 0;">{{ exam_title }}</h2>
-                <small style="color: #666;">Answer all questions below</small>
+                <small style="color: #666;" data-i18n="answer_all_questions">Answer all questions below</small>
             </div>
             
             <div class="card-body">
@@ -308,7 +308,7 @@
                         <button type="button" class="btn btn-secondary" style="visibility: hidden;">
                             ← Previous
                         </button>
-                        <button type="submit" class="btn btn-success" style="width: auto;">
+                        <button type="submit" class="btn btn-success" style="width: auto;" data-i18n="submit_exam_button">
                             ✓ SUBMIT EXAM
                         </button>
                     </div>
@@ -362,11 +362,11 @@ async function loadExamData() {
             examQuestions = data.questions;
             displayAllQuestions();
         } else {
-            alert('Error loading exam questions');
+            alert(window.i18n?.t('error_loading_questions') || 'Error loading exam questions');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert(window.i18n?.t('error_occurred') || 'An error occurred');
     }
 }
 
@@ -471,7 +471,7 @@ async function handleExamSubmit(e) {
     
     // Check if all questions are answered
     if (Object.keys(answers).length !== examQuestions.length) {
-        alert('Please answer all questions before submitting');
+        alert(window.i18n?.t('answer_all_questions') || 'Please answer all questions before submitting');
         return;
     }
     
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function submitExam(answers) {
     const examId = getExamIdFromURL();
     
-    if (!confirm('Are you sure you want to submit your exam?\n\nYou cannot change your answers after submission.')) {
+    if (!confirm(window.i18n?.t('confirm_submit_exam') || 'Are you sure you want to submit your exam?\n\nYou cannot change your answers after submission.')) {
         return;
     }
     
@@ -543,11 +543,11 @@ async function submitExam(answers) {
             
             resultsDiv.style.display = 'block';
         } else {
-            alert('Error submitting exam: ' + data.message);
+            alert((window.i18n?.t('error_submitting_exam') || 'Error submitting exam') + ': ' + data.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to submit exam');
+        alert(window.i18n?.t('failed_submit_exam') || 'Failed to submit exam');
     }
 }
 

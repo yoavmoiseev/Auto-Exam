@@ -242,41 +242,41 @@
 <div class="monitor-container">
     <!-- Header -->
     <div class="monitor-header">
-        <h1>📊 Exam Monitor</h1>
-        <p style="margin: 0; font-size: 16px;">{{ exam_title }} - Live Activity</p>
+        <h1 data-i18n="exam_monitor">📊 Exam Monitor</h1>
+        <p style="margin: 0; font-size: 16px;">{{ exam_title }} - <span data-i18n="live_activity">Live Activity</span></p>
     </div>
     
     <!-- Exam Information -->
     <div class="exam-info">
         <div class="info-card">
-            <div class="info-card-label">Exam ID</div>
+            <div class="info-card-label" data-i18n="exam_id">Exam ID</div>
             <div class="info-card-value">{{ exam_id }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-card-label">Exam Title</div>
+            <div class="info-card-label" data-i18n="exam_title">Exam Title</div>
             <div class="info-card-value">{{ exam_title }}</div>
         </div>
         
         <div class="info-card">
-            <div class="info-card-label">Status</div>
-            <div class="info-card-value" style="color: #28a745;">🟢 Running</div>
+            <div class="info-card-label" data-i18n="status">Status</div>
+            <div class="info-card-value" style="color: #28a745;" data-i18n="running">🟢 Running</div>
         </div>
     </div>
     
     <!-- Student Access Link -->
     <div class="card" style="margin-bottom: 20px;">
         <div class="card-header">
-            <h3 style="margin: 0;">📎 Student Access Link</h3>
+            <h3 style="margin: 0;" data-i18n="student_access_link">📎 Student Access Link</h3>
         </div>
         <div class="card-body">
             <div class="student-link">
                 <span id="student-link-text">{{ student_access_url }}</span>
-                <button type="button" class="copy-btn" onclick="copyStudentLink()">
+                <button type="button" class="copy-btn" onclick="copyStudentLink()" data-i18n="copy_link">
                     📋 Copy Link
                 </button>
             </div>
-            <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
+            <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;" data-i18n="share_link_instruction">
                 Share this link with your students. Each student will access it with their own session.
             </p>
         </div>
@@ -286,31 +286,31 @@
     <div class="stats-grid">
         <div class="stat-box active">
             <div class="stat-number" id="stat-active">0</div>
-            <div class="stat-label">In Progress</div>
+            <div class="stat-label" data-i18n="in_progress">In Progress</div>
         </div>
         <div class="stat-box completed">
             <div class="stat-number" id="stat-completed">0</div>
-            <div class="stat-label">Completed</div>
+            <div class="stat-label" data-i18n="completed">Completed</div>
         </div>
         <div class="stat-box suspicious">
             <div class="stat-number" id="stat-suspicious">0</div>
-            <div class="stat-label">Suspicious Activity</div>
+            <div class="stat-label" data-i18n="suspicious_activity">Suspicious Activity</div>
         </div>
         <div class="stat-box">
             <div class="stat-number" id="stat-total">0</div>
-            <div class="stat-label">Total Students</div>
+            <div class="stat-label" data-i18n="total_students">Total Students</div>
         </div>
     </div>
     
     <!-- Controls -->
     <div class="controls">
-        <button type="button" class="btn btn-primary" onclick="refreshData()">
+        <button type="button" class="btn btn-primary" onclick="refreshData()" data-i18n="refresh_now">
             🔄 Refresh Now
         </button>
-        <button type="button" class="btn btn-secondary" onclick="toggleAutoRefresh()">
+        <button type="button" class="btn btn-secondary" onclick="toggleAutoRefresh()" data-i18n="stop_auto_refresh">
             ⏸ Stop Auto-Refresh
         </button>
-        <a href="{{ url_for('teacher_exams') }}" class="btn btn-secondary">
+        <a href="{{ url_for('teacher_exams') }}" class="btn btn-secondary" data-i18n="back_to_exams">
             ← Back to Exams
         </a>
     </div>
@@ -318,28 +318,28 @@
     <!-- Students Table -->
     <div class="card">
         <div class="card-header">
-            <h3 style="margin: 0;">👥 Student Activity</h3>
+            <h3 style="margin: 0;" data-i18n="student_activity">👥 Student Activity</h3>
         </div>
         <div class="card-body">
             <table class="students-table">
                 <thead>
                     <tr>
-                        <th>Student Name</th>
-                        <th>Status</th>
-                        <th>Time Spent</th>
-                        <th>Score</th>
-                        <th>Suspicious Activity</th>
+                        <th data-i18n="student_name">Student Name</th>
+                        <th data-i18n="status">Status</th>
+                        <th data-i18n="time_spent">Time Spent</th>
+                        <th data-i18n="score">Score</th>
+                        <th data-i18n="suspicious_activity">Suspicious Activity</th>
                     </tr>
                 </thead>
                 <tbody id="students-tbody">
                     <tr>
-                        <td colspan="5" class="no-students">
+                        <td colspan="5" class="no-students" data-i18n="loading">
                             Loading student data...
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <div class="refresh-info" id="refresh-info">
+            <div class="refresh-info" id="refresh-info" data-i18n="auto_refreshing">
                 Auto-refreshing every 2 seconds...
             </div>
         </div>
@@ -418,10 +418,11 @@ function updateStudentsTable(students) {
     const tbody = document.getElementById('students-tbody');
     
     if (students.length === 0) {
+        const noStudentsText = window.i18n?.t('no_students_yet') || 'No students yet. Share the link above.';
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" class="no-students">
-                    No students yet. Share the link above.
+                    ${noStudentsText}
                 </td>
             </tr>
         `;

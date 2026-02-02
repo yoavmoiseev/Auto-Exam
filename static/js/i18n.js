@@ -154,8 +154,9 @@ class I18nManager {
     }
 }
 
-// Global instance
+// Global instance - expose to window
 const i18n = new I18nManager();
+window.i18n = i18n;
 
 // Note: init() is async but runs automatically in constructor
 // Language settings are applied via init() -> loadLanguage() -> applyLanguageSettings()

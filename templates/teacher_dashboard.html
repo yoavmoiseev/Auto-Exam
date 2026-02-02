@@ -8,11 +8,11 @@
 <!-- Active Exams Section -->
 <div class="card" style="margin-bottom: 20px;">
     <div class="card-header" style="background: #28a745; color: white;">
-        <h3>🟢 Active Exams (Running Now)</h3>
+        <h3 data-i18n="active_exams_running">🟢 Active Exams (Running Now)</h3>
     </div>
     <div class="card-body">
         <div id="active-exams-list">
-            <p style="text-align: center; color: #999;">Loading active exams...</p>
+            <p style="text-align: center; color: #999;" data-i18n="loading">Loading active exams...</p>
         </div>
     </div>
 </div>
@@ -24,7 +24,7 @@
         </div>
         <div class="card-body">
             <p data-i18n="view_and_manage">Click to view and manage your uploaded exams</p>
-            <a href="{{ url_for('teacher_exams') }}" class="btn btn-primary" style="width: 100%;" data-i18n="view_my_exams">View My Exams</a>
+            <a href="{{ url_for('teacher_exams') }}" class="btn btn-primary" style="width: 100%;" data-i18n="activate_exams">Activate Exams</a>
         </div>
     </div>
 
@@ -33,8 +33,8 @@
             <h3 data-i18n="results">Results</h3>
         </div>
         <div class="card-body">
-            <p data-i18n="no_results">No results available</p>
-            <a href="{{ url_for('teacher_results') }}" class="btn btn-primary" style="width: 100%;" data-i18n="view_results">View</a>
+            <p data-i18n="click_view_results">Click View Results button below to see your exam results</p>
+            <a href="{{ url_for('teacher_results') }}" class="btn btn-primary" style="width: 100%;" data-i18n="view_results">View Results</a>
         </div>
     </div>
 
@@ -63,22 +63,7 @@
     </div>
 </div>
 
-<div class="card" style="margin-top: 20px;">
-    <div class="card-header">
-        <h3 data-i18n="where_stored">📁 Where are my exams stored?</h3>
-    </div>
-    <div class="card-body" style="font-family: monospace; background: #f5f5f5; padding: 15px; border-radius: 4px;">
-        <p><strong data-i18n="files_saved_in">Files are saved in:</strong></p>
-        <code style="display: block; margin: 10px 0; word-break: break-all;">
-            Ex/data/teachers/teacher_{{ user_id }}/exams/
-        </code>
-        <p style="margin-top: 10px; color: #666;">
-            <span>✓ </span><span data-i18n="after_upload_go_to_my_exams">After uploading, go to "My Exams" to see them</span><br>
-            <span>✓ </span><span data-i18n="click_start_to_begin">Click "Start" to begin an exam</span><br>
-            <span>✓ </span><span data-i18n="click_delete_to_remove">Click "Delete" to remove an exam</span>
-        </p>
-    </div>
-</div>
+
 
 {% endblock %}
 
@@ -246,31 +231,31 @@ async function loadActiveExams() {
                             </h4>
                             <div style="color: #666; font-size: 14px;">
                                 <div style="margin: 5px 0;">
-                                    <strong>Started:</strong> ${new Date(exam.start_time).toLocaleString()}
+                                    <strong data-i18n="started">Started:</strong> ${new Date(exam.start_time).toLocaleString()}
                                 </div>
                                 <div style="margin: 5px 0;">
-                                    <strong>Students:</strong> 
-                                    <span style="color: #28a745;">✓ ${completedCount} completed</span>
-                                    / <span style="color: #007bff;">⏳ ${activeCount} active</span>
-                                    / <strong>${studentsCount} total</strong>
+                                    <strong data-i18n="students_summary">Students:</strong> 
+                                    <span style="color: #28a745;">✓ ${completedCount} <span data-i18n="completed_count">completed</span></span>
+                                    / <span style="color: #007bff;">⏳ ${activeCount} <span data-i18n="active_count">active</span></span>
+                                    / <strong>${studentsCount} <span data-i18n="total_count">total</span></strong>
                                 </div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <a href="/teacher/exam/${exam.exam_id}/monitor" 
                                class="btn btn-primary" 
-                               style="text-decoration: none;">
+                               style="text-decoration: none;" data-i18n="monitor">
                                 👁️ Monitor
                             </a>
                             <button onclick="endExam(${exam.exam_id})" 
                                     class="btn btn-danger"
-                                    style="background: #dc3545;">
+                                    style="background: #dc3545;" data-i18n="end_exam">
                                 🛑 End Exam
                             </button>
                         </div>
                     </div>
                     <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border: 1px solid #ddd; font-family: monospace; font-size: 13px;">
-                        <strong>Student Access URL:</strong><br>
+                        <strong data-i18n="student_access_url">Student Access URL:</strong><br>
                         <a href="${exam.student_url}" target="_blank" style="color: #007bff; word-break: break-all;">
                             ${exam.student_url}
                         </a>
@@ -283,8 +268,12 @@ async function loadActiveExams() {
                 
                 container.appendChild(examCard);
             });
+            
+            // Update translations for dynamically added content
+            i18n.updateTranslatableElements();
         } else {
-            container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No active exams. Start an exam from "My Exams".</p>';
+            container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;" data-i18n="no_active_exams">No active exams. Start an exam from "My Exams".</p>';
+            i18n.updateTranslatableElements();
         }
     } catch (error) {
         console.error('Error loading active exams:', error);
@@ -294,12 +283,12 @@ async function loadActiveExams() {
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        alert('URL copied to clipboard!');
+        alert(window.i18n?.t('url_copied_clipboard') || 'URL copied to clipboard!');
     });
 }
 
 async function endExam(examId) {
-    if (!confirm('Are you sure you want to end this exam?\n\nStudents will not be able to access it anymore.')) {
+    if (!confirm(window.i18n?.t('confirm_end_exam') || 'Are you sure you want to end this exam?\n\nStudents will not be able to access it anymore.')) {
         return;
     }
     
@@ -311,14 +300,14 @@ async function endExam(examId) {
         const data = await response.json();
         
         if (data.success) {
-            alert('Exam ended successfully');
+            alert(window.i18n?.t('exam_ended_successfully') || 'Exam ended successfully');
             loadActiveExams();
         } else {
             alert('Error: ' + data.message);
         }
     } catch (error) {
         console.error('Error ending exam:', error);
-        alert('Error ending exam');
+        alert(window.i18n?.t('error_ending_exam') || 'Error ending exam');
     }
 }
 

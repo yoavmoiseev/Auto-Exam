@@ -2,7 +2,7 @@
 <div id="exam-settings-modal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>Start Exam: <span id="modal-exam-name"></span></h2>
+            <h2><span data-i18n="start_exam_title">Start Exam</span>: <span id="modal-exam-name"></span></h2>
             <button type="button" class="close-modal">&times;</button>
         </div>
         
@@ -14,23 +14,23 @@
                 <!-- Existing Folders Section (shown if found) -->
                 <div id="existing-folders-section" style="display: none;" class="form-group">
                     <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 5px; padding: 15px; margin-bottom: 15px;">
-                        <h3 style="margin-top: 0; color: #856404;">⚠️ Existing Exam Sessions Found</h3>
-                        <p style="margin-bottom: 10px;">This exam was previously run. Choose an option:</p>
+                        <h3 style="margin-top: 0; color: #856404;" data-i18n="existing_sessions_found">⚠️ Existing Exam Sessions Found</h3>
+                        <p style="margin-bottom: 10px;" data-i18n="exam_previously_run">This exam was previously run. Choose an option:</p>
                         
                         <div style="margin: 15px 0;">
                             <label style="display: block; margin-bottom: 10px;">
                                 <input type="radio" name="folder_option" value="new" checked style="margin-right: 8px;">
-                                <strong>Create NEW folder</strong> (default - new date/time)
+                                <strong data-i18n="create_new_folder">Create NEW folder</strong> <span style="color: #666;">(default - new date/time)</span>
                             </label>
                             
                             <label style="display: block; margin-bottom: 5px;">
                                 <input type="radio" name="folder_option" value="append" style="margin-right: 8px;">
-                                <strong>APPEND to existing folder</strong> (add students to previous session)
+                                <strong data-i18n="append_to_folder">APPEND to existing folder</strong> <span style="color: #666;">(add students to previous session)</span>
                             </label>
                         </div>
                         
                         <div id="folder-selection" style="display: none; margin-left: 28px; margin-top: 10px;">
-                            <label for="select-existing-folder"><strong>Select folder:</strong></label>
+                            <label for="select-existing-folder"><strong data-i18n="select_folder">Select folder:</strong></label>
                             <select id="select-existing-folder" class="form-control" style="margin-top: 5px;">
                                 <!-- Options populated by JavaScript -->
                             </select>
@@ -44,7 +44,7 @@
                 <!-- Limit Questions -->
                 <div class="form-group">
                     <label for="max-questions">
-                        <strong>Limit the number of exam questions:</strong>
+                        <strong data-i18n="limit_questions">Limit the number of exam questions:</strong>
                     </label>
                     <input 
                         type="number" 
@@ -54,7 +54,7 @@
                         max="1000" 
                         value="1000"
                         class="form-control">
-                    <small class="form-text">Default: 1000 (no limit)</small>
+                    <small class="form-text" data-i18n="default_no_limit">Default: 1000 (no limit)</small>
                 </div>
                 
                 <!-- Shuffle Questions -->
@@ -65,15 +65,15 @@
                             id="shuffle-exam" 
                             name="shuffle_exam" 
                             checked>
-                        <strong>Shuffle Questions</strong>
+                        <strong data-i18n="shuffle_questions">Shuffle Questions</strong>
                     </label>
-                    <small class="form-text">Randomize question order</small>
+                    <small class="form-text" data-i18n="randomize_order">Randomize question order</small>
                 </div>
                 
                 <!-- Exam Duration (optional) -->
                 <div class="form-group">
                     <label for="exam-duration">
-                        <strong>Exam Duration (minutes):</strong>
+                        <strong data-i18n="exam_duration_minutes">Exam Duration (minutes):</strong>
                     </label>
                     <input 
                         type="number" 
@@ -83,13 +83,13 @@
                         max="300" 
                         value="60"
                         class="form-control">
-                    <small class="form-text">0 = no time limit</small>
+                    <small class="form-text" data-i18n="zero_no_limit">0 = no time limit</small>
                 </div>
                 
                 <!-- Submit Buttons -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary cancel-exam">Cancel</button>
-                    <button type="submit" class="btn btn-success">🚀 Start Exam</button>
+                    <button type="button" class="btn btn-secondary cancel-exam" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-success">🚀 <span data-i18n="start_exam">Start Exam</span></button>
                 </div>
             </form>
         </div>
@@ -312,7 +312,8 @@
         const details = document.getElementById('folder-details');
         if (this.value) {
             const studentCount = this.options[this.selectedIndex].dataset.studentCount;
-            details.innerHTML = `📊 Current students in this folder: <strong>${studentCount}</strong>`;
+            const currentStudentsText = window.i18n?.t('current_students_in_folder') || '📊 Current students in this folder';
+            details.innerHTML = `${currentStudentsText}: <strong>${studentCount}</strong>`;
         } else {
             details.innerHTML = '';
         }
@@ -369,11 +370,11 @@
                 // Redirect to monitor page
                 window.location.href = result.monitor_url;
             } else {
-                alert('Error: ' + result.message);
+                alert((window.i18n?.t('error_generic') || 'Error') + ': ' + result.message);
             }
         } catch (error) {
             console.error('Error starting exam:', error);
-            alert('Failed to start exam');
+            alert(window.i18n?.t('failed_start_exam') || 'Failed to start exam');
         }
     });
 })();

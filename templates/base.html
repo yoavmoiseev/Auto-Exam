@@ -19,20 +19,46 @@
     <!-- Header Navigation -->
     <header>
         <nav class="container">
-            <div class="logo">📚 Exam System</div>
-            <ul class="nav-links">
+            <div class="navbar-left">
+                <div class="logo">📚 School Auto Exam</div>
+            </div>
+            
+            <div class="navbar-center">
                 {% if current_user %}
-                    <li><a href="{{ url_for('teacher_dashboard') }}" data-i18n="teacher_dashboard">Dashboard</a></li>
-                    <li><span>{{ current_user.first_name }} {{ current_user.last_name }}</span></li>
-                    <li>
-                        <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-secondary" data-i18n="logout">Logout</button>
-                        </form>
-                    </li>
+                    <a href="{{ url_for('teacher_dashboard') }}" class="btn-dashboard" data-i18n="teacher_dashboard">Dashboard</a>
                 {% endif %}
-            </ul>
+            </div>
+            
+            <div class="navbar-right">
+                <!-- Video Widget -->
+                <div class="video-widget" id="videoWidget">
+                    <video id="navVideo" muted loop autoplay playsinline>
+                        <source src="/video/en.mp4" type="video/mp4">
+                    </video>
+                </div>
+                
+                {% if current_user %}
+                    <span class="user-name">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                    <form action="{{ url_for('logout') }}" method="POST" class="logout-form" id="logout-form">
+                        <button type="button" class="btn-logout" data-i18n="logout" onclick="confirmLogout()">Logout</button>
+                    </form>
+                {% endif %}
+            </div>
         </nav>
     </header>
+
+    <!-- Video Modal -->
+    <div id="videoModal" class="video-modal" style="display:none;">
+        <div class="video-modal-content">
+            <span class="video-modal-close" onclick="closeVideoModal()">&times;</span>
+            <a href="https://www.yamsoft.org" target="_blank" class="modal-company-link" id="modal-company-link">
+                <span data-i18n="company_name">YaM SOFT ©</span>
+            </a>
+            <video id="modalVideo" muted loop autoplay playsinline>
+                <source src="/video/en.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
 
     <!-- Language Switcher -->
     <div class="container mt-2">
@@ -58,14 +84,74 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 Exam System. All rights reserved. | 
-           <a href="#" style="color: white; text-decoration: none;">{{ url_for('index') }}</a>
-        </p>
+        <a href="https://www.yamsoft.org" target="_blank" class="footer-company-link" id="footer-company-link">
+            <span data-i18n="company_name">YaM SOFT ©</span>
+        </a>
     </footer>
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script>
+        // Video widget functionality
+        const videoWidget = document.getElementById('videoWidget');
+        const navVideo = document.getElementById('navVideo');
+        const videoModal = document.getElementById('videoModal');
+        const modalVideo = document.getElementById('modalVideo');
+        
+        // Double click to open modal
+        if (videoWidget && videoModal) {
+            videoWidget.addEventListener('dblclick', function() {
+                videoModal.style.display = 'flex';
+                if (modalVideo) {
+                    modalVideo.play();
+                }
+            });
+        }
+        
+        function closeVideoModal() {
+            videoModal.style.display = 'none';
+            modalVideo.pause();
+        }
+        
+        // Close modal on background click
+        if (videoModal) {
+            videoModal.addEventListener('click', function(e) {
+                if (e.target === videoModal) {
+                    closeVideoModal();
+                }
+            });
+        }
+        
+        // Update video source on language change
+        window.addEventListener('languageChanged', function(e) {
+            const lang = e.detail.language;
+            const videoSrc = `/video/${lang}.mp4`;
+            
+            if (navVideo) {
+                navVideo.pause();
+                navVideo.src = videoSrc;
+                navVideo.load();
+                navVideo.play().catch(() => {});
+            }
+            if (modalVideo) {
+                const wasPlaying = videoModal.style.display === 'flex';
+                modalVideo.pause();
+                modalVideo.src = videoSrc;
+                modalVideo.load();
+                if (wasPlaying) {
+                    modalVideo.play().catch(() => {});
+                }
+            }
+        });
+        
+        // Logout confirmation
+        function confirmLogout() {
+            const confirmMsg = window.i18n?.t('confirm_logout') || 'Are you sure you want to logout?';
+            if (confirm(confirmMsg)) {
+                document.getElementById('logout-form').submit();
+            }
+        }
+        
         // Initialize language buttons - wait until i18n is ready
         function initLanguageButtons() {
             if (typeof i18n === 'undefined') {
