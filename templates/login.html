@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Exam System{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 80px auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="text-center mb-0" data-i18n="login">Login</h1>
+        </div>
+        <div class="card-body">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username" data-i18n="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" data-i18n="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="submit">Submit</button>
+            </form>
+
+            <div id="login-message" class="mt-2" style="display: none;"></div>
+            
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <p data-i18n="already_registered">Already have an account?</p>
+                <a href="{{ url_for('signup') }}" class="btn btn-secondary" style="width: 100%; margin-top: 5px;" data-i18n="signup_button">Create Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const messageDiv = document.getElementById('login-message');
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = data.message || i18n.t('invalid_credentials');
+            }
+        } catch (error) {
+            messageDiv.style.display = 'block';
+            messageDiv.className = 'alert alert-danger';
+            messageDiv.textContent = 'Error logging in. Please try again.';
+            console.error('Login error:', error);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+1. מהי הפונקציה העיקרית של לוח אם?  
+   - מחבר ומשלב את כל רכיבי המחשב  
+   - מאחסן נתונים לצמיתות  
+   - מספק חשמל למערכת  
+   - מקרר את המעבד  
+   - מחבר התקנים חיצוניים  
+
+2. איזה רכיב אחראי על ביצוע פקודות במחשב?  
+   - מעבד (CPU - Central Processing Unit)  
+   - זיכרון RAM (Random Access Memory)  
+   - כרטיס מסך (GPU - Graphics Processing Unit)  
+   - ספק כוח (PSU - Power Supply Unit)  
+   - כונן SSD (Solid State Drive)  
+
+3. איזה סוג זיכרון משמש לאחסון זמני בזמן שהמחשב פועל?  
+   - זיכרון RAM (Random Access Memory)  
+   - זיכרון ROM (Read-Only Memory)  
+   - כונן קשיח HDD (Hard Disk Drive)  
+   - כונן SSD (Solid State Drive)  
+   - זיכרון מטמון (Cache Memory)  
+
+4. איזה התקן אחסון מספק את מהירויות הגישה לנתונים הגבוהות ביותר?  
+   - כונן SSD (Solid State Drive)  
+   - כונן קשיח HDD (Hard Disk Drive)  
+   - כונן USB Flash  
+   - כונן CD-ROM  
+   - כונן סרט מגנטי (Tape Drive)  
+
+5. איזה סוג מחבר חשמל משמש לכוננים קשיחים פנימיים?  
+   - מחבר חשמל SATA  
+   - מחבר USB Type-A  
+   - מחבר HDMI  
+   - מחבר VGA  
+   - מחבר רשת (Ethernet)  
+
+6. איזה פורט במחשב משמש בעיקר לחיבור מסכים חיצוניים?  
+   - HDMI (High-Definition Multimedia Interface)  
+   - USB Type-C  
+   - RJ-45  
+   - PCIe  
+   - PS/2  
+
+7. מהו התפקיד העיקרי של גוף קירור (Heatsink)?  
+   - פיזור חום מרכיבים  
+   - אחסון אנרגיה חשמלית  
+   - המרת זרם חילופין (AC) לזרם ישר (DC)  
+   - שיפור קישוריות הרשת  
+   - הגדלת קיבולת האחסון  
+
+8. איזה רכיב קובע את מספר יציאות ה-USB, SATA ו-PCIe הזמינות בלוח אם?  
+   - ערכת שבבים (Chipset)  
+   - זיכרון RAM  
+   - ספק כוח (PSU)  
+   - מעבד (CPU)  
+   - סוללת CMOS  
+
+9. איזה סוג זיכרון שומר נתונים גם כאשר המחשב כבוי?  
+   - זיכרון ROM (Read-Only Memory)  
+   - זיכרון RAM (Random Access Memory)  
+   - זיכרון מטמון (Cache Memory)  
+   - זיכרון וירטואלי (Virtual Memory)  
+   - זיכרון DRAM  
+
+10. איזה מחבר משמש לרשתות אינטרנט חוטיות?  
+    - RJ-45  
+    - RJ-11  
+    - USB-C  
+    - HDMI  
+    - Thunderbolt  
+
+11. איזה התקן אחראי על המרת זרם חילופין (AC) מהשקע לזרם ישר (DC) שהמחשב יכול להשתמש בו?  
+    - ספק כוח (PSU - Power Supply Unit)  
+    - כרטיס מסך (GPU - Graphics Processing Unit)  
+    - כרטיס רשת (NIC - Network Interface Card)  
+    - אל-פסק (UPS - Uninterruptible Power Supply)  
+    - זיכרון RAM  
+
+12. איזה סוג חריץ הרחבה משמש בדרך כלל לכרטיסי מסך בעלי ביצועים גבוהים?  
+    - PCIe (Peripheral Component Interconnect Express)  
+    - AGP (Accelerated Graphics Port)  
+    - ISA (Industry Standard Architecture)  
+    - SATA  
+    - USB  
+
+13. מה מטרתה של סוללת ה-CMOS בלוח אם?  
+    - שומרת על הגדרות ה-BIOS והשעה במערכת  
+    - מספקת חשמל למעבד  
+    - מספקת אחסון נוסף לזיכרון RAM  
+    - משפרת ביצועי כרטיס המסך  
+    - מאיצה העברת נתונים ב-USB  
+
+14. איזה רכיב מחשב מכיל את מערכת ההפעלה וקבצי המשתמש?  
+    - כונן קשיח (HDD/SSD)  
+    - זיכרון RAM  
+    - מעבד (CPU)  
+    - כרטיס מסך (GPU)  
+    - ספק כוח (PSU)  
+
+15. מה הפירוש של BIOS?  
+    - מערכת קלט/פלט בסיסית (Basic Input Output System)  
+    - מערכת הפעלה בינארית משולבת (Binary Integrated Operating System)  
+    - תוכנה מובנית להפעלה (Built-In Operating Software)  
+    - גיבוי והגדרת קלט/פלט (Backup Input Output Setup)  
+    - מערכת אופטימיזציית ממשק נתונים (Bus Interface Optimization System)  
+
+16. איזה התקן מאפשר למחשב לתקשר ברשת?  
+    - כרטיס רשת (NIC - Network Interface Card)  
+    - כרטיס קול  
+    - מעבד (CPU)  
+    - כונן SSD  
+    - ספק כוח (PSU)  
+
+17. איזה רכיב משמש לקירור המעבד?  
+    - מאוורר או מערכת קירור נוזלית  
+    - זיכרון RAM  
+    - ספק כוח (PSU)  
+    - כונן קשיח (HDD)  
+    - BIOS  
+
+18. איזה סוג מסך מספק את דיוק הצבעים הטוב ביותר?  
+    - OLED  
+    - IPS (In-Plane Switching)  
+    - TN (Twisted Nematic)  
+    - VA (Vertical Alignment)  
+    - CRT  
+
+19. איזה מחבר משמש להעברת וידאו ואודיו יחד?  
+    - DisplayPort  
+    - VGA  
+    - DVI  
+    - PS/2  
+    - Ethernet  
+
+20. איזה רכיב אחראי על עיבוד גרפי במחשב?  
+    - כרטיס מסך (GPU - Graphics Processing Unit)  
+    - מעבד (CPU)  
+    - זיכרון RAM  
+    - ספק כוח (PSU)  
+    - כרטיס קול  
+
+21. מה הפירוש של SATA?  
+    - חיבור טכנולוגי מתקדם סידורי (Serial Advanced Technology Attachment)  
+    - מתאם העברת מערכת אוטומטית (System Automated Transfer Adapter)  
+    - ארכיטקטורת אחסון והעברה (Storage And Transfer Architecture)  
+    - גישה אוטומטית לטכנולוגיה תוכנתית (Software Automated Technology Access)  
+    - גישה סידורית להעברות (Serial Access to Transmissions)  
+
+22. איזה התקן מאחסן את מערכת ההפעלה במרבית המחשבים המודרניים?  
+    - כונן SSD (Solid State Drive)  
+    - כונן קשיח HDD (Hard Disk Drive)  
+    - זיכרון RAM  
+    - BIOS  
+    - כרטיס מסך (GPU)  
+
+23. מהי הפונקציה של ספק כוח (PSU)?  
+    - ממיר זרם חילופין (AC) לזרם ישר (DC)  
+    - מקרר את המערכת  
+    - מאחסן קבצים לצמיתות  
+    - מאיץ מהירות רשת  
+    - מציג גרפיקה  
+
+24. מה סוג זיכרון ה-RAM הנפוץ ביותר במחשבים מודרניים?  
+    - DDR4  
+    - DDR3  
+    - DDR2  
+    - SDRAM  
+    - SRAM  
+
+25. איזה אפיק (Bus) מחבר בין המעבד ל-RAM?  
+    - אפיק קדמי (Front Side Bus - FSB)  
+    - PCIe  
+    - SATA  
+    - USB  
+    - Ethernet  
+
+26. מה הפירוש של GPU?  
+    - יחידת עיבוד גרפי (Graphics Processing Unit)  
+    - כלי עיבוד כללי (General Processing Utility)  
+    - יחידת כוח גרפית (Graphical Power Unit)  
+    - שדרוג ביצועי גיימינג (Gaming Performance Upgrade)  
+    - יחידת עיבוד גרפיט (Graphite Processor Unit)  
+
+27. איזה התקן אחסון משמש בדרך כלל לגיבוי נתונים?  
+    - כונן קשיח חיצוני (External HDD)  
+    - זיכרון RAM  
+    - ספק כוח (PSU)  
+    - מעבד (CPU)  
+    - כרטיס רשת (NIC)  
+
+28. איזה פורט משמש לחיבור התקני שמע?  
+    - שקע אודיו 3.5 מ"מ  
+    - USB Type-C  
+    - HDMI  
+    - DVI  
+    - RJ-45  

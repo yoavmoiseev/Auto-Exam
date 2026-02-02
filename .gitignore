@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+
+# App specific
+data/users.db
+logs/*.log
+teachers/*/results/*.txt
+uploads/*
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace

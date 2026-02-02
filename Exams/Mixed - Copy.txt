@@ -1,0 +1,92 @@
+1. A type of expansion slot is commonly used for high-performance graphics cards is  
+    - PCIe (Peripheral Component Interconnect Express)  
+    - AGP (Accelerated Graphics Port)  
+    - ISA (Industry Standard Architecture)  
+    - SATA  
+    - USB  
+
+
+2. Which component is responsible for executing instructions in a computer 
+Type your answer here
+
+111. Write a program that:
+Programming task:
+1111
+2222222222222
+333333333333333333333333
+444
+====================
+use print(a)
+c= a + b
+
+3. What type of memory is used for temporary storage while the computer is running?  
+
+
+4. Which storage device provides the fastest data access speeds?  
+Type your answer here
+5. Which type of power connector is used for internal hard drives?  
+Type your answer here
+
+6. Computer port is primarily used to connect external displays...
+Type your answer here
+16. Which device allows a computer to communicate over a network?  
+    - Network Interface Card (NIC)  
+    - Sound Card  
+    - CPU  
+    - SSD  
+    - PSU  
+
+7. What is the primary purpose of a heatsink?  
+Type your answer here
+
+8. Write a Python program that:
+Programming task:
+
+Asks the user how many students are in the class.
+
+For each student, asks for their name and score (0–100).
+
+Stores the data.
+
+After all input, the program should:
+
+Print each student's name with their grade (A, B, C, D, F based on score).
+
+Calculate and print the class average.
+
+Print the name of the top student(s).
+
+How many students? 3
+
+Enter name for student 1: Alice
+Enter score for Alice: 88
+
+Enter name for student 2: Bob
+Enter score for Bob: 92
+
+Enter name for student 3: Charlie
+Enter score for Charlie: 67
+
+Grades:
+Alice: B
+Bob: A
+Charlie: D
+
+Class average: 82.33
+Top student(s): Bob
+
+
+8. Which component determines the number of USB, SATA, and PCIe slots available on a motherboard?  
+Type your answer here
+
+9. Which type of memory retains data even when the power is turned off?  
+Type your answer here
+
+10. Which connector is most commonly used for wired Ethernet networks?  
+Type your answer here
+11. Which device is responsible for converting AC power from a wall outlet into usable DC power for a computer?  
+    - PSU (Power Supply Unit)  
+    - GPU (Graphics Processing Unit)  
+    - NIC (Network Interface Card)  
+    - UPS (Uninterruptible Power Supply)  
+    - RAM  

@@ -1,0 +1,380 @@
+<!-- Exam Settings Modal - GUI для настройки экзамена перед запуском -->
+<div id="exam-settings-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Start Exam: <span id="modal-exam-name"></span></h2>
+            <button type="button" class="close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="exam-settings-form">
+                <!-- Hidden field for exam filename -->
+                <input type="hidden" id="exam-filename" name="exam_filename">
+                
+                <!-- Existing Folders Section (shown if found) -->
+                <div id="existing-folders-section" style="display: none;" class="form-group">
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 5px; padding: 15px; margin-bottom: 15px;">
+                        <h3 style="margin-top: 0; color: #856404;">⚠️ Existing Exam Sessions Found</h3>
+                        <p style="margin-bottom: 10px;">This exam was previously run. Choose an option:</p>
+                        
+                        <div style="margin: 15px 0;">
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input type="radio" name="folder_option" value="new" checked style="margin-right: 8px;">
+                                <strong>Create NEW folder</strong> (default - new date/time)
+                            </label>
+                            
+                            <label style="display: block; margin-bottom: 5px;">
+                                <input type="radio" name="folder_option" value="append" style="margin-right: 8px;">
+                                <strong>APPEND to existing folder</strong> (add students to previous session)
+                            </label>
+                        </div>
+                        
+                        <div id="folder-selection" style="display: none; margin-left: 28px; margin-top: 10px;">
+                            <label for="select-existing-folder"><strong>Select folder:</strong></label>
+                            <select id="select-existing-folder" class="form-control" style="margin-top: 5px;">
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                            <div id="folder-details" style="margin-top: 8px; font-size: 13px; color: #666;">
+                                <!-- Details shown when folder selected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Limit Questions -->
+                <div class="form-group">
+                    <label for="max-questions">
+                        <strong>Limit the number of exam questions:</strong>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="max-questions" 
+                        name="max_questions" 
+                        min="1" 
+                        max="1000" 
+                        value="1000"
+                        class="form-control">
+                    <small class="form-text">Default: 1000 (no limit)</small>
+                </div>
+                
+                <!-- Shuffle Questions -->
+                <div class="form-group">
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            id="shuffle-exam" 
+                            name="shuffle_exam" 
+                            checked>
+                        <strong>Shuffle Questions</strong>
+                    </label>
+                    <small class="form-text">Randomize question order</small>
+                </div>
+                
+                <!-- Exam Duration (optional) -->
+                <div class="form-group">
+                    <label for="exam-duration">
+                        <strong>Exam Duration (minutes):</strong>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="exam-duration" 
+                        name="exam_duration" 
+                        min="0" 
+                        max="300" 
+                        value="60"
+                        class="form-control">
+                    <small class="form-text">0 = no time limit</small>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary cancel-exam">Cancel</button>
+                    <button type="submit" class="btn btn-success">🚀 Start Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group strong {
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.form-text {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 12px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+</style>
+
+<script>
+// Exam Settings Modal Functions
+(function() {
+    const modal = document.getElementById('exam-settings-modal');
+    const form = document.getElementById('exam-settings-form');
+    const closeBtn = modal.querySelector('.close-modal');
+    const cancelBtn = modal.querySelector('.cancel-exam');
+    
+    let existingFolders = [];
+    
+    // Open modal function
+    window.openExamSettingsModal = async function(examFilename) {
+        const examNameDisplay = examFilename.replace('.txt', '');
+        document.getElementById('modal-exam-name').textContent = examNameDisplay;
+        document.getElementById('exam-filename').value = examFilename;
+        
+        // Check for existing folders
+        await checkExistingFolders(examFilename);
+        
+        modal.style.display = 'flex';
+    };
+    
+    // Check for existing folders
+    async function checkExistingFolders(examFilename) {
+        try {
+            const response = await fetch('/api/exam/check-existing-folders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exam_filename: examFilename })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.has_existing) {
+                existingFolders = data.folders;
+                showExistingFoldersSection(data.folders);
+            } else {
+                hideExistingFoldersSection();
+            }
+        } catch (error) {
+            console.error('Error checking existing folders:', error);
+            hideExistingFoldersSection();
+        }
+    }
+    
+    // Show existing folders section
+    function showExistingFoldersSection(folders) {
+        const section = document.getElementById('existing-folders-section');
+        const select = document.getElementById('select-existing-folder');
+        
+        // Populate select
+        select.innerHTML = '<option value="">-- Select a folder --</option>';
+        folders.forEach(folder => {
+            const option = document.createElement('option');
+            option.value = folder.folder_name;
+            option.textContent = `${folder.date} ${folder.time} (${folder.student_count} students)`;
+            option.dataset.studentCount = folder.student_count;
+            select.appendChild(option);
+        });
+        
+        section.style.display = 'block';
+    }
+    
+    // Hide existing folders section
+    function hideExistingFoldersSection() {
+        document.getElementById('existing-folders-section').style.display = 'none';
+    }
+    
+    // Handle folder option radio buttons
+    document.querySelectorAll('input[name="folder_option"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const folderSelection = document.getElementById('folder-selection');
+            if (this.value === 'append') {
+                folderSelection.style.display = 'block';
+            } else {
+                folderSelection.style.display = 'none';
+            }
+        });
+    });
+    
+    // Handle folder selection
+    document.getElementById('select-existing-folder').addEventListener('change', function() {
+        const details = document.getElementById('folder-details');
+        if (this.value) {
+            const studentCount = this.options[this.selectedIndex].dataset.studentCount;
+            details.innerHTML = `📊 Current students in this folder: <strong>${studentCount}</strong>`;
+        } else {
+            details.innerHTML = '';
+        }
+    });
+    
+    // Close modal function
+    function closeModal() {
+        modal.style.display = 'none';
+        hideExistingFoldersSection();
+    }
+    
+    // Event listeners for closing
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    
+    // Don't close on background click - prevents accidental closing while selecting text
+    
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Determine append folder
+        let appendToFolder = null;
+        const folderOption = document.querySelector('input[name="folder_option"]:checked');
+        if (folderOption && folderOption.value === 'append') {
+            appendToFolder = document.getElementById('select-existing-folder').value;
+            if (!appendToFolder) {
+                alert('Please select a folder to append to, or choose "Create NEW folder"');
+                return;
+            }
+        }
+        
+        const formData = {
+            exam_filename: document.getElementById('exam-filename').value,
+            max_questions: parseInt(document.getElementById('max-questions').value),
+            shuffle_exam: document.getElementById('shuffle-exam').checked,
+            exam_duration: parseInt(document.getElementById('exam-duration').value),
+            append_to_folder: appendToFolder
+        };
+        
+        try {
+            const response = await fetch('/api/exam/start-with-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                closeModal();
+                // Redirect to monitor page
+                window.location.href = result.monitor_url;
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error starting exam:', error);
+            alert('Failed to start exam');
+        }
+    });
+})();
+</script>

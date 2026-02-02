@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Results - Exam System{% endblock %}
+
+{% block content %}
+<h1 data-i18n="results">Results</h1>
+
+<div class="card">
+    <div class="card-body">
+        <table>
+            <thead>
+                <tr>
+                    <th data-i18n="exam_name">Exam Name</th>
+                    <th>Date & Time</th>
+                    <th>Students</th>
+                    <th>Files</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="results-list">
+                <tr>
+                    <td colspan="5" class="text-center" data-i18n="no_results">Loading results...</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; text-align: center;" id="download-all-section">
+            <button class="btn btn-lg btn-success" onclick="downloadAllZip()" style="display:none;" id="download-all-btn">
+                📦 Download ALL in ZIP
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load results on page load
+document.addEventListener('DOMContentLoaded', loadResults);
+
+async function loadResults() {
+    try {
+        const response = await fetch('/api/results');
+        const data = await response.json();
+        
+        const tbody = document.getElementById('results-list');
+        
+        if (data.success && data.folders && data.folders.length > 0) {
+            tbody.innerHTML = '';
+            
+            data.folders.forEach(folder => {
+                const row = document.createElement('tr');
+                
+                // Exam name
+                const examCell = document.createElement('td');
+                examCell.textContent = folder.exam_name;
+                examCell.style.fontWeight = 'bold';
+                row.appendChild(examCell);
+                
+                // Date & Time
+                const dateCell = document.createElement('td');
+                dateCell.textContent = `${folder.exam_date} ${folder.exam_time.replace('-', ':')}`;
+                row.appendChild(dateCell);
+                
+                // Student count
+                const studentsCell = document.createElement('td');
+                studentsCell.textContent = `${folder.student_count} students`;
+                row.appendChild(studentsCell);
+                
+                // Files info
+                const filesCell = document.createElement('td');
+                const fileInfo = [];
+                if (folder.has_grades) fileInfo.push('GRADES.txt');
+                if (folder.has_all_exams) fileInfo.push('All_Exams.txt');
+                fileInfo.push(`${folder.html_count} HTML`);
+                filesCell.textContent = fileInfo.join(', ');
+                filesCell.style.fontSize = '12px';
+                row.appendChild(filesCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                actionsCell.style.whiteSpace = 'nowrap';
+                
+                // View Grades button
+                if (folder.has_grades) {
+                    const gradesBtn = document.createElement('button');
+                    gradesBtn.textContent = '📊 GRADES';
+                    gradesBtn.className = 'btn btn-sm btn-primary';
+                    gradesBtn.onclick = () => viewFile(folder.folder_name, 'GRADES.txt');
+                    actionsCell.appendChild(gradesBtn);
+                }
+                
+                // View All Exams button
+                if (folder.has_all_exams) {
+                    const allExamsBtn = document.createElement('button');
+                    allExamsBtn.textContent = '📝 All';
+                    allExamsBtn.className = 'btn btn-sm btn-secondary';
+                    allExamsBtn.onclick = () => viewFile(folder.folder_name, 'All_Exams.txt');
+                    actionsCell.appendChild(allExamsBtn);
+                }
+                
+                // Download ZIP button
+                const zipBtn = document.createElement('button');
+                zipBtn.textContent = '📦 ZIP';
+                zipBtn.className = 'btn btn-sm btn-success';
+                zipBtn.onclick = () => downloadZip(folder.folder_name);
+                actionsCell.appendChild(zipBtn);
+                
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
+            });
+            
+            // Show Download ALL button
+            document.getElementById('download-all-btn').style.display = 'inline-block';
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No results available</td></tr>';
+            document.getElementById('download-all-btn').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading results:', error);
+        document.getElementById('results-list').innerHTML = 
+            '<tr><td colspan="5" class="text-center">Error loading results</td></tr>';
+        document.getElementById('download-all-btn').style.display = 'none';
+    }
+}
+
+function viewFile(folderName, filename) {
+    // Open result file in new window
+    window.open(`/api/results/${folderName}/${filename}`, '_blank');
+}
+
+function downloadZip(folderName) {
+    // Download folder as ZIP
+    window.location.href = `/api/results/${folderName}/download-zip`;
+}
+
+function downloadAllZip() {
+    // Download all folders as one big ZIP
+    window.location.href = '/api/results/download-all-zip';
+}
+</script>
+
+<style>
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    margin-right: 4px;
+    display: inline-block;
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+</style>
+
+{% endblock %}

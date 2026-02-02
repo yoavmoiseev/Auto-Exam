@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Exam - Exam System{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div id="pre-exam" class="card">
+        <div class="card-header">
+            <h1 id="exam-title" data-i18n="exam_name">Exam</h1>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <p data-i18n="warning_do_not_leave">Do NOT leave the exam page until submitted</p>
+            </div>
+
+            <div class="form-group">
+                <label for="first-name" data-i18n="first_name">First Name</label>
+                <input type="text" id="first-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="last-name" data-i18n="last_name">Last Name</label>
+                <input type="text" id="last-name" required>
+            </div>
+
+            <button id="start-btn" class="btn btn-primary" style="width: 100%;" data-i18n="start_exam">Start Exam</button>
+        </div>
+    </div>
+
+    <div id="exam-form" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 id="exam-form-title"></h2>
+                        <small id="question-counter" style="color: #666;"></small>
+                    </div>
+                    <div class="timer" id="timer">60:00</div>
+                </div>
+            </div>
+            <div class="card-body" id="questions-container">
+                <!-- Questions will be inserted here -->
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: space-between;">
+            <button id="prev-btn" class="btn btn-secondary" style="display: none;" data-i18n="previous">← Previous</button>
+            <button id="next-btn" class="btn btn-secondary" data-i18n="next">Next →</button>
+            <button id="submit-btn" class="btn btn-success" style="display: none;" data-i18n="submit_exam">Submit Exam</button>
+        </div>
+
+        <div id="exam-results" style="display: none;">
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h3 data-i18n="exam_results">Exam Results</h3>
+                </div>
+                <div class="card-body" style="text-align: center;">
+                    <h2 id="final-score"></h2>
+                    <p id="results-message"></p>
+                    <a href="{{ url_for('teacher_exams') }}" class="btn btn-primary" data-i18n="back_to_dashboard">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timer {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.timer.warning {
+    border-color: #ffc107;
+    color: #ffc107;
+}
+
+.timer.critical {
+    border-color: #dc3545;
+    color: #dc3545;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.question-block {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.question-number {
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.question-text {
+    font-size: 16px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.options {
+    margin-top: 15px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.option:hover {
+    background: #e9ecef;
+}
+
+.option input {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.option label {
+    margin: 0;
+    cursor: pointer;
+    flex: 1;
+}
+
+#questions-container {
+    min-height: 400px;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/exam_script.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Exam System{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1 data-i18n="signup_title">Create Account</h1>
+        
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="firstName" data-i18n="first_name">First Name</label>
+                <input type="text" id="firstName" name="first_name" required 
+                       data-i18n="first_name_placeholder" placeholder="Enter your first name">
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName" data-i18n="last_name">Last Name</label>
+                <input type="text" id="lastName" name="last_name" required 
+                       data-i18n="last_name_placeholder" placeholder="Enter your last name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email" data-i18n="email">Email</label>
+                <input type="email" id="email" name="email" 
+                       data-i18n="email_placeholder" placeholder="example@email.com (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="username" data-i18n="username">Username</label>
+                <input type="text" id="username" name="username" required 
+                       data-i18n="username_placeholder" placeholder="Choose a username"
+                       pattern="[a-zA-Z0-9_]{3,}" 
+                       data-i18n-title="username_hint" title="Username must contain only letters, numbers, and underscores">
+                <small data-i18n="username_requirements">3+ characters: letters, numbers, underscore</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" data-i18n="password">Password</label>
+                <input type="password" id="password" name="password" required 
+                       data-i18n="password_placeholder" placeholder="Enter a password"
+                       minlength="6" 
+                       data-i18n-title="password_hint" title="Password must be at least 6 characters">
+                <small data-i18n="password_requirements">Minimum 6 characters</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword" data-i18n="confirm_password">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirm_password" required 
+                       data-i18n="confirm_password_placeholder" placeholder="Confirm your password"
+                       minlength="6" 
+                       data-i18n-title="confirm_password_hint" title="Enter the same password again">
+            </div>
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            
+            <button type="submit" class="btn btn-primary btn-block" data-i18n="signup_button">
+                Create Account
+            </button>
+            
+            <p class="auth-link">
+                <span data-i18n="already_registered">Already have an account?</span>
+                <a href="{{ url_for('login') }}" data-i18n="login_link">Login here</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const errorDiv = document.getElementById('errorMessage');
+    
+    // Clear previous error
+    errorDiv.style.display = 'none';
+    
+    // Client-side validation
+    if (password !== confirmPassword) {
+        errorDiv.textContent = document.querySelector('[data-i18n="passwords_not_match"]').getAttribute('data-i18n');
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    const formData = new FormData(form);
+    const data = {
+        first_name: formData.get('first_name'),
+        last_name: formData.get('last_name'),
+        email: formData.get('email'),
+        username: formData.get('username'),
+        password: formData.get('password'),
+        confirm_password: formData.get('confirm_password')
+    };
+    
+    try {
+        const response = await fetch('/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            window.location.href = result.redirect;
+        } else {
+            errorDiv.textContent = result.message;
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
+
+<style>
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 3px;
+    color: #666;
+    font-size: 12px;
+}
+
+.error-message {
+    background: #fee;
+    color: #c00;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #c00;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.auth-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .auth-box {
+        padding: 30px 20px;
+    }
+}
+</style>
+{% endblock %}

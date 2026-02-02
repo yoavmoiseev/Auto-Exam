@@ -1,0 +1,27 @@
+1. What is the primary function of a motherboard?  
+
+
+2. Which component is responsible for executing instructions in a computer?  
+
+
+3. What type of memory is used for temporary storage while the computer is running?  
+
+
+4. Which storage device provides the fastest data access speeds?  
+
+5. Which type of power connector is used for internal hard drives?  
+
+
+6. Which computer port is primarily used to connect external displays?  
+
+
+7. What is the primary purpose of a heatsink?  
+
+
+8. Which component determines the number of USB, SATA, and PCIe slots available on a motherboard?  
+
+
+9. Which type of memory retains data even when the power is turned off?  
+
+
+10. Which connector is most commonly used for wired Ethernet networks?  

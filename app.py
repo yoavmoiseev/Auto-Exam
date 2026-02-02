@@ -1,0 +1,1463 @@
+"""
+Exam System - Flask Web Application
+Main entry point for the exam management system
+Supports offline mode and web deployment
+"""
+
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from functools import wraps
+from werkzeug.utils import secure_filename
+import json
+import os
+import zipfile
+from io import BytesIO
+from datetime import datetime
+from config import app_config
+from services.auth_service import AuthService
+from services.file_service import FileService
+from services.exam_session_service import ExamSessionManager
+from services.exam_builder_service import ExamBuilder
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config.from_object(app_config)
+
+# Initialize services
+auth_service = AuthService()
+file_service = FileService()
+exam_session_manager = ExamSessionManager()
+
+# ==========================================
+# HELPER FUNCTIONS
+# ==========================================
+
+def login_required(f):
+    """Decorator to check if user is logged in"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def get_current_user():
+    """Get current logged in user"""
+    if 'user_id' in session:
+        return auth_service.get_user(session['user_id'])
+    return None
+
+
+def ensure_directories():
+    """Ensure all necessary directories exist"""
+    directories = [
+        app_config.DATA_DIR,
+        app_config.TEACHERS_DIR,
+        app_config.LOGS_DIR,
+        os.path.join(app_config.TEACHERS_DIR, 'teacher_1', 'exams'),
+        os.path.join(app_config.TEACHERS_DIR, 'teacher_1', 'results'),
+    ]
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+
+
+# ==========================================
+# ROUTES - AUTHENTICATION
+# ==========================================
+
+@app.route('/')
+def index():
+    """Home page - redirect to login or dashboard"""
+    if 'user_id' in session:
+        return redirect(url_for('teacher_dashboard'))
+    return redirect(url_for('login'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """User login page"""
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Username and password required'})
+        
+        result = auth_service.authenticate(username, password)
+        
+        if result['success']:
+            session['user_id'] = result['user']['id']
+            session['username'] = result['user']['username']
+            session['first_name'] = result['user']['first_name']
+            session['last_name'] = result['user']['last_name']
+            return jsonify({'success': True, 'redirect': url_for('teacher_dashboard')})
+        else:
+            return jsonify({'success': False, 'message': result['message']})
+    
+    return render_template('login.html')
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """User signup/registration page"""
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        email = data.get('email', '').strip() or None
+        
+        # Validation
+        if not all([username, password, first_name, last_name]):
+            return jsonify({'success': False, 'message': 'All fields except email are required'})
+        
+        if len(username) < 3:
+            return jsonify({'success': False, 'message': 'Username must be at least 3 characters'})
+        
+        if len(password) < 6:
+            return jsonify({'success': False, 'message': 'Password must be at least 6 characters'})
+        
+        if password != confirm_password:
+            return jsonify({'success': False, 'message': 'Passwords do not match'})
+        
+        # Create user
+        result = auth_service.add_user(username, password, first_name, last_name, email)
+        
+        if result['success']:
+            return jsonify({'success': True, 'message': 'Account created successfully', 'redirect': url_for('login')})
+        else:
+            return jsonify({'success': False, 'message': result['message']})
+    
+    return render_template('signup.html')
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def api_login():
+    """API endpoint for login (same as /login but always returns JSON)"""
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Username and password required'}), 400
+    
+    result = auth_service.authenticate(username, password)
+    
+    if result['success']:
+        session['user_id'] = result['user']['id']
+        session['username'] = result['user']['username']
+        session['first_name'] = result['user']['first_name']
+        session['last_name'] = result['user']['last_name']
+        return jsonify({'success': True, 'redirect': url_for('teacher_dashboard')})
+    else:
+        return jsonify({'success': False, 'message': result['message']}), 401
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    """User logout"""
+    session.clear()
+    return redirect(url_for('login'))
+
+
+# ==========================================
+# ROUTES - TEACHER DASHBOARD
+# ==========================================
+
+@app.route('/teacher/dashboard')
+@login_required
+def teacher_dashboard():
+    """Teacher dashboard"""
+    user = get_current_user()
+    return render_template('teacher_dashboard.html', user=user, user_id=user['id'])
+
+
+@app.route('/teacher/exams')
+@login_required
+def teacher_exams():
+    """List teacher's exams"""
+    user = get_current_user()
+    return render_template('teacher_exams.html', user=user, user_id=user['id'])
+
+
+@app.route('/teacher/results')
+@login_required
+def teacher_results():
+    """Teacher results page"""
+    user = get_current_user()
+    return render_template('teacher_results.html', user=user, user_id=user['id'])
+
+
+@app.route('/api/results', methods=['GET'])
+@login_required
+def api_get_results():
+    """Get exam result folders for current teacher"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Teacher's results directory
+        teacher_results_dir = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results'
+        )
+        
+        results_folders = []
+        
+        if os.path.exists(teacher_results_dir):
+            # Scan all folders in teacher's results directory
+            for folder_name in os.listdir(teacher_results_dir):
+                folder_path = os.path.join(teacher_results_dir, folder_name)
+                
+                if os.path.isdir(folder_path):
+                    # Check if GRADES.txt exists (confirms it's a results folder)
+                    grades_file = os.path.join(folder_path, 'GRADES.txt')
+                    all_exams_file = os.path.join(folder_path, 'All_Exams.txt')
+                    
+                    if os.path.exists(grades_file):
+                        # Parse folder name: "ExamName YYYY-MM-DD HH-MM"
+                        parts = folder_name.rsplit(' ', 2)  # Split from right, max 2 splits
+                        if len(parts) >= 3:
+                            exam_name = ' '.join(parts[:-2])
+                            exam_date = parts[-2]  # YYYY-MM-DD
+                            exam_time = parts[-1]  # HH-MM
+                        else:
+                            exam_name = folder_name
+                            exam_date = ''
+                            exam_time = ''
+                        
+                        # Count students from GRADES.txt
+                        student_count = 0
+                        if os.path.exists(grades_file):
+                            with open(grades_file, 'r', encoding='utf-8') as f:
+                                student_count = len([line for line in f if line.strip()])
+                        
+                        # Get folder stats
+                        html_files = [f for f in os.listdir(folder_path) if f.endswith('.html')]
+                        
+                        results_folders.append({
+                            'folder_name': folder_name,
+                            'exam_name': exam_name,
+                            'exam_date': exam_date,
+                            'exam_time': exam_time,
+                            'student_count': student_count,
+                            'html_count': len(html_files),
+                            'has_grades': os.path.exists(grades_file),
+                            'has_all_exams': os.path.exists(all_exams_file),
+                            'teacher_id': teacher_id
+                        })
+        
+        # Sort by date/time (newest first)
+        results_folders.sort(key=lambda x: f"{x.get('exam_date', '')} {x.get('exam_time', '')}", reverse=True)
+        
+        return jsonify({'success': True, 'folders': results_folders})
+    
+    except Exception as e:
+        print(f"Error getting results: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/results/<folder_name>/<filename>')
+@login_required
+def api_view_result_file(folder_name, filename):
+    """View a result HTML file"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path in teacher's results folder
+        file_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results',
+            folder_name,
+            filename
+        )
+        
+        if not os.path.exists(file_path):
+            return "File not found", 404
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        return content
+    
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+
+@app.route('/api/results/<folder_name>/download-zip')
+@login_required
+def api_download_folder_zip(folder_name):
+    """Download entire exam folder as ZIP"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path to folder
+        folder_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results',
+            folder_name
+        )
+        
+        if not os.path.exists(folder_path):
+            return "Folder not found", 404
+        
+        # Create ZIP in memory
+        memory_file = BytesIO()
+        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Walk through the folder and add all files
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, folder_path)
+                    zipf.write(file_path, arcname)
+        
+        memory_file.seek(0)
+        
+        # Generate ZIP filename
+        zip_filename = f"{folder_name}.zip"
+        
+        return send_file(
+            memory_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=zip_filename
+        )
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"Error creating ZIP: {str(e)}", 500
+
+
+@app.route('/api/results/download-all-zip')
+@login_required
+def api_download_all_folders_zip():
+    """Download all exam folders as one big ZIP"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path to results folder
+        results_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results'
+        )
+        
+        if not os.path.exists(results_path):
+            return "No results found", 404
+        
+        # Create ZIP in memory
+        memory_file = BytesIO()
+        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Walk through all folders in results
+            for root, dirs, files in os.walk(results_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # Create archive name relative to results folder
+                    arcname = os.path.relpath(file_path, results_path)
+                    zipf.write(file_path, arcname)
+        
+        memory_file.seek(0)
+        
+        # Generate ZIP filename with timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
+        zip_filename = f"All_Results_{timestamp}.zip"
+        
+        return send_file(
+            memory_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=zip_filename
+        )
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"Error creating ZIP: {str(e)}", 500
+
+
+# ==========================================
+# ROUTES - EXAM
+# ==========================================
+
+@app.route('/exams/<exam_id>')
+def exam_start(exam_id):
+    """Start exam for student"""
+    return render_template('exam.html', exam_id=exam_id)
+
+
+@app.route('/exam')
+def exam_interface():
+    """Exam interface for student - loads exam by name"""
+    exam_name = request.args.get('name')
+    if not exam_name:
+        return redirect('/'), 400
+    return render_template('exam.html', exam_name=exam_name)
+
+
+# ==========================================
+# ROUTES - EXAM SESSION MANAGEMENT (NEW)
+# ==========================================
+
+@app.route('/api/exam/check-existing-folders', methods=['POST'])
+@login_required
+def api_check_existing_folders():
+    """Check if teacher has existing result folders for this exam"""
+    try:
+        data = request.json
+        exam_filename = data.get('exam_filename')
+        
+        if not exam_filename:
+            return jsonify({'success': False, 'message': 'Exam filename required'}), 400
+        
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        exam_title = exam_filename.replace('.txt', '')
+        
+        # Teacher's results directory
+        teacher_results_dir = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results'
+        )
+        
+        existing_folders = []
+        
+        if os.path.exists(teacher_results_dir):
+            for folder_name in os.listdir(teacher_results_dir):
+                folder_path = os.path.join(teacher_results_dir, folder_name)
+                
+                if os.path.isdir(folder_path):
+                    # Check if folder starts with exam title
+                    if folder_name.startswith(exam_title + ' '):
+                        # Parse folder: "ExamName YYYY-MM-DD HH-MM"
+                        parts = folder_name.rsplit(' ', 2)
+                        if len(parts) >= 3:
+                            date_part = parts[-2]  # YYYY-MM-DD
+                            time_part = parts[-1]  # HH-MM
+                            
+                            # Count students
+                            grades_file = os.path.join(folder_path, 'GRADES.txt')
+                            student_count = 0
+                            if os.path.exists(grades_file):
+                                with open(grades_file, 'r', encoding='utf-8') as f:
+                                    student_count = len([line for line in f if line.strip()])
+                            
+                            existing_folders.append({
+                                'folder_name': folder_name,
+                                'date': date_part,
+                                'time': time_part.replace('-', ':'),
+                                'student_count': student_count
+                            })
+        
+        # Sort by date/time (newest first)
+        existing_folders.sort(key=lambda x: f"{x['date']} {x['time']}", reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'has_existing': len(existing_folders) > 0,
+            'folders': existing_folders
+        })
+    
+    except Exception as e:
+        print(f"Error checking existing folders: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam/start-with-settings', methods=['POST'])
+@login_required
+def start_exam_with_settings():
+    """Teacher starts exam with GUI settings (shuffle, limit, etc.)"""
+    try:
+        data = request.json
+        exam_filename = data.get('exam_filename')
+        max_questions = data.get('max_questions', 1000)
+        shuffle_exam = data.get('shuffle_exam', True)
+        exam_duration = data.get('exam_duration', 60)
+        append_to_folder = data.get('append_to_folder')  # Folder name if appending
+        
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Get exam title (filename without .txt)
+        exam_title = exam_filename.replace('.txt', '')
+        
+        # Create new exam session with settings
+        exam_id = exam_session_manager.start_exam(
+            teacher_id=teacher_id,
+            exam_filename=exam_filename,
+            exam_title=exam_title,
+            settings={
+                'max_questions': max_questions,
+                'shuffle_exam': shuffle_exam,
+                'exam_duration': exam_duration
+            }
+        )
+        
+        # Handle results folder
+        exam_session = exam_session_manager.get_session(exam_id)
+        if exam_session:
+            if append_to_folder:
+                # Append to existing folder
+                results_folder = os.path.join(
+                    app_config.TEACHERS_DIR,
+                    teacher_id,
+                    'results',
+                    append_to_folder
+                )
+                if os.path.exists(results_folder):
+                    exam_session.results_folder = results_folder
+                    print(f"Appending to existing folder: {results_folder}")
+                else:
+                    # Fallback: create new if folder doesn't exist
+                    results_folder = create_exam_results_folder(teacher_id, exam_title)
+                    exam_session.results_folder = results_folder
+            else:
+                # Create new results folder
+                results_folder = create_exam_results_folder(teacher_id, exam_title)
+                exam_session.results_folder = results_folder
+        
+        # Generate monitor URL
+        monitor_url = url_for('exam_monitor', exam_id=exam_id)
+        
+        return jsonify({
+            'success': True,
+            'exam_id': exam_id,
+            'monitor_url': monitor_url,
+            'message': 'Exam started successfully'
+        })
+    
+    except Exception as e:
+        print(f"Error starting exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/teacher/exam/<filename>/start', methods=['POST'])
+@login_required
+def start_exam_session(filename):
+    """Teacher starts a new exam session (fallback without settings)"""
+    user = get_current_user()
+    teacher_id = f"teacher_{user['id']}"
+    
+    # Get exam title (filename without .txt)
+    exam_title = filename.replace('.txt', '')
+    
+    # Create new exam session
+    exam_id = exam_session_manager.start_exam(
+        teacher_id=teacher_id,
+        exam_filename=filename,
+        exam_title=exam_title
+    )
+    
+    # Redirect teacher to monitor dashboard
+    return redirect(url_for('exam_monitor', exam_id=exam_id))
+
+
+@app.route('/teacher/exam/<int:exam_id>/monitor')
+@login_required
+def exam_monitor(exam_id):
+    """Teacher monitors exam - sees student activity in real-time"""
+    user = get_current_user()
+    exam_session = exam_session_manager.get_session(exam_id)
+    
+    if not exam_session:
+        return "Exam not found", 404
+    
+    # Generate student access URL
+    student_access_url = exam_session_manager.get_student_access_url(
+        exam_id,
+        base_url=request.url_root.rstrip('/')
+    )
+    
+    return render_template('exam_monitor.html',
+                          exam_id=exam_id,
+                          exam_title=exam_session.exam_title,
+                          student_access_url=student_access_url)
+
+
+@app.route('/exam/<int:exam_id>')
+def student_exam_session(exam_id):
+    """Student accesses exam by session ID"""
+    exam_session = exam_session_manager.get_session(exam_id)
+    
+    if not exam_session:
+        return "This exam is not available or has ended", 404
+    
+    return render_template('student_exam_session.html',
+                          exam_id=exam_id,
+                          exam_title=exam_session.exam_title)
+
+
+# ==========================================
+# ROUTES - API
+# ==========================================
+
+@app.route('/api/translations/<language>')
+def get_translations(language):
+    """Get translations for specified language"""
+    if language not in app_config.SUPPORTED_LANGUAGES:
+        language = app_config.DEFAULT_LANGUAGE
+    
+    try:
+        translations_path = os.path.join(
+            app_config.DATA_DIR,
+            'translations',
+            f'{language}.json'
+        )
+        with open(translations_path, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        return jsonify(translations)
+    except Exception as e:
+        print(f"Error loading translations: {e}")
+        return jsonify({}), 500
+
+
+@app.route('/api/exam/<exam_filename>')
+def get_exam(exam_filename):
+    """Get exam content with parsed questions"""
+    if not exam_filename:
+        return jsonify({'success': False, 'message': 'Exam not found'}), 404
+    
+    try:
+        # Find exam file in all teacher directories
+        for root, dirs, files in os.walk(app_config.TEACHERS_DIR):
+            if exam_filename in files:
+                filepath = os.path.join(root, exam_filename)
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Parse exam questions
+                questions = parse_exam_questions(content)
+                
+                return jsonify({
+                    'success': True,
+                    'filename': exam_filename,
+                    'questions': questions,
+                    'total_questions': len(questions)
+                })
+        
+        return jsonify({'success': False, 'message': 'Exam file not found'}), 404
+    except Exception as e:
+        print(f"Error loading exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+def parse_exam_questions(content):
+    """Parse exam file format and extract questions"""
+    questions = []
+    lines = content.strip().split('\n')
+    
+    current_question = None
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        
+        # Check if line is a question number (e.g., "1.", "2.", etc.)
+        if line[0].isdigit() and ('. ' in line or '.' == line[1]):
+            # Save previous question if exists
+            if current_question:
+                questions.append(current_question)
+            
+            # Parse question number and text
+            parts = line.split('. ', 1)
+            if len(parts) == 2:
+                current_question = {
+                    'id': len(questions) + 1,
+                    'number': parts[0],
+                    'text': parts[1],
+                    'options': [],
+                    'correct_answer': None
+                }
+        
+        # Check if line is an answer option (A), B), C), D), etc.)
+        elif current_question and len(line) > 2 and line[0] in 'ABCDEFGH' and line[1] == ')':
+            option_letter = line[0]
+            option_text = line[3:].strip()
+            current_question['options'].append({
+                'letter': option_letter,
+                'text': option_text
+            })
+        
+        # Check if line is the correct answer
+        elif current_question and line.lower().startswith('answer:'):
+            answer = line.split(':', 1)[1].strip().upper()
+            current_question['correct_answer'] = answer
+    
+    # Don't forget last question
+    if current_question:
+        questions.append(current_question)
+    
+    return questions
+
+
+@app.route('/api/submit-exam', methods=['POST'])
+def submit_exam():
+    """Submit exam answers and calculate score"""
+    try:
+        data = request.json
+        exam_filename = data.get('exam_filename')
+        student_name = data.get('student_name')
+        answers = data.get('answers', {})  # {question_id: answer_letter}
+        time_spent = data.get('time_spent', 0)
+        
+        if not exam_filename or not student_name:
+            return jsonify({'success': False, 'message': 'Missing required data'}), 400
+        
+        # Load exam to get correct answers
+        for root, dirs, files in os.walk(app_config.TEACHERS_DIR):
+            if exam_filename in files:
+                filepath = os.path.join(root, exam_filename)
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                questions = parse_exam_questions(content)
+                
+                # Calculate score
+                correct = 0
+                total = len(questions)
+                
+                for q in questions:
+                    q_id = str(q['id'])
+                    if q_id in answers:
+                        if answers[q_id].upper() == q['correct_answer']:
+                            correct += 1
+                
+                score = (correct / total * 100) if total > 0 else 0
+                
+                # Save results
+                result = {
+                    'student_name': student_name,
+                    'exam_filename': exam_filename,
+                    'correct_answers': correct,
+                    'total_questions': total,
+                    'score': round(score, 2),
+                    'time_spent': time_spent,
+                    'timestamp': datetime.now().isoformat(),
+                    'answers': answers
+                }
+                
+                # Save to results file
+                results_dir = os.path.join(app_config.DATA_DIR, 'results')
+                os.makedirs(results_dir, exist_ok=True)
+                
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                result_filename = f"{student_name['first']}_{student_name['last']}_{timestamp}.json"
+                result_path = os.path.join(results_dir, result_filename)
+                
+                with open(result_path, 'w', encoding='utf-8') as f:
+                    json.dump(result, f, ensure_ascii=False, indent=2)
+                
+                return jsonify({
+                    'success': True,
+                    'score': score,
+                    'correct': correct,
+                    'total': total,
+                    'message': f'Exam submitted: {correct}/{total} correct'
+                })
+        
+        return jsonify({'success': False, 'message': 'Exam file not found'}), 404
+    
+    except Exception as e:
+        print(f"Error submitting exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/current-user')
+def api_current_user():
+    """Get current logged in user"""
+    user = get_current_user()
+    if user:
+        return jsonify({'success': True, 'user': user})
+    return jsonify({'success': False}), 401
+
+
+@app.route('/api/upload-exam', methods=['POST'])
+@login_required
+def upload_exam():
+    """Upload a new exam file"""
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file provided'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.txt'):
+        return jsonify({'success': False, 'message': 'Only .txt files allowed'}), 400
+    
+    try:
+        # Keep original filename but remove path traversal attempts
+        filename = file.filename
+        # Remove path separators and null bytes
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '')
+        
+        # Ensure teacher exam directory exists
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        os.makedirs(exam_dir, exist_ok=True)
+        
+        filepath = os.path.join(exam_dir, filename)
+        
+        # Check if file already exists
+        if os.path.exists(filepath):
+            return jsonify({
+                'success': False,
+                'message': f'File already exists: {filename}',
+                'file_exists': True,
+                'filename': filename
+            }), 409  # 409 Conflict
+        
+        # Save file
+        file.save(filepath)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Exam uploaded',
+            'filename': filename
+        })
+    except Exception as e:
+        print(f"Error uploading exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exams-list', methods=['GET'])
+@login_required
+def get_exams():
+    """Get list of exams for current teacher"""
+    try:
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        
+        if not os.path.exists(exam_dir):
+            return jsonify({'success': True, 'exams': []})
+        
+        exams = [f for f in os.listdir(exam_dir) if f.endswith('.txt')]
+        return jsonify({'success': True, 'exams': exams})
+    except Exception as e:
+        print(f"Error getting exams: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/delete-exam/<filename>', methods=['DELETE'])
+@login_required
+def delete_exam(filename):
+    """Delete an exam file"""
+    try:
+        # Remove path traversal attempts but keep unicode characters
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        filepath = os.path.join(exam_dir, filename)
+        
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            return jsonify({'success': True, 'message': 'Exam deleted'})
+        else:
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+    except Exception as e:
+        print(f"Error deleting exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/upload-exam/overwrite', methods=['POST'])
+@login_required
+def upload_exam_overwrite():
+    """Upload a new exam file with overwrite confirmation"""
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file provided'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.txt'):
+        return jsonify({'success': False, 'message': 'Only .txt files allowed'}), 400
+    
+    try:
+        # Keep original filename but remove path traversal attempts
+        filename = file.filename
+        # Remove path separators and null bytes
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '')
+        
+        # Ensure teacher exam directory exists
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        os.makedirs(exam_dir, exist_ok=True)
+        
+        filepath = os.path.join(exam_dir, filename)
+        
+        # Save file (overwrite if exists)
+        file.save(filepath)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Exam uploaded',
+            'filename': filename
+        })
+    except Exception as e:
+        print(f"Error uploading exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ==========================================
+# ROUTES - API - EXAM SESSION (NEW)
+# ==========================================
+
+@app.route('/api/exam/<int:exam_id>/start-student', methods=['POST'])
+def api_start_student(exam_id):
+    """Student submits name and starts exam"""
+    try:
+        data = request.json
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        
+        if not first_name or not last_name:
+            return jsonify({'success': False, 'message': 'Name is required'}), 400
+        
+        # Get exam session
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False, 'message': 'Exam not found'}), 404
+        
+        # Add student to session
+        student_session_id = exam_session_manager.add_student_to_exam(
+            exam_id, first_name, last_name
+        )
+        
+        # Get exam settings
+        settings = getattr(exam_session, 'settings', {})
+        max_questions = settings.get('max_questions', 1000)
+        shuffle = settings.get('shuffle_exam', False)
+        
+        # Load exam questions with settings
+        teacher_id = exam_session.teacher_id
+        exam_data = load_exam_questions(
+            teacher_id, 
+            exam_session.exam_filename,
+            max_questions=max_questions,
+            shuffle=shuffle
+        )
+        
+        return jsonify({
+            'success': True,
+            'student_session_id': student_session_id,
+            'exam_data': exam_data
+        })
+    
+    except Exception as e:
+        print(f"Error starting student exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/questions', methods=['GET'])
+def api_get_exam_questions(exam_id):
+    """Get exam questions for display"""
+    try:
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False, 'message': 'Exam not found'}), 404
+        
+        # Get exam settings
+        settings = getattr(exam_session, 'settings', {})
+        max_questions = settings.get('max_questions', 1000)
+        shuffle = settings.get('shuffle_exam', False)
+        
+        # Load exam questions using ExamBuilder
+        exam_data = load_exam_questions(
+            exam_session.teacher_id,
+            exam_session.exam_filename,
+            max_questions=max_questions,
+            shuffle=shuffle
+        )
+        
+        return jsonify({
+            'success': True,
+            'questions': exam_data.get('questions', []),
+            'text_direction': exam_data.get('text_direction', 'ltr')
+        })
+    
+    except Exception as e:
+        print(f"Error loading questions: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/submit', methods=['POST'])
+def api_submit_exam(exam_id):
+    """Student submits exam answers"""
+    try:
+        data = request.json
+        student_session_id = data.get('student_session_id')
+        first_name = data.get('first_name', '')
+        last_name = data.get('last_name', '')
+        answers = data.get('answers', {})
+        questions_list = data.get('questions', [])  # Get questions student saw
+        
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False, 'message': 'Exam not found'}), 404
+        
+        student = exam_session.get_student(student_session_id)
+        if not student:
+            return jsonify({'success': False, 'message': 'Student not found'}), 404
+        
+        # Load full exam file for answer dictionary
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, exam_session.teacher_id, 'exams')
+        exam_path = os.path.join(exam_dir, exam_session.exam_filename)
+        
+        full_exam_data = ExamBuilder.parse_exam_file(exam_path)
+        question_answer_dict = full_exam_data.get('question_answer_dict', {})
+        text_direction = full_exam_data.get('text_direction', 'ltr')
+        
+        # Calculate score using ExamBuilder logic
+        score = ExamBuilder.calculate_score(answers, question_answer_dict)
+        
+        # Build response HTML using questions student actually saw
+        dir_attr = 'dir="rtl"' if text_direction == 'rtl' else ''
+        
+        response_html = f"<html {dir_attr}><body><meta charset='UTF-8'>"
+        response_html += f"<h2>{first_name} {last_name}, your exam was submitted successfully</h2>"
+        response_html += "<h3>Your Answers:</h3><ol>"
+        
+        # Loop through questions student saw (from client) in order
+        for question in questions_list:
+            question_text = question.get('text', '')
+            
+            # Find submitted answer for this question
+            submitted_answer = answers.get(question_text, 'No answer')
+            
+            # If exam is RTL (Hebrew), keep answers RTL too
+            # Otherwise, check if answer contains English and apply LTR
+            if text_direction == 'rtl':
+                align_dir = ""
+            else:
+                is_english = any(ord('A') <= ord(char) <= ord('z') for char in submitted_answer)
+                align_dir = "align='left' dir='ltr'" if is_english else ""
+            
+            response_html += f"<li><b>{question_text}</b><pre {align_dir}>{submitted_answer}</pre></li>"
+        
+        # Add grade
+        if score < 0:
+            grade_text = "Unknown yet, exam will be evaluated later"
+        else:
+            grade_text = f"{score} %"
+        
+        response_html += f"<h1>Your grade is {grade_text}</h1></ol></body></html>"
+        
+        # Mark exam as completed
+        exam_session.submit_student_exam(student_session_id, answers, score)
+        
+        # Save results to files (HTML, GRADES.txt, All_Exams.txt)
+        save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list)
+        
+        return jsonify({
+            'success': True,
+            'score': score,
+            'response_html': response_html,
+            'message': f'Exam submitted successfully'
+        })
+    
+    except Exception as e:
+        print(f"Error submitting exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/log-cheating', methods=['POST'])
+def api_log_cheating_attempt(exam_id):
+    """Log cheating attempt for a student"""
+    try:
+        data = request.json
+        student_session_id = data.get('student_session_id')
+        attempt_type = data.get('attempt_type')
+        details = data.get('details')
+        
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False}), 404
+        
+        # Log the cheating attempt
+        exam_session.log_cheating_attempt(student_session_id, attempt_type, details)
+        
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Error logging cheating: {e}")
+        return jsonify({'success': False}), 500
+
+
+@app.route('/api/active-exams', methods=['GET'])
+@login_required
+def api_get_active_exams():
+    """Get all active exams for current teacher"""
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        active_sessions = exam_session_manager.get_all_active_sessions()
+        
+        exams_list = []
+        base_url = request.url_root.rstrip('/')
+        
+        for exam_id, exam_session in active_sessions.items():
+            # Only show exams for this teacher
+            if exam_session.teacher_id == teacher_id:
+                students_summary = exam_session_manager.get_session_students_summary(exam_id)
+                
+                completed_count = sum(1 for s in students_summary if s['status'] == 'completed')
+                
+                exams_list.append({
+                    'exam_id': exam_id,
+                    'exam_title': exam_session.exam_title,
+                    'exam_filename': exam_session.exam_filename,
+                    'start_time': exam_session.start_time.isoformat(),
+                    'status': exam_session.status,
+                    'students_count': len(students_summary),
+                    'completed_count': completed_count,
+                    'student_url': f"{base_url}/exam/{exam_id}"
+                })
+        
+        return jsonify({
+            'success': True,
+            'exams': exams_list
+        })
+    
+    except Exception as e:
+        print(f"Error getting active exams: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/end', methods=['POST'])
+@login_required
+def api_end_exam(exam_id):
+    """Teacher ends an exam"""
+    try:
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False, 'message': 'Exam not found'}), 404
+        
+        # Verify teacher owns this exam
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        if exam_session.teacher_id != teacher_id:
+            return jsonify({'success': False, 'message': 'Not authorized'}), 403
+        
+        # End the exam
+        exam_session.status = 'ended'
+        
+        return jsonify({
+            'success': True,
+            'message': 'Exam ended successfully'
+        })
+    
+    except Exception as e:
+        print(f"Error ending exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+    except Exception as e:
+        print(f"Error logging cheating: {e}")
+        return jsonify({'success': False}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/log-event', methods=['POST'])
+def api_log_event(exam_id):
+    """Log a general event for a student"""
+    try:
+        data = request.json
+        student_session_id = data.get('student_session_id')
+        event_type = data.get('event_type')
+        event_data = data.get('event_data')
+        
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False}), 404
+        
+        # Log event (could be stored in a log file)
+        student = exam_session.get_student(student_session_id)
+        if student:
+            print(f"[EVENT] {event_type} - {student['first_name']} {student['last_name']}")
+        
+        return jsonify({'success': True})
+    
+    except Exception as e:
+        print(f"Error logging event: {e}")
+        return jsonify({'success': False}), 500
+
+
+@app.route('/api/exam/<int:exam_id>/students', methods=['GET'])
+def api_get_exam_students(exam_id):
+    """Get all students in exam with their current status"""
+    try:
+        exam_session = exam_session_manager.get_session(exam_id)
+        if not exam_session:
+            return jsonify({'success': False, 'message': 'Exam not found'}), 404
+        
+        students = exam_session_manager.get_session_students_summary(exam_id)
+        
+        return jsonify({
+            'success': True,
+            'exam_id': exam_id,
+            'exam_title': exam_session.exam_title,
+            'students': students
+        })
+    
+    except Exception as e:
+        print(f"Error getting students: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ==========================================
+# HELPER FUNCTIONS - EXAM LOGIC
+# ==========================================
+
+def create_exam_results_folder(teacher_id, exam_title):
+    """Create results folder for exam at start. Returns folder path."""
+    try:
+        from datetime import datetime as dt
+        
+        # Format: "ExamName YYYY-MM-DD HH-MM"
+        current_datetime = dt.now().strftime("%Y-%m-%d %H-%M")
+        folder_name = f"{exam_title} {current_datetime}"
+        
+        # Create in teacher's results directory
+        teacher_results_dir = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results'
+        )
+        os.makedirs(teacher_results_dir, exist_ok=True)
+        
+        results_folder = os.path.join(teacher_results_dir, folder_name)
+        os.makedirs(results_folder, exist_ok=True)
+        
+        print(f"Created results folder: {results_folder}")
+        return results_folder
+    
+    except Exception as e:
+        print(f"Error creating results folder: {e}")
+        # Fallback to old system
+        from datetime import datetime as dt
+        current_date = dt.now().strftime("%Y-%m-%d")
+        results_folder = os.path.join(
+            os.path.dirname(__file__),
+            f"{exam_title} {current_date}"
+        )
+        os.makedirs(results_folder, exist_ok=True)
+        return results_folder
+
+
+def load_exam_questions(teacher_id, exam_filename, max_questions=1000, shuffle=False):
+    """Load and parse exam file using ExamBuilder"""
+    try:
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        exam_path = os.path.join(exam_dir, exam_filename)
+        
+        if not os.path.exists(exam_path):
+            return {'questions': []}
+        
+        # ПРАВИЛЬНАЯ ЛОГИКА: сначала загружаем ВСЕ вопросы, потом shuffle, потом limit
+        # Load ALL questions first (no limit)
+        exam_data = ExamBuilder.parse_exam_file(exam_path, max_questions=9999)
+        
+        # Apply shuffle FIRST if requested (shuffles ALL questions)
+        if shuffle:
+            exam_data['questions'] = ExamBuilder.shuffle_exam(exam_data['questions'], shuffle)
+        
+        # THEN limit to max_questions (takes first N from shuffled list)
+        if max_questions < len(exam_data['questions']):
+            exam_data['questions'] = exam_data['questions'][:max_questions]
+        
+        return exam_data
+    
+    except Exception as e:
+        print(f"Error loading exam questions: {e}")
+        return {'questions': [], 'text_direction': 'ltr', 'question_answer_dict': {}}
+
+
+def calculate_exam_score(answers, exam_filename, teacher_id):
+    """Calculate score based on answers using ExamBuilder"""
+    try:
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        exam_path = os.path.join(exam_dir, exam_filename)
+        
+        if not os.path.exists(exam_path):
+            return 0
+        
+        # Use ExamBuilder to get question-answer dictionary
+        exam_data = ExamBuilder.parse_exam_file(exam_path)
+        question_answer_dict = exam_data.get('question_answer_dict', {})
+        
+        if not question_answer_dict:
+            return 0
+        
+        # Calculate score using ExamBuilder
+        score = ExamBuilder.calculate_score(answers, question_answer_dict)
+        
+        # If -1, it means there are open questions that can't be auto-graded
+        if score < 0:
+            return -1
+        
+        return score
+    
+    except Exception as e:
+        print(f"Error calculating score: {e}")
+        return 0
+
+
+def save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list):
+    """Save exam results to files (like old Exam.py system)"""
+    try:
+        from datetime import datetime as dt
+        
+        # Use results folder from exam session (created at exam start)
+        if hasattr(exam_session, 'results_folder') and exam_session.results_folder:
+            results_folder = exam_session.results_folder
+        else:
+            # Fallback: create folder now (old behavior)
+            teacher_id = exam_session.teacher_id
+            exam_title = exam_session.exam_title
+            current_date = dt.now().strftime("%Y-%m-%d")
+            results_folder = os.path.join(
+                os.path.dirname(__file__),
+                f"{exam_title} {current_date}"
+            )
+            os.makedirs(results_folder, exist_ok=True)
+        
+        current_time = dt.now().strftime("%H-%M-%S")
+        first_name = student['first_name']
+        last_name = student['last_name']
+        
+        # 1. Save HTML file (student's exam result)
+        html_filename = f"{first_name}_{last_name}_{current_time}.html"
+        html_path = os.path.join(results_folder, html_filename)
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(response_html)
+        
+        # 2. Append to GRADES.txt
+        grades_file = os.path.join(results_folder, 'GRADES.txt')
+        cheating_attempts = student.get('cheating_attempts', 0)
+        exam_duration = student.get('exam_duration', 'N/A')
+        
+        grade_text = f"{score} %" if score >= 0 else "Unknown yet, will be evaluated later"
+        grades_entry = (
+            f"{current_time}: {first_name} {last_name}-{grade_text}  "
+            f"Cheat Attempts-{cheating_attempts} Duration-{exam_duration}\n"
+        )
+        
+        with open(grades_file, 'a', encoding='utf-8') as f:
+            f.write(grades_entry)
+        
+        # 3. Append to All_Exams.txt (for ChatGPT evaluation)
+        all_exams_file = os.path.join(results_folder, 'All_Exams.txt')
+        
+        # Build text format like old system
+        exam_txt = "############################################################################\n\n"
+        exam_txt += f"Student details: Name-{first_name}  Last name-{last_name}  "
+        exam_txt += f"Submitting time-{current_time}  Cheating attemps-{cheating_attempts}\n\n"
+        
+        # Add all questions and answers
+        for question in questions_list:
+            question_text = question.get('text', '')
+            submitted_answer = answers.get(question_text, 'No answer')
+            
+            exam_txt += f"{question_text}\n{submitted_answer}\n"
+            exam_txt += "\n----------------------------------------------------------------------------\n"
+        
+        with open(all_exams_file, 'a', encoding='utf-8') as f:
+            f.write(exam_txt)
+        
+        print(f"Exam submitted {grades_entry}")
+        
+        return True
+    
+    except Exception as e:
+        print(f"Error saving results: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+# ==========================================
+# ERROR HANDLERS
+# ==========================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+    """404 error handler"""
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    """500 error handler"""
+    print(f"Internal server error: {error}")
+    return render_template('500.html'), 500
+
+
+# ==========================================
+# APPLICATION INITIALIZATION
+# ==========================================
+
+@app.before_request
+def before_request():
+    """Before each request"""
+    ensure_directories()
+
+
+@app.context_processor
+def inject_user():
+    """Inject user into template context"""
+    return dict(current_user=get_current_user())
+
+
+# ==========================================
+# MAIN
+# ==========================================
+
+if __name__ == '__main__':
+    # Ensure all directories exist
+    ensure_directories()
+    
+    # Create default teacher if not exists
+    result = auth_service.add_user(
+        username='teacher1',
+        password='password123',
+        first_name='Teacher',
+        last_name='One',
+        email='teacher1@exam-system.local'
+    )
+    if result['success']:
+        print("✓ Default teacher account created (username: teacher1, password: password123)")
+    else:
+        print(f"ℹ Default teacher: {result['message']}")
+    
+    # Print startup info
+    print("\n" + "="*60)
+    print("Exam System - Flask Application")
+    print("="*60)
+    print(f"Database: {app_config.DATABASE_PATH}")
+    print(f"Teachers Dir: {app_config.TEACHERS_DIR}")
+    print(f"Logs Dir: {app_config.LOGS_DIR}")
+    print(f"Debug Mode: {app_config.DEBUG}")
+    print("="*60 + "\n")
+    
+    # Start Flask development server
+    app.run(
+        host='127.0.0.1',
+        port=5000,
+        debug=app_config.DEBUG
+    )

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Exam{% endblock %}</title>
+    
+    <!-- Stylesheets -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* RTL support */
+        [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        [dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+        }
+    </style>
+    
+    <!-- Additional styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Main Content - No header, no navigation, no logout -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer - minimal -->
+    <footer style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+        <p>&copy; 2026 Exam System</p>
+    </footer>
+
+    <!-- Scripts -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

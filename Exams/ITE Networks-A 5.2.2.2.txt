@@ -1,0 +1,174 @@
+1. Какая сеть охватывает небольшую территорию, например офис или кампус?
+   LAN (Local Area Network)
+   WAN (Wide Area Network)
+   PAN (Personal Area Network)
+   WLAN (Wireless LAN)
+   VLAN (Virtual LAN)
+
+2. Какая сеть используется для подключения устройств на очень маленьком расстоянии, например между телефоном и наушниками?
+   PAN (Personal Area Network)
+   LAN (Local Area Network)
+   WAN (Wide Area Network)
+   VLAN (Virtual LAN)
+   WLAN (Wireless LAN)
+
+3. Какая сеть соединяет города, страны и даже континенты?
+   WAN (Wide Area Network)
+   LAN (Local Area Network)
+   WLAN (Wireless LAN)
+   PAN (Personal Area Network)
+   VLAN (Virtual LAN)
+
+4. Какая сеть обеспечивает беспроводное соединение внутри ограниченной территории, например в кафе или университете?
+   WLAN (Wireless LAN)
+   PAN (Personal Area Network)
+   WAN (Wide Area Network)
+   LAN (Local Area Network)
+   VLAN (Virtual LAN)
+
+5. Какая технология позволяет логически разделять устройства внутри одной физической сети?
+   VLAN (Virtual LAN)
+   WLAN (Wireless LAN)
+   WAN (Wide Area Network)
+   PAN (Personal Area Network)
+   LAN (Local Area Network)
+
+6. Какой быстрый тип подключения к интернету использует телефонную линию?
+   DSL
+   Cable
+   Fiber
+   Satellite
+   Dial-up
+
+7. Какой тип подключения использует коаксиальный кабель от провайдера?
+   Cable
+   DSL
+   Fiber
+   Satellite
+   Cellular
+
+8. Какой тип подключения к интернету основан на передаче данных через оптическое волокно?
+   Fiber
+   Cable
+   DSL
+   Satellite
+   Dial-up
+
+9. Какой тип интернет-соединения используется в местах без кабельной инфраструктуры, например в сельских районах?
+   Satellite
+   Fiber
+   Cable
+   DSL
+   Cellular
+
+10. Какой протокол отвечает за установку соединения и передачу данных с гарантией доставки?
+    TCP (Transmission Control Protocol)
+    UDP (User Datagram Protocol)
+    HTTP (HyperText Transfer Protocol)
+    DNS (Domain Name System)
+    FTP (File Transfer Protocol)
+
+11. Какой протокол используется для просмотра веб-страниц в браузере?
+    HTTP
+    TCP
+    DNS
+    SMTP
+    POP3
+
+12. Какой протокол преобразует доменные имена в IP-адреса?
+    DNS (Domain Name System)
+    HTTP
+    SMTP
+    FTP
+    SSH
+
+13. Какой протокол используется для отправки электронной почты?
+    SMTP (Simple Mail Transfer Protocol)
+    POP3 (Post Office Protocol v3)
+    IMAP (Internet Message Access Protocol)
+    HTTP
+    DNS
+
+14. Какой протокол используется для получения электронной почты с почтового сервера?
+    POP3
+    SMTP
+    DNS
+    FTP
+    HTTP
+
+15. Какой протокол обеспечивает безопасное удалённое подключение к другому компьютеру?
+    SSH (Secure Shell)
+    Telnet
+    FTP
+    TFTP
+    HTTP
+
+16. Какой протокол используется для удалённого доступа к компьютеру, но не обеспечивает шифрование?
+    Telnet
+    SSH
+    FTP
+    DNS
+    HTTP
+
+17. Какой протокол используется для передачи файлов между клиентом и сервером?
+    FTP (File Transfer Protocol)
+    HTTP
+    DNS
+    SMTP
+    Telnet
+
+18. Какой протокол является упрощённой версией FTP и часто используется для загрузки прошивок сетевого оборудования?
+    TFTP (Trivial File Transfer Protocol)
+    FTP
+    HTTP
+    SMTP
+    SSH
+
+19. Какой сетевой прибор используется для распределения пакетов внутри локальной сети?
+    Switch (Коммутатор)
+    Hub (Концентратор)
+    Router (Маршрутизатор)
+    Firewall (Межсетевой экран)
+    Access Point (Точка доступа)
+
+20. Какой сетевой прибор соединяет разные сети и направляет пакеты между ними?
+    Router (Маршрутизатор)
+    Switch (Коммутатор)
+    Hub (Концентратор)
+    Firewall (Межсетевой экран)
+    Access Point (Точка доступа)
+
+21. Какое устройство обеспечивает беспроводное подключение устройств к сети?
+    Access Point (Точка доступа)
+    Switch
+    Router
+    Firewall
+    Hub
+
+22. Какое устройство фильтрует сетевой трафик и защищает сеть от атак?
+    Firewall (Межсетевой экран)
+    Router
+    Switch
+    Hub
+    Access Point
+
+23. Какой тип кабеля чаще всего используется в локальных сетях?
+    Витая пара (Twisted Pair, UTP)
+    Коаксиальный кабель
+    Оптоволоконный кабель
+    HDMI
+    USB
+
+24. Какой кабель используется для высокоскоростной передачи данных на большие расстояния?
+    Оптоволоконный кабель (Fiber-optic)
+    Витая пара (UTP)
+    Коаксиальный кабель
+    HDMI
+    USB
+
+25. Какой кабель использует медный провод и применяется в старых телевизионных и сетевых системах?
+    Коаксиальный кабель
+    Витая пара (UTP)
+    Оптоволоконный кабель
+    HDMI
+    DisplayPort

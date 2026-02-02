@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Exam System{% endblock %}</title>
+    
+    <!-- Stylesheets -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rtl.css') }}">
+    
+    <!-- Additional styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <nav class="container">
+            <div class="logo">📚 Exam System</div>
+            <ul class="nav-links">
+                {% if current_user %}
+                    <li><a href="{{ url_for('teacher_dashboard') }}" data-i18n="teacher_dashboard">Dashboard</a></li>
+                    <li><span>{{ current_user.first_name }} {{ current_user.last_name }}</span></li>
+                    <li>
+                        <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-secondary" data-i18n="logout">Logout</button>
+                        </form>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Language Switcher -->
+    <div class="container mt-2">
+        <div class="language-switcher">
+            <button id="lang-en" class="active" data-i18n="english">English</button>
+            <button id="lang-ru" data-i18n="russian">Русский</button>
+            <button id="lang-he" data-i18n="hebrew">עברית</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Exam System. All rights reserved. | 
+           <a href="#" style="color: white; text-decoration: none;">{{ url_for('index') }}</a>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        // Initialize language buttons - wait until i18n is ready
+        function initLanguageButtons() {
+            if (typeof i18n === 'undefined') {
+                setTimeout(initLanguageButtons, 100);
+                return;
+            }
+            
+            if (!i18n.isReady) {
+                setTimeout(initLanguageButtons, 100);
+                return;
+            }
+            
+            const btnEn = document.getElementById('lang-en');
+            const btnRu = document.getElementById('lang-ru');
+            const btnHe = document.getElementById('lang-he');
+            
+            if (btnEn && btnRu && btnHe) {
+                btnEn.onclick = function(e) { 
+                    e.preventDefault();
+                    i18n.switchLanguage('en'); 
+                };
+                btnRu.onclick = function(e) { 
+                    e.preventDefault();
+                    i18n.switchLanguage('ru'); 
+                };
+                btnHe.onclick = function(e) { 
+                    e.preventDefault();
+                    i18n.switchLanguage('he'); 
+                };
+            }
+        }
+        
+        // Start initialization immediately
+        initLanguageButtons();
+        
+        // Also try on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', initLanguageButtons);
+        
+        // Update language button active state when language changes
+        window.addEventListener('languageChanged', function(e) {
+            document.querySelectorAll('.language-switcher button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtnId = 'lang-' + e.detail.language;
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

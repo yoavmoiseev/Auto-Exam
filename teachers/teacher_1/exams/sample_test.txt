@@ -1,0 +1,11 @@
+1. What is 2 + 2?
+A) 3
+B) 4
+C) 5
+answer: b
+
+2. What is the capital of France?
+A) London
+B) Berlin
+C) Paris
+answer: c

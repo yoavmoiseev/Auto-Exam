@@ -1,0 +1,584 @@
+{% extends "base_student.html" %}
+
+{% block title %}{{ exam_title }}{% endblock %}
+
+{% block content %}
+<style>
+    .exam-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    /* RTL support */
+    .exam-container.rtl,
+    .rtl .question-block,
+    .rtl .pre-exam-form,
+    .rtl .card,
+    .rtl .alert-warning,
+    .rtl .alert-danger {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    .rtl .form-group label {
+        text-align: right;
+    }
+    
+    .rtl .timer {
+        left: 20px;
+        right: auto;
+    }
+    
+    .pre-exam-screen {
+        display: block;
+    }
+    
+    .exam-screen {
+        display: none;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: #856404;
+    }
+    
+    .alert-danger {
+        background: #f8d7da;
+        border: 2px solid #f5c6cb;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: #721c24;
+    }
+    
+    .warning-text {
+        font-weight: bold;
+        font-size: 16px;
+        margin: 10px 0;
+    }
+    
+    .pre-exam-form {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    
+    .btn-start-exam {
+        width: 100%;
+        padding: 15px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    
+    .btn-start-exam:hover {
+        background-color: #c82333;
+    }
+    
+    .timer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        padding: 15px 25px;
+        border: 3px solid #007bff;
+        border-radius: 8px;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 100;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    .timer.warning {
+        border-color: #ffc107;
+        color: #ffc107;
+    }
+    
+    .timer.critical {
+        border-color: #dc3545;
+        color: #dc3545;
+        animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .question-block {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .question-text {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .answer-option {
+        margin-bottom: 10px;
+    }
+    
+    .answer-option input {
+        margin-right: 10px;
+    }
+    
+    .answer-option label {
+        cursor: pointer;
+    }
+    
+    .buttons-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        justify-content: space-between;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.8;
+    }
+    
+    .results-display {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+    
+    .results-display h2 {
+        font-size: 36px;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+    
+    .results-display p {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="exam-container">
+    <!-- ============================================================ -->
+    <!-- STAGE 1: PRE-EXAM SCREEN -->
+    <!-- ============================================================ -->
+    <div id="pre-exam-screen" class="pre-exam-screen">
+        <div class="card">
+            <div class="card-header">
+                <h1 style="margin: 0;">{{ exam_title }}</h1>
+            </div>
+            <div class="card-body">
+                <!-- WARNINGS -->
+                <div class="alert-danger">
+                    <h3 style="margin-top: 0;">⚠️ IMPORTANT WARNINGS</h3>
+                    
+                    <div class="warning-text">🚫 DO NOT leave this page during the exam</div>
+                    <p>If you switch tabs, minimize window, or refresh the page, it will be recorded as a cheating attempt.</p>
+                    
+                    <div class="warning-text">🚫 DO NOT copy or paste answers</div>
+                    <p>Any attempt to copy text will be logged and reported.</p>
+                    
+                    <div class="warning-text">🚫 Developer Tools are disabled</div>
+                    <p>Attempting to open DevTools (F12, Ctrl+Shift+I) will be recorded.</p>
+                    
+                    <div class="warning-text">📱 Use a single device only</div>
+                    <p>This exam must be completed on one device.</p>
+                    
+                    <hr style="margin: 15px 0;">
+                    
+                    <!-- Russian warnings -->
+                    <div class="warning-text">🚫 НЕ ПОКИДАЙТЕ эту страницу во время экзамена</div>
+                    <p>Если вы переключитесь на другую вкладку или обновите страницу, это будет записано.</p>
+                    
+                    <!-- Hebrew warnings -->
+                    <div class="warning-text" style="direction: rtl;">🚫 אל תעזוב את דף זה במהלך הבחינה</div>
+                    <p style="direction: rtl;">אם תעבור לכרטיסייה אחרת או תרענן את הדף, זה יירשם כניסיון הערמה.</p>
+                </div>
+                
+                <!-- STUDENT NAME INPUT -->
+                <form id="pre-exam-form" class="pre-exam-form">
+                    <div class="form-group">
+                        <label for="first-name">First Name *</label>
+                        <input type="text" id="first-name" name="first_name" required autofocus>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last-name">Last Name *</label>
+                        <input type="text" id="last-name" name="last_name" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-start-exam">
+                        🚀 START EXAM
+                    </button>
+                </form>
+                
+                <div class="alert-warning" style="margin-top: 20px;">
+                    <strong>ℹ️ Instructions:</strong>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>Enter your name above</li>
+                        <li>Click START EXAM - exam will load immediately</li>
+                        <li>Answer all questions</li>
+                        <li>Click SUBMIT when finished</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- STAGE 2: ACTIVE EXAM SCREEN -->
+    <!-- ============================================================ -->
+    <div id="exam-screen" class="exam-screen">
+        <!-- Timer -->
+        <div id="timer" class="timer">00:00</div>
+        
+        <!-- Exam Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0;">{{ exam_title }}</h2>
+                <small style="color: #666;">Answer all questions below</small>
+            </div>
+            
+            <div class="card-body">
+                <!-- Questions Container -->
+                <form id="exam-form">
+                    <div id="questions-container">
+                        <!-- Questions will be loaded here by JavaScript -->
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="buttons-container">
+                        <button type="button" class="btn btn-secondary" style="visibility: hidden;">
+                            ← Previous
+                        </button>
+                        <button type="submit" class="btn btn-success" style="width: auto;">
+                            ✓ SUBMIT EXAM
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- EXAM RESULTS -->
+    <!-- ============================================================ -->
+    <div id="exam-results" class="results-display">
+        <div class="card">
+            <div class="card-header">
+                <h3>Exam Completed</h3>
+            </div>
+            <div class="card-body">
+                <div id="results-content" style="text-align: left;">
+                    <!-- Results will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load the proctoring system -->
+<script src="{{ url_for('static', filename='proctoring.js') }}"></script>
+
+<script>
+/**
+ * Exam-specific initialization
+ * Loads questions and handles exam submission
+ */
+
+let examQuestions = [];
+let currentQuestionIndex = 0;
+let textDirection = 'ltr';  // Store text direction from server
+
+// Load exam data after student clicks START
+async function loadExamData() {
+    const examId = getExamIdFromURL();
+    
+    try {
+        const response = await fetch(`/api/exam/${examId}/questions`);
+        const data = await response.json();
+        
+        if (data.success) {
+            examQuestions = data.questions;
+            displayAllQuestions();
+        } else {
+            alert('Error loading exam questions');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred');
+    }
+}
+
+function displayAllQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+    
+    // Apply RTL to container if needed
+    if (textDirection === 'rtl') {
+        container.style.direction = 'rtl';
+    }
+    
+    examQuestions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-block';
+        questionDiv.id = `question-${index}`;
+        
+        // Apply RTL to question div if needed
+        if (textDirection === 'rtl') {
+            questionDiv.style.direction = 'rtl';
+            questionDiv.style.textAlign = 'right';
+        }
+        
+        let html = `
+            <div class="question-text">
+                ${question.number}. ${escapeHtml(question.text)}
+            </div>
+        `;
+        
+        // Check if it's an open-ended question
+        if (question.type === 'open') {
+            // Display instructions if any (skip marker text)
+            if (question.answers && question.answers.length > 0) {
+                const instructions = question.answers.filter(ans => 
+                    !ans.includes('Programming task:') && 
+                    !ans.includes('Open Question') &&
+                    !ans.includes('Type your answer here')
+                );
+                
+                if (instructions.length > 0) {
+                    html += `<div style="color: #666; font-style: italic; margin-bottom: 10px;">${escapeHtml(instructions.join(' '))}</div>`;
+                }
+            }
+            
+            html += `
+                <textarea 
+                    name="question-${index}" 
+                    id="answer-${index}"
+                    placeholder="Type your answer here..."
+                    style="width: 100%; min-height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;"
+                    required></textarea>
+            `;
+        } else {
+            // Multiple choice question - display all answers as radio buttons
+            if (question.answers && question.answers.length > 0) {
+                question.answers.forEach((answer, answerIndex) => {
+                    html += `
+                        <div class="answer-option">
+                            <label style="display: flex; align-items: flex-start; padding: 8px;">
+                                <input 
+                                    type="radio" 
+                                    name="question-${index}" 
+                                    value="${escapeHtml(answer)}"
+                                    id="option-${index}-${answerIndex}"
+                                    style="margin-right: 10px; margin-top: 3px;"
+                                    required>
+                                <span>${escapeHtml(answer)}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+            }
+        }
+        
+        questionDiv.innerHTML = html;
+        container.appendChild(questionDiv);
+    });
+}
+
+// Handle exam submission
+document.addEventListener('DOMContentLoaded', () => {
+    const examForm = document.getElementById('exam-form');
+    if (examForm) {
+        examForm.addEventListener('submit', handleExamSubmit);
+    }
+});
+
+async function handleExamSubmit(e) {
+    e.preventDefault();
+    
+    // Collect all answers using question text as key
+    const answers = {};
+    examQuestions.forEach((question, index) => {
+        const answer = document.querySelector(`input[name="question-${index}"]:checked`) || 
+                      document.querySelector(`textarea[name="question-${index}"]`);
+        
+        if (answer) {
+            // Use question text as key for matching on server
+            answers[question.text] = answer.value;
+        }
+    });
+    
+    // Check if all questions are answered
+    if (Object.keys(answers).length !== examQuestions.length) {
+        alert('Please answer all questions before submitting');
+        return;
+    }
+    
+    // Submit exam
+    await submitExam(answers);
+}
+
+// Variables declared in proctoring.js:
+// - studentSessionId
+// - examQuestions
+// Student names are set in proctoring.js as window.studentFirstName and window.studentLastName
+
+// Get exam ID from URL
+function getExamIdFromURL() {
+    const path = window.location.pathname;
+    const match = path.match(/\/exam\/(\d+)/);
+    return match ? parseInt(match[1]) : null;
+}
+
+// Handle pre-exam form submission (name entry)
+// Note: Form handling is done in proctoring.js to avoid duplicate student registration
+document.addEventListener('DOMContentLoaded', () => {
+    // Form is handled by proctoring.js handlePreExamSubmit()
+});
+
+// Submit exam
+async function submitExam(answers) {
+    const examId = getExamIdFromURL();
+    
+    if (!confirm('Are you sure you want to submit your exam?\n\nYou cannot change your answers after submission.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/exam/${examId}/submit`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                student_session_id: studentSessionId,
+                first_name: window.studentFirstName,
+                last_name: window.studentLastName,
+                answers: answers,
+                questions: examQuestions  // Send questions list to preserve order
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Hide exam screen
+            document.getElementById('exam-screen').style.display = 'none';
+            
+            // Show results
+            const resultsDiv = document.getElementById('exam-results');
+            const resultsContent = document.getElementById('results-content');
+            
+            // Insert the response HTML from server
+            if (data.response_html) {
+                resultsContent.innerHTML = data.response_html;
+            } else {
+                // Fallback
+                const scoreText = data.score < 0 ? 'Will be evaluated later' : `${data.score}%`;
+                resultsContent.innerHTML = `
+                    <h2>Exam Submitted Successfully!</h2>
+                    <h3>Your Score: ${scoreText}</h3>
+                    <p>Thank you, ${window.studentFirstName} ${window.studentLastName}</p>
+                `;
+            }
+            
+            resultsDiv.style.display = 'block';
+        } else {
+            alert('Error submitting exam: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to submit exam');
+    }
+}
+
+// Simple timer (timerInterval declared in proctoring.js)
+let timerSeconds = 0;
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        const minutes = Math.floor(timerSeconds / 60);
+        const seconds = timerSeconds % 60;
+        document.getElementById('timer').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+</script>
+{% endblock %}

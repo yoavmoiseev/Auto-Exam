@@ -1,0 +1,232 @@
+/* ==========================================
+   RTL (Right-to-Left) Styles for Hebrew
+   ========================================== */
+
+/* Set direction for Hebrew */
+html[dir="rtl"],
+body[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Adjust margins and padding for RTL */
+html[dir="rtl"] .mb-1,
+html[dir="rtl"] .mb-2,
+html[dir="rtl"] .mb-3,
+html[dir="rtl"] .mb-4 {
+    margin-bottom: var(--mb-value);
+}
+
+html[dir="rtl"] .form-group {
+    text-align: right;
+}
+
+html[dir="rtl"] label {
+    text-align: right;
+}
+
+html[dir="rtl"] input[type="text"],
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="password"],
+html[dir="rtl"] input[type="number"],
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+    text-align: right;
+    direction: rtl;
+}
+
+/* RTL Buttons */
+html[dir="rtl"] button,
+html[dir="rtl"] .btn {
+    direction: rtl;
+}
+
+/* RTL Navigation */
+html[dir="rtl"] nav {
+    flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .nav-links {
+    flex-direction: row-reverse;
+}
+
+/* RTL Forms */
+html[dir="rtl"] .answer-option {
+    flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .answer-option input[type="radio"],
+html[dir="rtl"] .answer-option input[type="checkbox"] {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+html[dir="rtl"] .answer-option label {
+    margin-left: 0;
+    margin-right: 10px;
+}
+
+/* RTL Question Box */
+html[dir="rtl"] .question {
+    border-left: none;
+    border-right: 4px solid #3498db;
+    text-align: right;
+}
+
+/* RTL Language Switcher */
+html[dir="rtl"] .language-switcher {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+}
+
+/* RTL Tables */
+html[dir="rtl"] table {
+    direction: rtl;
+}
+
+html[dir="rtl"] th {
+    text-align: right;
+}
+
+html[dir="rtl"] td {
+    text-align: right;
+}
+
+/* RTL Alerts */
+html[dir="rtl"] .alert {
+    text-align: right;
+}
+
+/* RTL Cards */
+html[dir="rtl"] .card {
+    direction: rtl;
+}
+
+html[dir="rtl"] .card-header,
+html[dir="rtl"] .card-body,
+html[dir="rtl"] .card-footer {
+    text-align: right;
+}
+
+/* RTL Utility Classes */
+html[dir="rtl"] .text-left {
+    text-align: left;
+}
+
+html[dir="rtl"] .text-right {
+    text-align: right;
+}
+
+/* RTL Margins - flip left/right */
+html[dir="rtl"] .ml-1 {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+html[dir="rtl"] .ml-2 {
+    margin-left: 16px;
+    margin-right: 0;
+}
+
+html[dir="rtl"] .mr-1 {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
+html[dir="rtl"] .mr-2 {
+    margin-left: 0;
+    margin-right: 16px;
+}
+
+/* RTL Padding */
+html[dir="rtl"] .pl-1 {
+    padding-left: 0;
+    padding-right: 8px;
+}
+
+html[dir="rtl"] .pl-2 {
+    padding-left: 0;
+    padding-right: 16px;
+}
+
+html[dir="rtl"] .pr-1 {
+    padding-left: 8px;
+    padding-right: 0;
+}
+
+html[dir="rtl"] .pr-2 {
+    padding-left: 16px;
+    padding-right: 0;
+}
+
+/* RTL Header Navigation */
+html[dir="rtl"] header {
+    direction: rtl;
+}
+
+html[dir="rtl"] .logo {
+    order: 2;
+}
+
+html[dir="rtl"] nav {
+    justify-content: flex-end;
+}
+
+/* RTL Form Layout */
+html[dir="rtl"] form {
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Mobile Specific */
+@media (max-width: 599px) {
+    html[dir="rtl"] .nav-links {
+        flex-direction: column-reverse;
+    }
+
+    html[dir="rtl"] .nav-links a {
+        text-align: right;
+    }
+
+    html[dir="rtl"] .language-switcher {
+        justify-content: flex-end;
+    }
+}
+
+/* RTL Tablet */
+@media (min-width: 600px) and (max-width: 1023px) {
+    html[dir="rtl"] .grid-2 {
+        direction: rtl;
+    }
+}
+
+/* RTL Desktop */
+@media (min-width: 1024px) {
+    html[dir="rtl"] nav {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .nav-links {
+        gap: 30px;
+        flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .grid-2,
+    html[dir="rtl"] .grid-3,
+    html[dir="rtl"] .grid-4 {
+        direction: rtl;
+    }
+}
+
+/* RTL Tablet Menu (if needed) */
+@media (max-width: 768px) and (orientation: landscape) {
+    html[dir="rtl"] nav {
+        flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .nav-links {
+        flex-direction: row-reverse;
+    }
+}
