@@ -181,11 +181,12 @@ function handleKeyboardEvent(e) {
     
     // Allow copy/paste within the exam (but log attempts to copy answers)
     // Block if trying to copy from outside the exam form
+    // FIX v4: FULL BLOCK of Ctrl+C
+    // REMARK: Previously only logged copy attempts, now completely blocks copying
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
-        const selectedText = window.getSelection().toString();
-        if (selectedText.length > 0) {
-            logCheatingAttempt('copy_attempt', { text_length: selectedText.length });
-        }
+        e.preventDefault();
+        logCheatingAttempt('copy_blocked');
+        return false;
     }
     
     // Block Ctrl+V (Paste) - to prevent pasting from external sources

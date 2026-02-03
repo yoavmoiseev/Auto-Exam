@@ -42,6 +42,16 @@
     "start_exam": "Start Exam",
     "submit_exam": "Submit Exam",
     
+    "exam_instructions": "Instructions:",
+    "enter_name_above": "Enter your name above",
+    "click_start_exam_instruction": "Click START EXAM - exam will load immediately",
+    "answer_all_questions_instruction": "Answer all questions",
+    "click_submit_instruction": "Click SUBMIT when finished",
+    "exam_completed": "Exam Completed",
+    "exam_submitted_successfully": "your exam was submitted successfully",
+    "your_answers": "Your Answers:",
+    "your_grade_is": "Your grade is",
+    
     "time_remaining": "Time Remaining",
     "minutes": "minutes",
     "seconds": "seconds",
@@ -128,6 +138,9 @@
     
     "company_name": "YaM SOFT ©",
     
+    "question_number": "Question",
+    "of": "of",
+    
     "active_exams_running": "🟢 Active Exams (Running Now)",
     "no_active_exams": "No active exams. Start an exam from \"My Exams\"",
     "date_time": "Date & Time",
@@ -140,6 +153,10 @@
     "randomize_order": "Randomize question order",
     "exam_duration_minutes": "Exam Duration (minutes):",
     "zero_no_limit": "0 = no time limit",
+    "block_translation": "Block Translation Attempts",
+    "block_translation_help": "Prevent Google Translate (for language exams)",
+    "fullscreen_mode": "Fullscreen Mode",
+    "fullscreen_mode_help": "Force fullscreen (exit = cheat log)",
     "cancel": "Cancel",
     "exam_monitor": "📊 Exam Monitor",
     "live_activity": "Live Activity",
@@ -181,9 +198,14 @@
     
     "grades_button": "📊 GRADES",
     "all_exams_button": "📝 All",
+    "folder_content_button": "📁 Folder",
     "zip_button": "📦 ZIP",
     "students_count": "students",
     "html_count": "HTML",
+    "view_folder_content": "View Folder Content",
+    "folder_files": "Files in folder",
+    "click_to_view": "Click to view",
+    "close": "Close",
     
     "confirm_logout": "Are you sure you want to logout?",
     

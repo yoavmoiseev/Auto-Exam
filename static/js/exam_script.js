@@ -52,10 +52,14 @@ class ExamSystem {
 
     /**
      * Update translations
+     * TRANSLATION TRACKING: IDs используемые здесь
+     * - ID 100.4: 'previous' - кнопка Назад
+     * - ID 100.5: 'next' - кнопка Далее
      */
     updateTranslations() {
         if (typeof i18n === 'undefined') return;
         
+        // Стандартный перевод всех элементов с data-i18n атрибутом
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (key) {
@@ -66,6 +70,29 @@ class ExamSystem {
                 }
             }
         });
+        
+        // СПЕЦИАЛЬНАЯ ОБРАБОТКА: Добавить стрелки к кнопкам навигации
+        // Это необходимо потому что стрелки не переводятся между языками
+        // ← остается ← даже для RTL (иврит)
+        // → остается → даже для RTL (иврит)
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        if (prevBtn) {
+            const prevSpan = prevBtn.querySelector('span[data-i18n="previous"]');
+            if (prevSpan) {
+                // Hardcoded стрелка ← + перевод 'previous'
+                prevBtn.innerHTML = `← <span data-i18n="previous">${prevSpan.textContent}</span>`;
+            }
+        }
+        
+        if (nextBtn) {
+            const nextSpan = nextBtn.querySelector('span[data-i18n="next"]');
+            if (nextSpan) {
+                // Перевод 'next' + hardcoded стрелка →
+                nextBtn.innerHTML = `<span data-i18n="next">${nextSpan.textContent}</span> →`;
+            }
+        }
     }
 
     /**
@@ -205,6 +232,12 @@ class ExamSystem {
 
     /**
      * Load exam questions from API
+     * TRANSLATION TRACKING: Автоматическое определение языка
+     * 
+     * API response содержит поле 'language' со значением:
+     * - 'he' для иврита (требует RTL)
+     * - 'ru' для русского
+     * - 'en' для английского
      */
     async loadExamQuestions() {
         try {
@@ -225,6 +258,23 @@ class ExamSystem {
 
             this.questions = data.questions;
             document.getElementById('exam-form-title').textContent = data.filename;
+            
+            // Load exam language (AUTO-DETECTED on server side by detect_exam_language())
+            if (data.language) {
+                // data.language содержит 'he', 'ru' или 'en'
+                await i18n.loadLanguage(data.language);
+                document.documentElement.lang = data.language;
+                
+                // Apply RTL for Hebrew language
+                if (data.language === 'he') {
+                    document.documentElement.dir = 'rtl';  // CSS: html[dir="rtl"]
+                } else {
+                    document.documentElement.dir = 'ltr';  // CSS: html[dir="ltr"]
+                }
+                
+                // Update translations after loading language
+                this.updateTranslations();
+            }
             
             // Initialize answers object
             this.questions.forEach(q => {
@@ -265,7 +315,9 @@ class ExamSystem {
         container.innerHTML = `
             <div class="question-block">
                 <div class="question-number">
-                    ${i18n.t('question')} ${question.number}
+                    <!-- TRANSLATION TRACKING: ID 100.2 (question_number) + ID 100.3 (of) -->
+                    <!-- Результат: "Question 1 of 10" / "Вопрос 1 из 10" / "שאלה 1 מתוך 10" -->
+                    ${i18n.t('question_number')} ${question.number} ${i18n.t('of')} ${this.questions.length}
                 </div>
                 <div class="question-text">
                     ${question.text}

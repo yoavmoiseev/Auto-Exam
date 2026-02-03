@@ -7,7 +7,8 @@
 
 <div class="card">
     <div class="card-body">
-        <table>
+        <!-- Desktop/Tablet Table -->
+        <table id="results-table">
             <thead>
                 <tr>
                     <th data-i18n="exam_name">Exam Name</th>
@@ -24,6 +25,12 @@
             </tbody>
         </table>
         
+        <!-- MOBILE RESPONSIVE v5: Card layout for smartphones -->
+        <!-- REMARK: Previously only table existed, this is for mobile (<480px) -->
+        <div id="results-mobile-cards" class="mobile-cards-container" style="display: none;">
+            <!-- Mobile cards will be loaded here -->
+        </div>
+        
         <div style="margin-top: 20px; text-align: center;" id="download-all-section">
             <button class="btn btn-lg btn-success" onclick="downloadAllZip()" style="display:none;" id="download-all-btn">
                 📦 <span data-i18n="download_all_zip">Download ALL in ZIP</span>
@@ -31,6 +38,24 @@
             <button class="btn btn-lg btn-danger" onclick="deleteAllFolders()" style="display:none; margin-left: 15px;" id="delete-all-btn">
                 🗑️ <span data-i18n="delete_all_results">Delete All</span>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- FOLDER CONTENT MODAL - NEW FEATURE v1 -->
+<!-- REMARK: Previously no modal existed, "All" button opened All_Exams.txt directly -->
+<div id="folder-content-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 data-i18n="view_folder_content">View Folder Content</h2>
+            <button class="modal-close" onclick="closeFolderModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <h3 id="folder-name-display"></h3>
+            <p data-i18n="folder_files">Files in folder:</p>
+            <div id="folder-files-list" class="files-list">
+                <!-- Files will be loaded here -->
+            </div>
         </div>
     </div>
 </div>
@@ -49,6 +74,91 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAndLoad();
 });
 
+// MOBILE RESPONSIVE: Generate cards for mobile view
+// REMARK: Added v1 - generates mobile-friendly card layout for screens <480px
+function generateMobileCards(folders) {
+    const cardsContainer = document.getElementById('results-mobile-cards');
+    cardsContainer.innerHTML = '';
+    
+    folders.forEach(folder => {
+        const card = document.createElement('div');
+        card.className = 'mobile-card';
+        
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.className = 'mobile-card-delete';
+        deleteBtn.title = 'Delete folder';
+        deleteBtn.onclick = () => deleteFolder(folder.folder_name);
+        card.appendChild(deleteBtn);
+        
+        // Exam name
+        const examName = document.createElement('div');
+        examName.className = 'mobile-card-title';
+        examName.textContent = folder.exam_name;
+        card.appendChild(examName);
+        
+        // Date & time
+        const dateInfo = document.createElement('div');
+        dateInfo.className = 'mobile-card-info';
+        dateInfo.innerHTML = `📅 ${folder.exam_date} ${folder.exam_time.replace('-', ':')}`;
+        card.appendChild(dateInfo);
+        
+        // Student count
+        const studentsText = (window.i18n && window.i18n.t) ? window.i18n.t('students_count') : 'students';
+        const studentsInfo = document.createElement('div');
+        studentsInfo.className = 'mobile-card-info';
+        studentsInfo.innerHTML = `👥 ${folder.student_count} ${studentsText}`;
+        card.appendChild(studentsInfo);
+        
+        // Files info
+        const fileInfo = [];
+        if (folder.has_grades) fileInfo.push('GRADES.txt');
+        if (folder.has_all_exams) fileInfo.push('All_Exams.txt');
+        const htmlText = (window.i18n && window.i18n.t) ? window.i18n.t('html_count') : 'HTML';
+        fileInfo.push(`${folder.html_count} ${htmlText}`);
+        const filesInfo = document.createElement('div');
+        filesInfo.className = 'mobile-card-info';
+        filesInfo.textContent = `📄 ${fileInfo.join(', ')}`;
+        card.appendChild(filesInfo);
+        
+        // Action buttons
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'mobile-card-actions';
+        
+        // View Grades button
+        if (folder.has_grades) {
+            const gradesBtn = document.createElement('button');
+            const gradesText = (window.i18n && window.i18n.t) ? window.i18n.t('grades_button') : '📊 GRADES';
+            gradesBtn.textContent = gradesText;
+            gradesBtn.className = 'btn btn-sm btn-primary';
+            gradesBtn.onclick = () => viewFile(folder.folder_name, 'GRADES.txt');
+            actionsDiv.appendChild(gradesBtn);
+        }
+        
+        // View Folder Content button
+        if (folder.has_all_exams) {
+            const folderBtn = document.createElement('button');
+            const folderText = (window.i18n && window.i18n.t) ? window.i18n.t('folder_content_button') : '📁 Folder';
+            folderBtn.textContent = folderText;
+            folderBtn.className = 'btn btn-sm btn-secondary';
+            folderBtn.onclick = () => viewFolderContent(folder.folder_name);
+            actionsDiv.appendChild(folderBtn);
+        }
+        
+        // Download ZIP button
+        const zipBtn = document.createElement('button');
+        const zipText = (window.i18n && window.i18n.t) ? window.i18n.t('zip_button') : '📦 ZIP';
+        zipBtn.textContent = zipText;
+        zipBtn.className = 'btn btn-sm btn-success';
+        zipBtn.onclick = () => downloadZip(folder.folder_name);
+        actionsDiv.appendChild(zipBtn);
+        
+        card.appendChild(actionsDiv);
+        cardsContainer.appendChild(card);
+    });
+}
+
 async function loadResults() {
     try {
         const response = await fetch('/api/results');
@@ -58,6 +168,10 @@ async function loadResults() {
         
         if (data.success && data.folders && data.folders.length > 0) {
             tbody.innerHTML = '';
+            
+            // MOBILE RESPONSIVE: Generate mobile cards
+            // REMARK: Added v1 - populates both table and mobile cards
+            generateMobileCards(data.folders);
             
             data.folders.forEach(folder => {
                 const row = document.createElement('tr');
@@ -118,14 +232,16 @@ async function loadResults() {
                     actionsCell.appendChild(gradesBtn);
                 }
                 
-                // View All Exams button
+                // View All Exams button - CHANGED TO FOLDER CONTENT v1
+                // REMARK: Previously opened All_Exams.txt directly: viewFile(folder.folder_name, 'All_Exams.txt')
+                // NOW: Opens modal with list of all files in folder
                 if (folder.has_all_exams) {
-                    const allExamsBtn = document.createElement('button');
-                    const allText = (window.i18n && window.i18n.t) ? window.i18n.t('all_exams_button') : '📝 All';
-                    allExamsBtn.textContent = allText;
-                    allExamsBtn.className = 'btn btn-sm btn-secondary';
-                    allExamsBtn.onclick = () => viewFile(folder.folder_name, 'All_Exams.txt');
-                    actionsCell.appendChild(allExamsBtn);
+                    const folderBtn = document.createElement('button');
+                    const folderText = (window.i18n && window.i18n.t) ? window.i18n.t('folder_content_button') : '📁 Folder';
+                    folderBtn.textContent = folderText;
+                    folderBtn.className = 'btn btn-sm btn-secondary';
+                    folderBtn.onclick = () => viewFolderContent(folder.folder_name);
+                    actionsCell.appendChild(folderBtn);
                 }
                 
                 // Download ZIP button
@@ -147,6 +263,12 @@ async function loadResults() {
         } else {
             const noResultsText = (window.i18n && window.i18n.t) ? window.i18n.t('no_results') : 'No results available';
             tbody.innerHTML = `<tr><td colspan="5" class="text-center">${noResultsText}</td></tr>`;
+            
+            // MOBILE RESPONSIVE: Clear mobile cards when no results
+            // REMARK: Added v1 - ensures mobile view also shows "no results"
+            const cardsContainer = document.getElementById('results-mobile-cards');
+            cardsContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: #666;">${noResultsText}</div>`;
+            
             document.getElementById('download-all-btn').style.display = 'none';
             document.getElementById('delete-all-btn').style.display = 'none';
         }
@@ -154,6 +276,12 @@ async function loadResults() {
         console.error('Error loading results:', error);
         document.getElementById('results-list').innerHTML = 
             '<tr><td colspan="5" class="text-center">Error loading results</td></tr>';
+        
+        // MOBILE RESPONSIVE: Clear mobile cards on error
+        // REMARK: Added v1 - ensures mobile view also shows error
+        const cardsContainer = document.getElementById('results-mobile-cards');
+        cardsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #d32f2f;">Error loading results</div>';
+        
         document.getElementById('download-all-btn').style.display = 'none';
         document.getElementById('delete-all-btn').style.display = 'none';
     }
@@ -162,6 +290,59 @@ async function loadResults() {
 function viewFile(folderName, filename) {
     // Open result file in new window
     window.open(`/api/results/${folderName}/${filename}`, '_blank');
+}
+
+// NEW FEATURE v1: View folder content modal
+// REMARK: Previously no folder viewing existed, only direct file open
+async function viewFolderContent(folderName) {
+    try {
+        // Fetch list of files in folder
+        const response = await fetch(`/api/results/${folderName}/list-files`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            alert((window.i18n?.t('error') || 'Error') + ': ' + data.message);
+            return;
+        }
+        
+        // Update modal with folder name
+        document.getElementById('folder-name-display').textContent = folderName;
+        
+        // Build files list
+        const filesList = document.getElementById('folder-files-list');
+        filesList.innerHTML = '';
+        
+        if (data.files && data.files.length > 0) {
+            data.files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.onclick = () => {
+                    viewFile(folderName, file.filename);
+                };
+                
+                fileItem.innerHTML = `
+                    <span class="file-icon">${file.icon}</span>
+                    <span class="file-name">${file.filename}</span>
+                    <span class="file-size">${file.size_formatted}</span>
+                `;
+                
+                filesList.appendChild(fileItem);
+            });
+        } else {
+            filesList.innerHTML = '<p>No files found</p>';
+        }
+        
+        // Show modal
+        document.getElementById('folder-content-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('Error loading folder content:', error);
+        alert((window.i18n?.t('error') || 'Error') + ': ' + error.message);
+    }
+}
+
+function closeFolderModal() {
+    document.getElementById('folder-content-modal').style.display = 'none';
 }
 
 function downloadZip(folderName) {
@@ -306,6 +487,272 @@ window.addEventListener('languageChanged', function() {
 
 .btn-trash:hover {
     transform: scale(1.3);
+}
+
+/* MODAL STYLES - NEW FEATURE v1 - RESPONSIVE FOR MOBILE */
+/* REMARK: Previously no modal styles existed */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-body h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.files-list {
+    margin-top: 15px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.file-item:hover {
+    background: #e3f2fd;
+    border-color: #2196F3;
+    transform: translateX(5px);
+}
+
+.file-icon {
+    font-size: 24px;
+    margin-right: 12px;
+}
+
+.file-name {
+    flex: 1;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.file-size {
+    color: #666;
+    font-size: 12px;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+/* MOBILE RESPONSIVE STYLES */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .file-item {
+        padding: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .file-name {
+        font-size: 14px;
+    }
+    
+    .file-size {
+        width: 100%;
+        margin-left: 36px;
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 98%;
+    }
+    
+    .modal-header h2 {
+        font-size: 16px;
+    }
+    
+    .file-icon {
+        font-size: 20px;
+        margin-right: 8px;
+    }
+    
+    .file-item {
+        padding: 8px;
+    }
+}
+
+/* MOBILE CARDS LAYOUT - NEW FEATURE v1 */
+/* REMARK: Added responsive card layout for smartphones (<480px) */
+/* Desktop/Tablet: show table, hide cards */
+/* Mobile: hide table, show cards */
+
+.mobile-cards-container {
+    display: none; /* Hidden by default on desktop */
+}
+
+.mobile-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.mobile-card-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.mobile-card-delete:hover {
+    background: #d32f2f;
+}
+
+.mobile-card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    padding-right: 40px; /* Space for delete button */
+}
+
+.mobile-card-info {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.mobile-card-actions .btn {
+    flex: 1;
+    min-width: 100px;
+    font-size: 13px;
+    padding: 8px 10px;
+}
+
+/* MOBILE RESPONSIVE: Hide table, show cards on smartphones */
+/* REMARK: Media query switches display for screens <480px */
+@media (max-width: 480px) {
+    /* Hide desktop table */
+    #results-table {
+        display: none !important;
+    }
+    
+    /* Show mobile cards */
+    .mobile-cards-container {
+        display: block !important;
+    }
+    
+    /* Adjust card for small screens */
+    .mobile-card {
+        padding: 12px;
+    }
+    
+    .mobile-card-title {
+        font-size: 16px;
+    }
+    
+    .mobile-card-info {
+        font-size: 13px;
+    }
+    
+    .mobile-card-actions .btn {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
 }
 </style>
 

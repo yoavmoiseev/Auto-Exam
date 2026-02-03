@@ -3,6 +3,9 @@
 {% block title %}{{ exam_title }}{% endblock %}
 
 {% block content %}
+<!-- NEW v4: Apply translation blocking if enabled -->
+<!-- REMARK: Previously no translate attribute -->
+<div class="exam-container{% if block_translation %} notranslate{% endif %}"{% if block_translation %} translate="no"{% endif %}>
 <style>
     .exam-container {
         max-width: 900px;
@@ -255,27 +258,28 @@
                 <!-- STUDENT NAME INPUT -->
                 <form id="pre-exam-form" class="pre-exam-form">
                     <div class="form-group">
-                        <label for="first-name">First Name *</label>
+                        <label for="first-name" data-i18n="first_name">First Name *</label>
                         <input type="text" id="first-name" name="first_name" required autofocus>
                     </div>
                     
                     <div class="form-group">
-                        <label for="last-name">Last Name *</label>
+                        <label for="last-name" data-i18n="last_name">Last Name *</label>
                         <input type="text" id="last-name" name="last_name" required>
                     </div>
                     
-                    <button type="submit" class="btn-start-exam">
+                    <button type="submit" class="btn-start-exam" data-i18n="start_exam">
                         🚀 START EXAM
                     </button>
                 </form>
                 
+                <!-- TRANSLATION TRACKING: exam_instructions (ID 101.1) + instruction lines (IDs 101.2-101.5) -->
                 <div class="alert-warning" style="margin-top: 20px;">
-                    <strong>ℹ️ Instructions:</strong>
+                    <strong data-i18n="exam_instructions">ℹ️ Instructions:</strong>
                     <ol style="margin: 10px 0; padding-left: 20px;">
-                        <li>Enter your name above</li>
-                        <li>Click START EXAM - exam will load immediately</li>
-                        <li>Answer all questions</li>
-                        <li>Click SUBMIT when finished</li>
+                        <li data-i18n="enter_name_above">Enter your name above</li>
+                        <li data-i18n="click_start_exam_instruction">Click START EXAM - exam will load immediately</li>
+                        <li data-i18n="answer_all_questions_instruction">Answer all questions</li>
+                        <li data-i18n="click_submit_instruction">Click SUBMIT when finished</li>
                     </ol>
                 </div>
             </div>
@@ -323,10 +327,10 @@
     <div id="exam-results" class="results-display">
         <div class="card">
             <div class="card-header">
-                <h3>Exam Completed</h3>
+                <h3 data-i18n="exam_completed">Exam Completed</h3>
             </div>
             <div class="card-body">
-                <div id="results-content" style="text-align: left;">
+                <div id="results-content">
                     <!-- Results will be inserted here -->
                 </div>
             </div>
@@ -339,6 +343,52 @@
 {% block extra_js %}
 <!-- Load the proctoring system -->
 <script src="{{ url_for('static', filename='proctoring.js') }}"></script>
+
+<script>
+// TRANSLATION FIX v1: Initialize i18n with exam language from server
+// REMARK: Previously i18n initialized with localStorage language (dashboard language)
+// NOW: Force exam language to match exam content language
+const EXAM_LANGUAGE = '{{ exam_language }}';  // Passed from Flask route
+
+// NEW v4: Exam protection settings
+const BLOCK_TRANSLATION = {{ 'true' if block_translation else 'false' }};
+const FULLSCREEN_MODE = {{ 'true' if fullscreen_mode else 'false' }};
+
+// Initialize i18n manager
+window.i18n = new I18nManager();
+
+// Wait for i18n to be ready, then set exam language
+window.i18n.readyPromise.then(() => {
+    // Force exam language (override localStorage)
+    if (EXAM_LANGUAGE && EXAM_LANGUAGE !== window.i18n.currentLanguage) {
+        window.i18n.switchLanguage(EXAM_LANGUAGE);
+    }
+});
+
+// NEW v4: Fullscreen enforcement
+if (FULLSCREEN_MODE) {
+    function enterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+    
+    // Monitor fullscreen exit
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && examStarted) {
+            logCheatingAttempt('fullscreen_exit');
+        }
+    });
+    
+    // Enter fullscreen when exam starts
+    window.addEventListener('examStarted', enterFullscreen);
+}
+</script>
 
 <script>
 /**
@@ -360,6 +410,10 @@ async function loadExamData() {
         
         if (data.success) {
             examQuestions = data.questions;
+            // TRANSLATION FIX v1: Store text_direction from server
+            // REMARK: Previously text_direction not extracted from API response
+            textDirection = data.text_direction || 'ltr';
+            // NOTE: Language already set during page load (see EXAM_LANGUAGE above)
             displayAllQuestions();
         } else {
             alert(window.i18n?.t('error_loading_questions') || 'Error loading exam questions');
@@ -383,6 +437,13 @@ function displayAllQuestions() {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-block';
         questionDiv.id = `question-${index}`;
+        
+        // NEW v4: Apply translation blocking if enabled
+        // REMARK: Previously no translate attribute on questions
+        if (BLOCK_TRANSLATION) {
+            questionDiv.classList.add('notranslate');
+            questionDiv.setAttribute('translate', 'no');
+        }
         
         // Apply RTL to question div if needed
         if (textDirection === 'rtl') {

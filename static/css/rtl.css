@@ -73,6 +73,34 @@ html[dir="rtl"] .question {
     text-align: right;
 }
 
+/* RTL Exam Questions */
+html[dir="rtl"] .question-block {
+    border-left: none;
+    border-right: 4px solid #007bff;
+}
+
+html[dir="rtl"] .question-number {
+    text-align: right;
+}
+
+html[dir="rtl"] .question-text {
+    text-align: right;
+}
+
+html[dir="rtl"] .option {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+html[dir="rtl"] .option input {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+html[dir="rtl"] .option label {
+    text-align: right;
+}
+
 /* RTL Language Switcher */
 html[dir="rtl"] .language-switcher {
     justify-content: flex-end;

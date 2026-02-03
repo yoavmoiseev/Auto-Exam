@@ -6,7 +6,6 @@ Supports offline mode and web deployment
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from functools import wraps
-from werkzeug.utils import secure_filename
 import json
 import os
 import zipfile
@@ -276,10 +275,77 @@ def api_get_results():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/results/<folder_name>/list-files')
+@login_required
+def api_list_folder_files(folder_name):
+    """List all files in result folder for viewing - NEW FEATURE v1
+    REMARK: Previously only All_Exams.txt was viewable directly
+    NOW: Returns list of all files in folder with metadata
+    """
+    try:
+        user = get_current_user()
+        teacher_id = f"teacher_{user['id']}"
+        
+        # Construct path to folder
+        folder_path = os.path.join(
+            app_config.TEACHERS_DIR,
+            teacher_id,
+            'results',
+            folder_name
+        )
+        
+        if not os.path.exists(folder_path):
+            return jsonify({'success': False, 'message': 'Folder not found'}), 404
+        
+        # Get all files in folder
+        files = []
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                file_stat = os.stat(file_path)
+                file_size = file_stat.st_size
+                
+                # Determine file type
+                if filename.endswith('.html'):
+                    file_type = 'html'
+                    icon = '📄'
+                elif filename.endswith('.txt'):
+                    file_type = 'txt'
+                    icon = '📝'
+                else:
+                    file_type = 'other'
+                    icon = '📎'
+                
+                files.append({
+                    'filename': filename,
+                    'type': file_type,
+                    'icon': icon,
+                    'size': file_size,
+                    'size_formatted': f"{file_size / 1024:.1f} KB" if file_size > 1024 else f"{file_size} B"
+                })
+        
+        # Sort files: txt files first, then html files alphabetically
+        files.sort(key=lambda x: (0 if x['type'] == 'txt' else 1, x['filename']))
+        
+        return jsonify({
+            'success': True,
+            'folder_name': folder_name,
+            'files': files,
+            'count': len(files)
+        })
+    
+    except Exception as e:
+        print(f"Error listing folder files: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/results/<folder_name>/<filename>')
 @login_required
 def api_view_result_file(folder_name, filename):
-    """View a result HTML file"""
+    """View a result HTML or TXT file
+    FIX v2: TXT files now wrapped in <pre> for proper line breaks
+    REMARK: Previously all files returned as-is, causing .txt files to display in one line in browser
+    """
     try:
         user = get_current_user()
         teacher_id = f"teacher_{user['id']}"
@@ -299,7 +365,52 @@ def api_view_result_file(folder_name, filename):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        return content
+        # FIX v2: Wrap .txt files in <pre> tags for proper formatting
+        # REMARK: Previously returned raw content, browser ignored \n line breaks
+        if filename.endswith('.txt'):
+            # Wrap in HTML with proper charset and pre tag
+            html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{filename}</title>
+    <style>
+        body {{
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }}
+        pre {{
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }}
+        /* Mobile responsive */
+        @media (max-width: 768px) {{
+            body {{
+                padding: 10px;
+            }}
+            pre {{
+                padding: 15px;
+                font-size: 14px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <h2>{filename}</h2>
+    <pre>{content}</pre>
+</body>
+</html>"""
+            return html_content
+        else:
+            # HTML files and others return as-is
+            return content
     
     except Exception as e:
         return f"Error: {str(e)}", 500
@@ -569,6 +680,8 @@ def start_exam_with_settings():
         max_questions = data.get('max_questions', 1000)
         shuffle_exam = data.get('shuffle_exam', True)
         exam_duration = data.get('exam_duration', 60)
+        block_translation = data.get('block_translation', False)  # NEW v4
+        fullscreen_mode = data.get('fullscreen_mode', False)      # NEW v4
         append_to_folder = data.get('append_to_folder')  # Folder name if appending
         
         user = get_current_user()
@@ -578,6 +691,7 @@ def start_exam_with_settings():
         exam_title = exam_filename.replace('.txt', '')
         
         # Create new exam session with settings
+        # REMARK: Previously only max_questions, shuffle_exam, exam_duration
         exam_id = exam_session_manager.start_exam(
             teacher_id=teacher_id,
             exam_filename=exam_filename,
@@ -585,7 +699,9 @@ def start_exam_with_settings():
             settings={
                 'max_questions': max_questions,
                 'shuffle_exam': shuffle_exam,
-                'exam_duration': exam_duration
+                'exam_duration': exam_duration,
+                'block_translation': block_translation,  # NEW v4
+                'fullscreen_mode': fullscreen_mode       # NEW v4
             }
         )
         
@@ -678,9 +794,39 @@ def student_exam_session(exam_id):
     if not exam_session:
         return "This exam is not available or has ended", 404
     
+    # TRANSLATION FIX v1: Determine exam language from exam content
+    # REMARK: Previously no language detection - used localStorage (dashboard language)
+    exam_dir = os.path.join(app_config.TEACHERS_DIR, exam_session.teacher_id, 'exams')
+    exam_path = os.path.join(exam_dir, exam_session.exam_filename)
+    
+    try:
+        exam_data = ExamBuilder.parse_exam_file(exam_path)
+        text_direction = exam_data.get('text_direction', 'ltr')
+        
+        # Map text_direction to language code
+        if text_direction == 'rtl':
+            exam_language = 'he'  # Hebrew (right-to-left)
+        else:
+            # Detect if Russian or English by checking content
+            with open(exam_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            exam_language = detect_exam_language(content)  # Returns 'ru', 'en', or 'he'
+    except Exception as e:
+        print(f"Error detecting exam language: {e}")
+        exam_language = 'en'  # Fallback to English
+    
+    # NEW v4: Get exam settings for student page
+    # REMARK: Previously no settings passed to student page
+    settings = exam_session.settings or {}
+    block_translation = settings.get('block_translation', False)
+    fullscreen_mode = settings.get('fullscreen_mode', False)
+    
     return render_template('student_exam_session.html',
                           exam_id=exam_id,
-                          exam_title=exam_session.exam_title)
+                          exam_title=exam_session.exam_title,
+                          exam_language=exam_language,
+                          block_translation=block_translation,
+                          fullscreen_mode=fullscreen_mode)
 
 
 # ==========================================
@@ -707,6 +853,39 @@ def get_translations(language):
         return jsonify({}), 500
 
 
+def detect_exam_language(content):
+    """
+    Detect exam language based on content analysis
+    TRANSLATION TRACKING: AUTO-DETECTION MECHANISM - FIXED v2
+    
+    Анализирует содержимое экзамена и определяет язык:
+    - СРАВНИВАЕТ количество символов каждого языка
+    - Выбирает язык с НАИБОЛЬШИМ количеством символов
+    - Пороги удалены - используется логика большинства
+    
+    Returns: 'he' for Hebrew, 'ru' for Russian, 'en' for English
+    """
+    hebrew_count = 0
+    russian_count = 0
+    
+    for char in content:
+        # Hebrew Unicode range: U+0590 to U+05FF
+        if "\u0590" <= char <= "\u05FF":
+            hebrew_count += 1
+        # Russian Cyrillic range: U+0400 to U+04FF
+        elif "\u0400" <= char <= "\u04FF":
+            russian_count += 1
+    
+    # FIXED: Choose the language with the MOST characters
+    # This prevents false positives when one language name appears in another language text
+    if hebrew_count > russian_count and hebrew_count > 0:
+        return 'he'  # RTL язык, требует CSS dir="rtl"
+    elif russian_count > hebrew_count and russian_count > 0:
+        return 'ru'  # LTR язык
+    else:
+        return 'en'  # LTR язык (по умолчанию)
+
+
 @app.route('/api/exam/<exam_filename>')
 def get_exam(exam_filename):
     """Get exam content with parsed questions"""
@@ -724,11 +903,15 @@ def get_exam(exam_filename):
                 # Parse exam questions
                 questions = parse_exam_questions(content)
                 
+                # Detect language
+                language = detect_exam_language(content)
+                
                 return jsonify({
                     'success': True,
                     'filename': exam_filename,
                     'questions': questions,
-                    'total_questions': len(questions)
+                    'total_questions': len(questions),
+                    'language': language
                 })
         
         return jsonify({'success': False, 'message': 'Exam file not found'}), 404
@@ -1107,15 +1290,44 @@ def api_submit_exam(exam_id):
         question_answer_dict = full_exam_data.get('question_answer_dict', {})
         text_direction = full_exam_data.get('text_direction', 'ltr')
         
+        # TRANSLATION FIX v2: Load translations for results page based on exam language
+        # REMARK: Previously results were hard-coded in English ("your exam was submitted successfully", "Your Answers:", "Your grade is")
+        if text_direction == 'rtl':
+            exam_language = 'he'
+        else:
+            # Detect Russian or English
+            with open(exam_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            exam_language = detect_exam_language(content)
+        
+        # Load translations
+        translations_path = os.path.join(app_config.DATA_DIR, 'translations', f'{exam_language}.json')
+        try:
+            with open(translations_path, 'r', encoding='utf-8') as f:
+                translations = json.load(f)
+        except Exception as e:
+            print(f"Error loading translations: {e}")
+            # Fallback to English hard-coded text
+            translations = {
+                'exam_submitted_successfully': 'your exam was submitted successfully',
+                'your_answers': 'Your Answers:',
+                'your_grade_is': 'Your grade is'
+            }
+        
         # Calculate score using ExamBuilder logic
         score = ExamBuilder.calculate_score(answers, question_answer_dict)
         
         # Build response HTML using questions student actually saw
-        dir_attr = 'dir="rtl"' if text_direction == 'rtl' else ''
+        # TRANSLATION FIX v3: Improved RTL support - use div instead of html tag
+        # REMARK: Previously used <html dir='rtl'> which didn't apply properly inside results-content div
+        if text_direction == 'rtl':
+            dir_attr = 'dir="rtl" style="text-align: right; direction: rtl;"'
+        else:
+            dir_attr = 'style="text-align: left;"'
         
-        response_html = f"<html {dir_attr}><body><meta charset='UTF-8'>"
-        response_html += f"<h2>{first_name} {last_name}, your exam was submitted successfully</h2>"
-        response_html += "<h3>Your Answers:</h3><ol>"
+        response_html = f"<div {dir_attr}>"
+        response_html += f"<h2>{first_name} {last_name}, {translations.get('exam_submitted_successfully', 'your exam was submitted successfully')}</h2>"
+        response_html += f"<h3>{translations.get('your_answers', 'Your Answers:')}</h3><ol>"
         
         # Loop through questions student saw (from client) in order
         for question in questions_list:
@@ -1135,12 +1347,16 @@ def api_submit_exam(exam_id):
             response_html += f"<li><b>{question_text}</b><pre {align_dir}>{submitted_answer}</pre></li>"
         
         # Add grade
+        # TRANSLATION FIX v2: Use translated "Your grade is" text
+        # REMARK: Previously "Your grade is" was hard-coded in English
         if score < 0:
             grade_text = "Unknown yet, exam will be evaluated later"
         else:
             grade_text = f"{score} %"
         
-        response_html += f"<h1>Your grade is {grade_text}</h1></ol></body></html>"
+        # TRANSLATION FIX v3: Close div instead of html/body tags
+        # REMARK: Previously closed with </body></html>
+        response_html += f"<h1>{translations.get('your_grade_is', 'Your grade is')} {grade_text}</h1></ol></div>"
         
         # Mark exam as completed
         exam_session.submit_student_exam(student_session_id, answers, score)
@@ -1422,6 +1638,9 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
             os.makedirs(results_folder, exist_ok=True)
         
         current_time = dt.now().strftime("%H-%M-%S")
+        # FIX v3: Date format with year, month name, day
+        # REMARK: Previously "%Y-%m-%d" (2026-02-03), now "%Y %B %d" (2026 February 03)
+        current_date = dt.now().strftime("%Y %B %d")
         first_name = student['first_name']
         last_name = student['last_name']
         
@@ -1432,14 +1651,26 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
             f.write(response_html)
         
         # 2. Append to GRADES.txt
+        # FIX v3: Improved format to handle names with numbers
+        # REMARK: Previously format was "HH-MM-SS: Name-Score%" which confused names with numbers
+        # NEW FORMAT: "YYYY-MM-DD HH-MM-SS | FullName | Score: XX% | Cheat: X | Duration: X"
         grades_file = os.path.join(results_folder, 'GRADES.txt')
         cheating_attempts = student.get('cheating_attempts', 0)
-        exam_duration = student.get('exam_duration', 'N/A')
         
-        grade_text = f"{score} %" if score >= 0 else "Unknown yet, will be evaluated later"
+        # FIX v4: Use time_spent instead of exam_duration, format as "5m 23s"
+        # REMARK: Previously used 'exam_duration' key which didn't exist (showed N/A)
+        time_spent_seconds = student.get('time_spent', 0)
+        if time_spent_seconds and time_spent_seconds > 0:
+            minutes = int(time_spent_seconds // 60)
+            seconds = int(time_spent_seconds % 60)
+            exam_duration = f"{minutes}m {seconds}s"
+        else:
+            exam_duration = "N/A"
+        
+        grade_text = f"{score}%" if score >= 0 else "Unknown yet"
         grades_entry = (
-            f"{current_time}: {first_name} {last_name}-{grade_text}  "
-            f"Cheat Attempts-{cheating_attempts} Duration-{exam_duration}\n"
+            f"{current_date} {current_time} | {first_name} {last_name} | "
+            f"Score: {grade_text} | Cheat: {cheating_attempts} | Duration: {exam_duration}\n"
         )
         
         with open(grades_file, 'a', encoding='utf-8') as f:
@@ -1541,7 +1772,7 @@ if __name__ == '__main__':
     
     # Start Flask development server
     app.run(
-        host='127.0.0.1',
+        host='0.0.0.0',
         port=5000,
         debug=app_config.DEBUG
     )

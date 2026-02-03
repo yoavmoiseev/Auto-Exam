@@ -68,10 +68,13 @@
 
     <!-- Footer - minimal -->
     <footer style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-        <p>&copy; 2026 Exam System</p>
+        <a href="https://www.yamsoft.org" target="_blank" class="footer-company-link" id="footer-company-link" style="text-decoration: none; color: #999;">
+            <span data-i18n="company_name">YaM SOFT ©</span>
+        </a>
     </footer>
 
     <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

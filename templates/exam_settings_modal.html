@@ -86,6 +86,32 @@
                     <small class="form-text" data-i18n="zero_no_limit">0 = no time limit</small>
                 </div>
                 
+                <!-- NEW FEATURE v4: Block Translation Attempts -->
+                <!-- REMARK: Previously no translation blocking existed -->
+                <div class="form-group">
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            id="block-translation" 
+                            name="block_translation">
+                        <strong data-i18n="block_translation">Block Translation Attempts</strong>
+                    </label>
+                    <small class="form-text" data-i18n="block_translation_help">Prevent Google Translate (for language exams)</small>
+                </div>
+                
+                <!-- NEW FEATURE v4: Fullscreen Mode -->
+                <!-- REMARK: Previously no fullscreen enforcement existed -->
+                <div class="form-group">
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            id="fullscreen-mode" 
+                            name="fullscreen_mode">
+                        <strong data-i18n="fullscreen_mode">Fullscreen Mode</strong>
+                    </label>
+                    <small class="form-text" data-i18n="fullscreen_mode_help">Force fullscreen (exit = cheat log)</small>
+                </div>
+                
                 <!-- Submit Buttons -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary cancel-exam" data-i18n="cancel">Cancel</button>
@@ -351,6 +377,8 @@
             max_questions: parseInt(document.getElementById('max-questions').value),
             shuffle_exam: document.getElementById('shuffle-exam').checked,
             exam_duration: parseInt(document.getElementById('exam-duration').value),
+            block_translation: document.getElementById('block-translation').checked,  // NEW FEATURE v4
+            fullscreen_mode: document.getElementById('fullscreen-mode').checked,      // NEW FEATURE v4
             append_to_folder: appendToFolder
         };
         

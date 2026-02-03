@@ -1,0 +1,160 @@
+############################################################################
+
+Student details: Name-English  Last name-Moiseev  Submitting time-16-05-49  Cheating attemps-0
+
+What does BIOS stand for?
+- Basic Input Output System
+
+----------------------------------------------------------------------------
+Which computer port is primarily used to connect external displays?
+- USB Type-C
+
+----------------------------------------------------------------------------
+Which computer component houses the operating system and user files?
+- Hard Drive (HDD/SSD)
+
+----------------------------------------------------------------------------
+Which port is used for connecting audio devices?
+- 3.5mm Audio Jack
+
+----------------------------------------------------------------------------
+Which type of memory retains data even when the power is turned off?
+- Cache Memory
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Yoav  Last name-Moiseev  Submitting time-16-17-08  Cheating attemps-0
+
+Which storage device is typically used for backup storage?
+- CPU
+
+----------------------------------------------------------------------------
+What does GPU stand for?
+- General Processing Utility
+
+----------------------------------------------------------------------------
+Which component is used to cool the CPU?
+- Fan or Liquid Cooling System
+
+----------------------------------------------------------------------------
+Which connector is used to transfer both video and audio signals?
+- VGA
+
+----------------------------------------------------------------------------
+What type of memory is used for temporary storage while the computer is running?
+- HDD (Hard Disk Drive)
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Yoav44  Last name-Moiseev44  Submitting time-18-23-46  Cheating attemps-18
+
+Which type of memory retains data even when the power is turned off?
+- Virtual Memory
+
+----------------------------------------------------------------------------
+What is the primary purpose of a heatsink?
+- Converts AC to DC power
+
+----------------------------------------------------------------------------
+Which device is responsible for converting AC power from a wall outlet into usable DC power for a computer?
+- PSU (Power Supply Unit)
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Cheat  Last name-Attempts  Submitting time-18-26-29  Cheating attemps-7
+
+Which type of expansion slot is commonly used for high-performance graphics cards?
+- USB
+
+----------------------------------------------------------------------------
+Which component processes graphics in a computer?
+- CPU
+
+----------------------------------------------------------------------------
+Which connector is most commonly used for wired Ethernet networks?
+- HDMI
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Timur  Last name-M2  Submitting time-18-29-42  Cheating attemps-25
+
+What does SATA stand for?
+- Storage And Transfer Architecture
+
+----------------------------------------------------------------------------
+Which component is used to cool the CPU?
+- Fan or Liquid Cooling System
+
+----------------------------------------------------------------------------
+Which component is responsible for executing instructions in a computer?
+- GPU (Graphics Processing Unit)
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-New  Last name-Student  Submitting time-18-29-51  Cheating attemps-23
+
+Which connector is most commonly used for wired Ethernet networks?
+- RJ-11
+
+----------------------------------------------------------------------------
+Which device allows a computer to communicate over a network?
+- PSU
+
+----------------------------------------------------------------------------
+Which bus connects the CPU to the RAM?
+- Front Side Bus (FSB)
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-No  Last name-Touch  Submitting time-18-30-01  Cheating attemps-10
+
+Which type of expansion slot is commonly used for high-performance graphics cards?
+- ISA (Industry Standard Architecture)
+
+----------------------------------------------------------------------------
+Which computer port is primarily used to connect external displays?
+- PCIe
+
+----------------------------------------------------------------------------
+What is a primary feature of an NVMe SSD?
+- Built-in Wi-Fi
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Vasia  Last name-y1,hj,  Submitting time-18-35-11  Cheating attemps-33
+
+What is the function of a power supply unit (PSU)?
+- Cools the system
+
+----------------------------------------------------------------------------
+What is the primary purpose of a heatsink?
+- Stores electrical energy
+
+----------------------------------------------------------------------------
+What is the primary function of a computer case?
+- Protects internal components
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-Smart33  Last name-Phone344  Submitting time-18-40-06  Cheating attemps-0
+
+What does BIOS stand for?
+- Bus Interface Optimization System
+
+----------------------------------------------------------------------------
+Which device is responsible for converting AC power from a wall outlet into usable DC power for a computer?
+- UPS (Uninterruptible Power Supply)
+
+----------------------------------------------------------------------------
+Which storage device provides the fastest data access speeds?
+- HDD (Hard Disk Drive)
+
+----------------------------------------------------------------------------
