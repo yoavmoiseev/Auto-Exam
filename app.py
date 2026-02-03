@@ -1770,9 +1770,13 @@ if __name__ == '__main__':
     print(f"Debug Mode: {app_config.DEBUG}")
     print("="*60 + "\n")
     
+    # Get port from environment variable or default to 5001
+    # REMARK: Changed from hardcoded 5000 to support multiple deployments on same VM
+    port = int(os.environ.get('FLASK_PORT', 5001))
+    
     # Start Flask development server
     app.run(
         host='0.0.0.0',
-        port=5000,
+        port=port,
         debug=app_config.DEBUG
     )
