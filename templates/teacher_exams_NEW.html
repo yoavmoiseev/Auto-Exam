@@ -42,14 +42,14 @@
 <div id="viewSourceModal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
-            <h2><span data-i18n="view_source_title">View Source</span>: <span id="sourceModalTitle"></span></h2>
+            <h2>View Source: <span id="sourceModalTitle"></span></h2>
             <span class="close" onclick="closeModal('viewSourceModal')">&times;</span>
         </div>
         <div class="modal-body">
             <pre id="sourceContent" style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; max-height: 500px;"></pre>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('viewSourceModal')" data-i18n="close">Close</button>
+            <button class="btn btn-secondary" onclick="closeModal('viewSourceModal')">Close</button>
         </div>
     </div>
 </div>
@@ -58,14 +58,14 @@
 <div id="studentPreviewModal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 900px;">
         <div class="modal-header">
-            <h2><span data-i18n="student_preview_title">Student Preview</span>: <span id="previewModalTitle"></span></h2>
+            <h2>Student Preview: <span id="previewModalTitle"></span></h2>
             <span class="close" onclick="closeModal('studentPreviewModal')">&times;</span>
         </div>
         <div class="modal-body">
             <div id="previewContent" style="max-height: 600px; overflow-y: auto;"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('studentPreviewModal')" data-i18n="close">Close</button>
+            <button class="btn btn-secondary" onclick="closeModal('studentPreviewModal')">Close</button>
         </div>
     </div>
 </div>
@@ -74,7 +74,7 @@
 <div id="examDataModal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 800px;">
         <div class="modal-header">
-            <h2><span data-i18n="exam_data_title">Exam Data</span>: <span id="dataModalTitle"></span></h2>
+            <h2>Exam Data: <span id="dataModalTitle"></span></h2>
             <span class="close" onclick="closeModal('examDataModal')">&times;</span>
         </div>
         <div class="modal-body">
@@ -82,7 +82,7 @@
             <div id="examErrors"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('examDataModal')" data-i18n="close">Close</button>
+            <button class="btn btn-secondary" onclick="closeModal('examDataModal')">Close</button>
         </div>
     </div>
 </div>
@@ -91,15 +91,15 @@
 <div id="loadExamplesModal" class="modal" style="display: none;">
     <div class="modal-content" style="max-width: 700px;">
         <div class="modal-header">
-            <h2 data-i18n="load_examples_title">Load Example Exam</h2>
+            <h2>Load Example Exam</h2>
             <span class="close" onclick="closeModal('loadExamplesModal')">&times;</span>
         </div>
         <div class="modal-body">
-            <p data-i18n="select_example">Select an example exam to preview or load:</p>
+            <p>Select an example exam to preview or load:</p>
             <div id="examplesList"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('loadExamplesModal')" data-i18n="close">Close</button>
+            <button class="btn btn-secondary" onclick="closeModal('loadExamplesModal')">Close</button>
         </div>
     </div>
 </div>
@@ -126,9 +126,6 @@ function loadExams() {
                 // Get translated button labels
                 const startLabel = typeof i18n !== 'undefined' ? i18n.t('start') : 'Start';
                 const deleteLabel = typeof i18n !== 'undefined' ? i18n.t('delete') : 'Delete';
-                const viewSourceLabel = typeof i18n !== 'undefined' ? i18n.t('view_source') : 'View Source';
-                const studentPreviewLabel = typeof i18n !== 'undefined' ? i18n.t('student_preview') : 'Student Preview';
-                const examDataLabel = typeof i18n !== 'undefined' ? i18n.t('exam_data') : 'Exam Data';
                 
                 data.exams.forEach(exam => {
                     const row = document.createElement('tr');
@@ -137,19 +134,19 @@ function loadExams() {
                     row.innerHTML = `
                         <td style="padding: 10px;">${escapeHtml(exam)}</td>
                         <td style="padding: 10px; text-align: center;">
-                            <button class="btn btn-primary btn-sm exam-action-btn" onclick="startExam('${escapeHtml(exam)}')" style="margin: 2px;">
+                            <button class="btn btn-primary btn-sm" onclick="startExam('${escapeHtml(exam)}')" style="margin: 2px;">
                                 ${startLabel}
                             </button>
-                            <button class="btn btn-info btn-sm exam-action-btn" onclick="viewSource('${escapeHtml(exam)}')" style="margin: 2px;">
-                                ${viewSourceLabel}
+                            <button class="btn btn-info btn-sm" onclick="viewSource('${escapeHtml(exam)}')" style="margin: 2px;">
+                                View Source
                             </button>
-                            <button class="btn btn-success btn-sm exam-action-btn" onclick="studentPreview('${escapeHtml(exam)}')" style="margin: 2px;">
-                                ${studentPreviewLabel}
+                            <button class="btn btn-success btn-sm" onclick="studentPreview('${escapeHtml(exam)}')" style="margin: 2px;">
+                                Student Preview
                             </button>
-                            <button class="btn btn-warning btn-sm exam-action-btn" onclick="viewExamData('${escapeHtml(exam)}')" style="margin: 2px;">
-                                ${examDataLabel}
+                            <button class="btn btn-warning btn-sm" onclick="viewExamData('${escapeHtml(exam)}')" style="margin: 2px;">
+                                Exam Data
                             </button>
-                            <button class="btn btn-danger btn-sm exam-action-btn" onclick="deleteExam('${escapeHtml(exam)}')" style="margin: 2px;">
+                            <button class="btn btn-danger btn-sm" onclick="deleteExam('${escapeHtml(exam)}')" style="margin: 2px;">
                                 ${deleteLabel}
                             </button>
                         </td>
@@ -175,18 +172,7 @@ function viewSource(examName) {
         .then(data => {
             if (data.success) {
                 document.getElementById('sourceModalTitle').textContent = examName;
-                const sourceContent = document.getElementById('sourceContent');
-                sourceContent.textContent = data.content;
-                
-                // Set RTL ONLY for Hebrew, NOT Russian!
-                if (data.language === 'he') {
-                    sourceContent.style.direction = 'rtl';
-                    sourceContent.style.textAlign = 'right';
-                } else {
-                    sourceContent.style.direction = 'ltr';
-                    sourceContent.style.textAlign = 'left';
-                }
-                
+                document.getElementById('sourceContent').textContent = data.content;
                 openModal('viewSourceModal');
             } else {
                 alert('Error: ' + data.message);
@@ -220,11 +206,7 @@ function renderPreview(questions, language) {
     const container = document.getElementById('previewContent');
     const direction = language === 'he' ? 'rtl' : 'ltr';
     
-    // CRITICAL: Clear container styles to prevent CSS inheritance from html[dir="rtl"]
-    container.style.direction = '';
-    container.style.textAlign = '';
-    
-    let html = `<div style="direction: ${direction}; text-align: ${direction === 'rtl' ? 'right' : 'left'};">`;
+    let html = `<div style="direction: ${direction};">`;
     
     questions.forEach((q, index) => {
         html += `
@@ -273,39 +255,18 @@ function renderExamData(metadata) {
     const metaContainer = document.getElementById('examMetadata');
     const errorsContainer = document.getElementById('examErrors');
     
-    // Get translated labels
-    const languageLabel = typeof i18n !== 'undefined' ? i18n.t('language') : 'Language';
-    const totalQuestionsLabel = typeof i18n !== 'undefined' ? i18n.t('total_questions') : 'Total Questions';
-    const validationErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('validation_errors') : 'Validation Errors';
-    const noErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('no_errors_found') : 'No errors found - exam is valid';
-    const examInfoLabel = typeof i18n !== 'undefined' ? i18n.t('exam_information') : 'Exam Information';
-    const examTypeLabel = typeof i18n !== 'undefined' ? i18n.t('exam_type') : 'Exam Type';
-    const multipleChoiceLabel = typeof i18n !== 'undefined' ? i18n.t('multiple_choice') : 'Multiple Choice';
-    const openQuestionsLabel = typeof i18n !== 'undefined' ? i18n.t('open_questions') : 'Open Questions';
-    const statusLabel = typeof i18n !== 'undefined' ? i18n.t('status') : 'Status';
-    const validLabel = typeof i18n !== 'undefined' ? i18n.t('valid') : 'Valid';
-    const hasErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('has_errors') : 'Has Errors';
-    
-    // Display language name
-    let languageName = 'English';
-    if (metadata.language === 'he') {
-        languageName = 'Hebrew';
-    } else if (metadata.language === 'ru') {
-        languageName = 'Russian';
-    }
-    
     // Render metadata
     let html = `
         <div style="padding: 15px; background: #e8f4f8; border-radius: 5px;">
-            <h3>${examInfoLabel}</h3>
+            <h3>Exam Information</h3>
             <ul style="list-style: none; padding: 0;">
-                <li><strong>${languageLabel}:</strong> ${languageName}</li>
-                <li><strong>${totalQuestionsLabel}:</strong> ${metadata.total_questions}</li>
-                <li><strong>${examTypeLabel}:</strong> ${metadata.exam_type}</li>
-                <li><strong>${multipleChoiceLabel}:</strong> ${metadata.multiple_choice_count}</li>
-                <li><strong>${openQuestionsLabel}:</strong> ${metadata.open_questions_count}</li>
-                <li><strong>${statusLabel}:</strong> <span style="color: ${metadata.valid ? 'green' : 'red'}; font-weight: bold;">
-                    ${metadata.valid ? '✓ ' + validLabel : '⚠ ' + hasErrorsLabel}
+                <li><strong>Language:</strong> ${metadata.language === 'he' ? 'Hebrew' : 'English'}</li>
+                <li><strong>Total Questions:</strong> ${metadata.total_questions}</li>
+                <li><strong>Exam Type:</strong> ${metadata.exam_type}</li>
+                <li><strong>Multiple Choice:</strong> ${metadata.multiple_choice_count}</li>
+                <li><strong>Open Questions:</strong> ${metadata.open_questions_count}</li>
+                <li><strong>Status:</strong> <span style="color: ${metadata.valid ? 'green' : 'red'}; font-weight: bold;">
+                    ${metadata.valid ? '✓ Valid' : '⚠ Has Errors'}
                 </span></li>
             </ul>
         </div>
@@ -316,7 +277,7 @@ function renderExamData(metadata) {
     if (metadata.errors && metadata.errors.length > 0) {
         let errHtml = `
             <div style="padding: 15px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 5px; margin-top: 15px;">
-                <h3 style="color: #856404;">⚠️ ${validationErrorsLabel} (${metadata.errors.length})</h3>
+                <h3 style="color: #856404;">⚠️ Parsing Errors (${metadata.errors.length})</h3>
         `;
         
         metadata.errors.forEach(err => {
@@ -337,7 +298,7 @@ ${escapeHtml(err.text)}
         errHtml += '</div>';
         errorsContainer.innerHTML = errHtml;
     } else {
-        errorsContainer.innerHTML = `<div style="color: green; padding: 10px;">✓ ${noErrorsLabel}</div>`;
+        errorsContainer.innerHTML = '<div style="color: green; padding: 10px;">✓ No parsing errors found!</div>';
     }
 }
 

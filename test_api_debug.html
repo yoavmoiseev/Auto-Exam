@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Debug Test</title>
+</head>
+<body>
+    <h1>Test API Endpoint</h1>
+    <p>Enter Exam ID: <input id="examId" type="number" value="1"> <button onclick="testAPI()">Test</button></p>
+    <pre id="output" style="background: #f0f0f0; padding: 10px; border: 1px solid #ccc;"></pre>
+
+    <script>
+    async function testAPI() {
+        const examId = document.getElementById('examId').value;
+        const output = document.getElementById('output');
+        
+        output.textContent = 'Loading...\n';
+        
+        try {
+            const response = await fetch(`http://127.0.0.1:5001/api/exam/${examId}/questions`);
+            const data = await response.json();
+            
+            output.textContent = 'Response Status: ' + response.status + '\n\n';
+            output.textContent += 'Response Data:\n';
+            output.textContent += JSON.stringify(data, null, 2) + '\n\n';
+            
+            if (data.success) {
+                output.textContent += '\n=== ANALYSIS ===\n';
+                output.textContent += 'Questions count: ' + data.questions.length + '\n';
+                output.textContent += 'Text direction: ' + data.text_direction + '\n';
+                
+                if (data.questions.length > 0) {
+                    output.textContent += '\nFirst question:\n';
+                    output.textContent += JSON.stringify(data.questions[0], null, 2);
+                }
+            }
+        } catch (error) {
+            output.textContent = 'ERROR: ' + error.message;
+        }
+    }
+    
+    // Auto-test on load
+    window.onload = () => testAPI();
+    </script>
+</body>
+</html>

@@ -1,15 +1,11 @@
-1. A type of expansion slot is commonly used for high-performance graphics cards is  
+1. Which type of expansion slot is commonly used for high-performance graphics cards?  
     - PCIe (Peripheral Component Interconnect Express)  
     - AGP (Accelerated Graphics Port)  
     - ISA (Industry Standard Architecture)  
     - SATA  
     - USB  
-
-
-2. Which component is responsible for executing instructions in a computer 
-Type your answer here
-
-111. Write a program that:
+2. Which component is responsible for executing instructions in a computer?  
+21. Write a program that:
 Programming task:
 1111
 2222222222222
@@ -20,15 +16,9 @@ use print(a)
 c= a + b
 
 3. What type of memory is used for temporary storage while the computer is running?  
-
-
 4. Which storage device provides the fastest data access speeds?  
-Type your answer here
 5. Which type of power connector is used for internal hard drives?  
-Type your answer here
-
-6. Computer port is primarily used to connect external displays...
-Type your answer here
+6. Which computer port is primarily used to connect external displays?  
 16. Which device allows a computer to communicate over a network?  
     - Network Interface Card (NIC)  
     - Sound Card  
@@ -37,7 +27,6 @@ Type your answer here
     - PSU  
 
 7. What is the primary purpose of a heatsink?  
-Type your answer here
 
 8. Write a Python program that:
 Programming task:
@@ -77,13 +66,10 @@ Top student(s): Bob
 
 
 8. Which component determines the number of USB, SATA, and PCIe slots available on a motherboard?  
-Type your answer here
 
 9. Which type of memory retains data even when the power is turned off?  
-Type your answer here
 
 10. Which connector is most commonly used for wired Ethernet networks?  
-Type your answer here
 11. Which device is responsible for converting AC power from a wall outlet into usable DC power for a computer?  
     - PSU (Power Supply Unit)  
     - GPU (Graphics Processing Unit)  

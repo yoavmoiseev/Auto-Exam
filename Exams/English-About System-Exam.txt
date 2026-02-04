@@ -1,0 +1,89 @@
+1. What is the main purpose of the Online Exam System?
+To create and manage online exams for students
+To build websites
+To teach programming automatically
+To replace teachers completely
+
+2. Where do students take the exam?
+On the website ex.yamsoft.org
+In a mobile application only
+On the teacher’s computer
+On a local server without internet
+
+3. What file format is used to create exams?
+Text file (.txt)
+Word document (.docx)
+PDF file
+Excel spreadsheet
+
+4. How must every question start in the exam file?
+With a number and a dot
+With a dash
+With a letter
+With a question mark only
+
+5. How are multiple choice answers written?
+One answer per line, without numbering
+All answers on one line
+Answers separated by commas
+Answers starting with numbers
+
+6. Which answer is considered correct by the system?
+The first answer listed
+The longest answer
+The last answer listed
+The answer chosen by most students
+
+7. What does the system do with answer options for students?
+Shuffles them randomly
+Always shows them in the same order
+Hides incorrect answers
+Shows only two options
+
+8. When does a question become an open question?
+When no answers are written after it
+When it has more than four answers
+When it is written in Hebrew
+When it uses long text
+
+9. Who grades open questions?
+The teacher manually
+The system automatically
+Other students
+An external service
+
+10. What is the purpose of the “Programming task:” marker?
+To show code or long instructions to students
+To mark the correct answer
+To hide the question
+To shuffle answers
+
+11. Is the marker “Programming task:” visible to students?
+No, it is hidden
+Yes, always
+Only in preview mode
+Only for teachers
+
+12. What button shows how students will see the exam?
+Student Preview
+View Source
+Exam Data
+Add Exam
+
+13. What information does the “Exam Data” view show?
+Question count, language, and errors
+Student grades
+Correct answers
+Teacher comments
+
+14. Which languages are supported by the system?
+English, Hebrew, and Russian
+Only English
+English and Spanish
+All world languages
+
+15. What is a common mistake when creating questions?
+Forgetting the dot after the question number
+Using clear language
+Testing the exam
+Saving the file as .txt

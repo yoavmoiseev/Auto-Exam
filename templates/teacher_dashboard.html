@@ -43,43 +43,153 @@
             <h3 data-i18n="upload_exam">Upload Exam</h3>
         </div>
         <div class="card-body">
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="examFile" data-i18n="select_txt_file"><strong>Select .txt file:</strong></label>
-                    <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-                        <input type="file" id="examFile" name="file" accept=".txt" required style="display: none;">
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('examFile').click();" style="flex: 0; padding: 6px 12px; font-size: 13px; white-space: nowrap;" data-i18n="browse">📁 Browse</button>
-                        <span id="fileName" style="flex: 1; color: #666; font-size: 0.9em;" data-i18n="no_file_chosen">No file chosen</span>
-                    </div>
-                    <small style="display: block; margin: 5px 0; color: #666;">
-                        <span>✓ </span><span data-i18n="only_txt_files">Only .txt files (text format)</span><br>
-                        <span>✓ </span><span data-i18n="each_exam_one_file">Each exam = one .txt file</span>
-                    </small>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;" data-i18n="add_exam">Upload Exam</button>
-            </form>
-            <div id="uploadMessage" class="mt-2" style="display: none; padding: 10px; border-radius: 4px; margin-top: 10px;"></div>
+            <p data-i18n="add_exam_description">Click button below to add a new exam file</p>
+            <button type="button" class="btn btn-primary" onclick="openAddExamModal()" style="width: 100%; margin-top: 10px;" data-i18n="add_exam">Add Exam</button>
         </div>
     </div>
 </div>
 
+<!-- Add Exam Modal -->
+<div id="addExamModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2 data-i18n="add_exam">Add Exam</h2>
+            <span class="close" onclick="closeAddExamModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <!-- File Selection Step -->
+            <div id="fileSelection">
+                <p data-i18n="select_exam_file">Select an exam file from your computer or from examples:</p>
+                
+                <div style="margin: 20px 0;">
+                    <input type="file" id="examFileInput" accept=".txt" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('examFileInput').click()" style="width: 100%; margin-bottom: 10px;">
+                        📁 <span data-i18n="browse_computer">Browse Computer</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadExampleExams()" style="width: 100%;">
+                        📂 <span data-i18n="load_from_examples">Load from Examples</span>
+                    </button>
+                </div>
+                
+                <small style="display: block; margin: 10px 0; color: #666;">
+                    <span>✓ </span><span data-i18n="only_txt_files">Only .txt files (text format)</span><br>
+                    <span>✓ </span><span data-i18n="each_exam_one_file">Each exam = one .txt file</span>
+                </small>
+            </div>
+            
+            <!-- File Preview Step -->
+            <div id="filePreview" style="display: none;">
+                <div style="padding: 15px; background: #e8f4f8; border-radius: 5px; margin-bottom: 20px;">
+                    <h4 data-i18n="selected_file">Selected File:</h4>
+                    <p id="selectedFileInfo" style="font-family: monospace; font-weight: bold; color: #007bff;"></p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="btn btn-info btn-sm" onclick="viewSourcePreview()" style="flex: 1;">
+                        <span data-i18n="view_source">View Source</span>
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="studentPreviewContent()" style="flex: 1;">
+                        <span data-i18n="student_preview">Student Preview</span>
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="viewDataPreview()" style="flex: 1;">
+                        <span data-i18n="exam_data">Exam Data</span>
+                    </button>
+                </div>
+                
+                <div id="uploadStatus" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="backToFileSelection()" style="flex: 1;">
+                        ← <span data-i18n="back">Back</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="finalizeAddExam()" style="flex: 2;">
+                        ✅ <span data-i18n="add_exam">Add Exam</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Source Modal -->
+<div id="previewSourceModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2><span data-i18n="view_source_title">View Source</span>: <span id="previewSourceTitle"></span></h2>
+            <span class="close" onclick="closePreviewModal('previewSourceModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <pre id="previewSourceContent" style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; max-height: 500px;"></pre>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePreviewModal('previewSourceModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Student Modal -->
+<div id="previewStudentModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2><span data-i18n="student_preview_title">Student Preview</span>: <span id="previewStudentTitle"></span></h2>
+            <span class="close" onclick="closePreviewModal('previewStudentModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="previewStudentContent" style="max-height: 600px; overflow-y: auto;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePreviewModal('previewStudentModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Data Modal -->
+<div id="previewDataModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2><span data-i18n="exam_data_title">Exam Data</span>: <span id="previewDataTitle"></span></h2>
+            <span class="close" onclick="closePreviewModal('previewDataModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="previewMetadata" style="margin-bottom: 20px;"></div>
+            <div id="previewErrors"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePreviewModal('previewDataModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Examples List Modal -->
+<div id="examplesModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h2 data-i18n="load_from_examples">Load from Examples</h2>
+            <span class="close" onclick="closePreviewModal('examplesModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p data-i18n="select_example_exam">Select an example exam:</p>
+            <div id="examplesListModal"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closePreviewModal('examplesModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+</div>
 
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Update file name display when file is selected
-document.getElementById('examFile').addEventListener('change', function() {
-    const fileNameSpan = document.getElementById('fileName');
-    if (this.files && this.files[0]) {
-        fileNameSpan.textContent = this.files[0].name;
-    } else {
-        fileNameSpan.textContent = fileNameSpan.getAttribute('data-i18n') ? i18n.t('no_file_chosen') : 'No file chosen';
-    }
-});
+// ========================================
+// ADD EXAM MODAL - Global Variables
+// ========================================
+let selectedFileContent = null;
+let selectedFileName = null;
+let selectedFileSource = null; // 'computer' or 'examples'
 
-// Function to show confirmation dialog
+// Function to show confirmation dialog (old upload system - kept for compatibility)
 function showOverwriteDialog(filename) {
     return new Promise((resolve) => {
         const title = typeof i18n !== 'undefined' ? i18n.t('file_already_exists') : 'File already exists';
@@ -131,78 +241,6 @@ async function uploadFile(file, overwrite = false) {
         data: await response.json()
     };
 }
-
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const fileInput = document.getElementById('examFile');
-    const file = fileInput.files[0];
-    const messageDiv = document.getElementById('uploadMessage');
-    
-    if (!file) {
-        messageDiv.textContent = '❌ ' + (typeof i18n !== 'undefined' ? i18n.t('please_select_file') : 'Please select a file');
-        messageDiv.className = 'alert alert-danger';
-        messageDiv.style.display = 'block';
-        return;
-    }
-    
-    if (!file.name.endsWith('.txt')) {
-        messageDiv.textContent = '❌ ' + (typeof i18n !== 'undefined' ? i18n.t('only_txt_accepted') : 'Only .txt files are accepted');
-        messageDiv.className = 'alert alert-danger';
-        messageDiv.style.display = 'block';
-        return;
-    }
-    
-    try {
-        const uploadResult = await uploadFile(file, false);
-        
-        // Check if file exists (409 Conflict)
-        if (uploadResult.status === 409 && uploadResult.data.file_exists) {
-            const shouldOverwrite = await showOverwriteDialog(file.name);
-            
-            if (shouldOverwrite) {
-                // Upload with overwrite flag
-                const overwriteResult = await uploadFile(file, true);
-                
-                if (overwriteResult.data.success) {
-                    const uploadedText = typeof i18n !== 'undefined' ? i18n.t('exam_uploaded') : 'Exam uploaded';
-                    const goToExamsText = typeof i18n !== 'undefined' ? i18n.t('go_to_my_exams') : 'Go to "My Exams" to see it';
-                    messageDiv.innerHTML = '✅ ' + uploadedText + ': ' + file.name + '<br><small>' + goToExamsText + '</small>';
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.style.display = 'block';
-                    fileInput.value = '';
-                    document.getElementById('fileName').textContent = i18n.t('no_file_chosen');
-                } else {
-                    messageDiv.textContent = '❌ ' + (overwriteResult.data.message || (typeof i18n !== 'undefined' ? i18n.t('error_uploading') : 'Error uploading exam'));
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.style.display = 'block';
-                }
-            }
-            // If user clicked "No, Cancel", just close dialog without doing anything
-            return;
-        }
-        
-        // Handle other responses
-        if (uploadResult.data.success) {
-            const uploadedText = typeof i18n !== 'undefined' ? i18n.t('exam_uploaded') : 'Exam uploaded';
-            const goToExamsText = typeof i18n !== 'undefined' ? i18n.t('go_to_my_exams') : 'Go to "My Exams" to see it';
-            messageDiv.innerHTML = '✅ ' + uploadedText + ': ' + file.name + '<br><small>' + goToExamsText + '</small>';
-            messageDiv.className = 'alert alert-success';
-            messageDiv.style.display = 'block';
-            fileInput.value = '';
-            document.getElementById('fileName').textContent = i18n.t('no_file_chosen');
-        } else {
-            messageDiv.textContent = '❌ ' + (uploadResult.data.message || (typeof i18n !== 'undefined' ? i18n.t('error_uploading') : 'Error uploading exam'));
-            messageDiv.className = 'alert alert-danger';
-            messageDiv.style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        messageDiv.textContent = '❌ ' + (typeof i18n !== 'undefined' ? i18n.t('error_uploading') : 'Error uploading exam');
-        messageDiv.className = 'alert alert-danger';
-        messageDiv.style.display = 'block';
-    }
-});
 
 // Load active exams
 async function loadActiveExams() {
@@ -316,7 +354,465 @@ document.addEventListener('DOMContentLoaded', () => {
     loadActiveExams();
     // Refresh every 10 seconds
     setInterval(loadActiveExams, 10000);
+    
+    // Setup file input handler for Add Exam modal
+    const examFileInput = document.getElementById('examFileInput');
+    if (examFileInput) {
+        examFileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                if (!file.name.endsWith('.txt')) {
+                    alert('Only .txt files allowed!');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedFileContent = event.target.result;
+                    selectedFileName = file.name;
+                    selectedFileSource = 'computer';
+                    showFilePreview();
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
 });
+
+// ========================================
+// ADD EXAM MODAL FUNCTIONS
+// ========================================
+
+function openAddExamModal() {
+    document.getElementById('addExamModal').style.display = 'block';
+    resetAddExamModal();
+}
+
+function closeAddExamModal() {
+    document.getElementById('addExamModal').style.display = 'none';
+    resetAddExamModal();
+}
+
+function resetAddExamModal() {
+    selectedFileContent = null;
+    selectedFileName = null;
+    selectedFileSource = null;
+    document.getElementById('examFileInput').value = '';
+    document.getElementById('fileSelection').style.display = 'block';
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('selectedFileInfo').textContent = '';
+    document.getElementById('uploadStatus').style.display = 'none';
+}
+
+function showFilePreview() {
+    document.getElementById('fileSelection').style.display = 'none';
+    document.getElementById('filePreview').style.display = 'block';
+    document.getElementById('selectedFileInfo').textContent = selectedFileName;
+}
+
+function backToFileSelection() {
+    resetAddExamModal();
+}
+
+function viewSourcePreview() {
+    if (!selectedFileContent) return;
+    
+    const builder = new ExamBuilderClient(selectedFileContent);
+    const language = builder.detectLanguage();
+    
+    console.log('[DEBUG viewSourcePreview] Exam language detected:', language);
+    console.log('[DEBUG viewSourcePreview] System language (i18n):', window.i18n?.currentLanguage);
+    console.log('[DEBUG viewSourcePreview] HTML dir attribute:', document.documentElement.getAttribute('dir'));
+    
+    document.getElementById('previewSourceTitle').textContent = selectedFileName;
+    const sourceContent = document.getElementById('previewSourceContent');
+    sourceContent.textContent = selectedFileContent;
+    
+    console.log('[DEBUG viewSourcePreview] Calculated direction:', language === 'he' ? 'rtl' : 'ltr');
+    
+    // Set RTL ONLY for Hebrew (not Russian!)
+    if (language === 'he') {
+        sourceContent.style.direction = 'rtl';
+        sourceContent.style.textAlign = 'right';
+    } else {
+        sourceContent.style.direction = 'ltr';
+        sourceContent.style.textAlign = 'left';
+    }
+    
+    document.getElementById('previewSourceModal').style.display = 'block';
+}
+
+function studentPreviewContent() {
+    if (!selectedFileContent) return;
+    
+    const builder = new ExamBuilderClient(selectedFileContent);
+    const questions = builder.parseQuestions();
+    const language = builder.detectLanguage();
+    
+    document.getElementById('previewStudentTitle').textContent = selectedFileName;
+    const container = document.getElementById('previewStudentContent');
+    const direction = language === 'he' ? 'rtl' : 'ltr';
+    
+    // CRITICAL: Clear container styles to prevent CSS inheritance from html[dir="rtl"]
+    container.style.direction = '';
+    container.style.textAlign = '';
+    
+    let html = `<div style="direction: ${direction}; text-align: ${direction === 'rtl' ? 'right' : 'left'};">`;
+    
+    questions.forEach((q, index) => {
+        html += `
+            <div style="margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
+                <div style="font-weight: bold; margin-bottom: 10px;">
+                    ${index + 1}. ${escapeHtml(q.question)}
+                </div>
+        `;
+        
+        if (q.type === 'multiple_choice') {
+            q.options.forEach(opt => {
+                html += `<div style="margin: 5px 0; padding: 5px;">${escapeHtml(opt)}</div>`;
+            });
+        } else {
+            // Show task content (code/examples) if exists
+            if (q.task_content) {
+                html += `<pre style="background: #f5f5f5; padding: 10px; border-radius: 3px; margin: 10px 0; white-space: pre-wrap;">${escapeHtml(q.task_content)}</pre>`;
+            }
+            html += `<div style="margin: 10px 0; padding: 10px; background: white; border: 1px dashed #ccc; min-height: 60px;">
+                <i>(Open question - student writes answer here)</i>
+            </div>`;
+        }
+        
+        html += `</div>`;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    document.getElementById('previewStudentModal').style.display = 'block';
+}
+
+function viewDataPreview() {
+    if (!selectedFileContent) return;
+    
+    const builder = new ExamBuilderClient(selectedFileContent);
+    const metadata = builder.validateExam();
+    
+    document.getElementById('previewDataTitle').textContent = selectedFileName;
+    renderPreviewExamData(metadata);
+    document.getElementById('previewDataModal').style.display = 'block';
+}
+
+function renderPreviewExamData(metadata) {
+    const metaContainer = document.getElementById('previewMetadata');
+    const errorsContainer = document.getElementById('previewErrors');
+    
+    // Get translated labels
+    const languageLabel = typeof i18n !== 'undefined' ? i18n.t('language') : 'Language';
+    const totalQuestionsLabel = typeof i18n !== 'undefined' ? i18n.t('total_questions') : 'Total Questions';
+    const examInfoLabel = typeof i18n !== 'undefined' ? i18n.t('exam_information') : 'Exam Information';
+    const examTypeLabel = typeof i18n !== 'undefined' ? i18n.t('exam_type') : 'Exam Type';
+    const multipleChoiceLabel = typeof i18n !== 'undefined' ? i18n.t('multiple_choice') : 'Multiple Choice';
+    const openQuestionsLabel = typeof i18n !== 'undefined' ? i18n.t('open_questions') : 'Open Questions';
+    const statusLabel = typeof i18n !== 'undefined' ? i18n.t('status') : 'Status';
+    const validLabel = typeof i18n !== 'undefined' ? i18n.t('valid') : 'Valid';
+    const hasErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('has_errors') : 'Has Errors';
+    const validationErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('validation_errors') : 'Validation Errors';
+    const noErrorsLabel = typeof i18n !== 'undefined' ? i18n.t('no_errors_found') : 'No errors found';
+    
+    let languageName = 'English';
+    if (metadata.language === 'he') languageName = 'Hebrew';
+    else if (metadata.language === 'ru') languageName = 'Russian';
+    
+    let html = `
+        <div style="padding: 15px; background: #e8f4f8; border-radius: 5px;">
+            <h3>${examInfoLabel}</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li><strong>${languageLabel}:</strong> ${languageName}</li>
+                <li><strong>${totalQuestionsLabel}:</strong> ${metadata.total_questions}</li>
+                <li><strong>${examTypeLabel}:</strong> ${metadata.exam_type}</li>
+                <li><strong>${multipleChoiceLabel}:</strong> ${metadata.multiple_choice_count}</li>
+                <li><strong>${openQuestionsLabel}:</strong> ${metadata.open_questions_count}</li>
+                <li><strong>${statusLabel}:</strong> <span style="color: ${metadata.valid ? 'green' : 'red'}; font-weight: bold;">
+                    ${metadata.valid ? '✓ ' + validLabel : '⚠ ' + hasErrorsLabel}
+                </span></li>
+            </ul>
+        </div>
+    `;
+    metaContainer.innerHTML = html;
+    
+    if (metadata.errors && metadata.errors.length > 0) {
+        let errHtml = `
+            <div style="padding: 15px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 5px; margin-top: 15px;">
+                <h3 style="color: #856404;">⚠️ ${validationErrorsLabel} (${metadata.errors.length})</h3>
+        `;
+        metadata.errors.forEach(err => {
+            errHtml += `
+                <div style="margin: 15px 0; padding: 15px; background: white; border-left: 4px solid #dc3545; border-radius: 3px;">
+                    <div style="font-weight: bold; color: #dc3545; margin-bottom: 10px;">${escapeHtml(err.message)}</div>
+                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">${escapeHtml(err.text)}</pre>
+                </div>
+            `;
+        });
+        errHtml += '</div>';
+        errorsContainer.innerHTML = errHtml;
+    } else {
+        errorsContainer.innerHTML = `<div style="color: green; padding: 10px;">✓ ${noErrorsLabel}</div>`;
+    }
+}
+
+function loadExampleExams() {
+    fetch('/api/examples-list')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const examplesDiv = document.getElementById('examplesListModal');
+                let html = '<div style="max-height: 400px; overflow-y: auto;">';
+                
+                data.examples.forEach(example => {
+                    html += `
+                        <div style="padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 4px; cursor: pointer; border: 2px solid transparent;" 
+                             onmouseover="this.style.borderColor='#007bff'" 
+                             onmouseout="this.style.borderColor='transparent'"
+                             onclick="selectExampleExam('${escapeHtml(example)}')">
+                            <strong>📄 ${escapeHtml(example)}</strong>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                examplesDiv.innerHTML = html;
+                document.getElementById('examplesModal').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading examples:', error);
+            alert('Error loading example exams');
+        });
+}
+
+function selectExampleExam(exampleName) {
+    fetch('/api/exam-source-from-examples/' + encodeURIComponent(exampleName))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                selectedFileContent = data.content;
+                selectedFileName = exampleName;
+                selectedFileSource = 'examples';
+                document.getElementById('examplesModal').style.display = 'none';
+                showFilePreview();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading example exam');
+        });
+}
+
+function finalizeAddExam() {
+    if (!selectedFileContent || !selectedFileName) {
+        alert('No file selected');
+        return;
+    }
+    
+    // Create a FormData object with the file content
+    const blob = new Blob([selectedFileContent], { type: 'text/plain' });
+    const formData = new FormData();
+    formData.append('file', blob, selectedFileName);
+    
+    const statusDiv = document.getElementById('uploadStatus');
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = '<p style="color: #007bff;">⏳ Uploading exam...</p>';
+    
+    fetch('/api/upload-exam', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            statusDiv.innerHTML = '<p style="color: green;">✅ Exam added successfully!</p>';
+            setTimeout(() => {
+                closeAddExamModal();
+                // Optionally reload the page or redirect to exams list
+                window.location.href = '/teacher/exams';
+            }, 1500);
+        } else if (data.file_exists) {
+            // File already exists, ask for overwrite
+            if (confirm(`File "${selectedFileName}" already exists. Overwrite?`)) {
+                // Re-submit with overwrite endpoint
+                fetch('/api/upload-exam/overwrite', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(overwriteData => {
+                    if (overwriteData.success) {
+                        statusDiv.innerHTML = '<p style="color: green;">✅ Exam updated successfully!</p>';
+                        setTimeout(() => {
+                            closeAddExamModal();
+                            window.location.href = '/teacher/exams';
+                        }, 1500);
+                    } else {
+                        statusDiv.innerHTML = '<p style="color: red;">❌ Error: ' + (overwriteData.message || 'Upload failed') + '</p>';
+                    }
+                });
+            } else {
+                statusDiv.style.display = 'none';
+            }
+        } else {
+            statusDiv.innerHTML = '<p style="color: red;">❌ Error: ' + (data.message || 'Upload failed') + '</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        statusDiv.innerHTML = '<p style="color: red;">❌ Error uploading exam</p>';
+    });
+}
+
+function closePreviewModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modals when clicking outside (on backdrop)
+window.addEventListener('click', function(event) {
+    // Check if click is directly on modal backdrop (not on modal-content)
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+// Exam Builder Client (simplified version for browser)
+class ExamBuilderClient {
+    constructor(content) {
+        this.content = content;
+        this.lines = content.split('\n');
+        // Open question markers - same as Python backend
+        this.OPEN_QUESTION_MARKERS = [
+            "Programming task:",
+            "Open Question/Multiple lines question/task:",
+            "Type your answer here"
+        ];
+    }
+    
+    isOpenQuestionMarker(text) {
+        return this.OPEN_QUESTION_MARKERS.some(marker => text.includes(marker));
+    }
+    
+    detectLanguage() {
+        const hebrewRegex = /[\u0590-\u05FF]/;
+        const russianRegex = /[\u0400-\u04FF]/;
+        
+        for (const line of this.lines) {
+            if (hebrewRegex.test(line)) return 'he';
+        }
+        for (const line of this.lines) {
+            if (russianRegex.test(line)) return 'ru';
+        }
+        return 'en';
+    }
+    
+    parseQuestions() {
+        const questions = [];
+        const questionRegex = /^\d+\.\s/;
+        let currentQuestion = null;
+        let currentAnswers = [];
+        
+        for (const line of this.lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            
+            if (questionRegex.test(trimmed)) {
+                if (currentQuestion) {
+                    questions.push(this.buildQuestion(currentQuestion, currentAnswers));
+                }
+                currentQuestion = trimmed.replace(questionRegex, '');
+                currentAnswers = [];
+            } else if (currentQuestion) {
+                currentAnswers.push(trimmed);
+            }
+        }
+        
+        if (currentQuestion) {
+            questions.push(this.buildQuestion(currentQuestion, currentAnswers));
+        }
+        
+        return questions;
+    }
+    
+    buildQuestion(questionText, answers) {
+        // Check if first answer is a programming task marker
+        if (answers.length > 0 && this.isOpenQuestionMarker(answers[0])) {
+            return {
+                question: questionText,
+                type: 'open_question',
+                options: answers.slice(1),  // Skip marker, keep task content
+                task_content: answers.slice(1).join('\n')
+            };
+        }
+        
+        // No answers = open question
+        if (answers.length === 0) {
+            return { question: questionText, type: 'open_question', options: [] };
+        }
+        
+        // Multiple choice
+        return {
+            question: questionText,
+            type: 'multiple_choice',
+            options: answers,
+            correct_answer: answers[0]
+        };
+    }
+    
+    validateExam() {
+        const questions = this.parseQuestions();
+        const language = this.detectLanguage();
+        const errors = [];
+        
+        let multipleChoiceCount = 0;
+        let openQuestionsCount = 0;
+        
+        questions.forEach(q => {
+            if (q.type === 'multiple_choice') multipleChoiceCount++;
+            else openQuestionsCount++;
+            
+            if (q.type === 'multiple_choice' && q.options.length < 2) {
+                errors.push({
+                    message: `Question has insufficient answers (${q.options.length})`,
+                    text: `${q.question}\n${q.options.join('\n')}`
+                });
+            }
+        });
+        
+        const examType = multipleChoiceCount > 0 && openQuestionsCount > 0 ? 'Mixed' :
+                        multipleChoiceCount > 0 ? 'Multiple Choice' : 'Open Questions';
+        
+        return {
+            total_questions: questions.length,
+            multiple_choice_count: multipleChoiceCount,
+            open_questions_count: openQuestionsCount,
+            exam_type: examType,
+            language: language,
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 </script>
 
 <style>
@@ -336,6 +832,137 @@ document.addEventListener('DOMContentLoaded', () => {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    text-align: right;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.preview-question {
+    background: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #007bff;
+}
+
+/* Preview modals should appear above main modal */
+#previewSourceModal,
+#previewStudentModal,
+#previewDataModal,
+#examplesModal {
+    z-index: 10000 !important;
+}
+
+/* Mobile responsiveness for modals */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 5% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 16px !important;
+    }
+    
+    .modal-body {
+        padding: 15px !important;
+        font-size: 14px;
+    }
+    
+    #previewSourceContent,
+    #previewStudentContent {
+        max-height: 400px !important;
+        font-size: 13px;
+    }
+    
+    /* File selection buttons */
+    #fileSelection button {
+        font-size: 14px !important;
+        padding: 12px !important;
+    }
+    
+    /* Preview action buttons */
+    #filePreview button {
+        font-size: 13px !important;
+        padding: 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 2% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 14px !important;
+    }
+    
+    .modal-body {
+        padding: 10px !important;
+        font-size: 13px;
+    }
 }
 </style>
 {% endblock %}

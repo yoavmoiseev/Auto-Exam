@@ -1195,6 +1195,260 @@ def upload_exam_overwrite():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/exam-source/<filename>', methods=['GET'])
+@login_required
+def get_exam_source(filename):
+    """Get raw source of exam file"""
+    try:
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        filepath = os.path.join(exam_dir, filename)
+        
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Detect language
+        from services.exam_builder_service import ExamBuilder
+        language = ExamBuilder.detect_language(content)
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'content': content,
+            'language': language
+        })
+    except Exception as e:
+        print(f"Error reading exam source: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam-preview/<filename>', methods=['GET'])
+@login_required
+def get_exam_preview(filename):
+    """Get student preview of exam (no shuffle)"""
+    try:
+        from services.exam_builder_service import ExamBuilder
+        
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        filepath = os.path.join(exam_dir, filename)
+        
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Parse exam without shuffling
+        questions = ExamBuilder.parse_exam_file_for_preview(filepath, shuffle=False)
+        language = ExamBuilder.detect_language(content)
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'language': language,
+            'questions': questions
+        })
+    except Exception as e:
+        print(f"Error previewing exam: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam-data/<filename>', methods=['GET'])
+@login_required
+def get_exam_data(filename):
+    """Get exam metadata and validation errors"""
+    try:
+        from services.exam_builder_service import ExamBuilder
+        
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        filepath = os.path.join(exam_dir, filename)
+        
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        # Validate exam and get metadata
+        metadata = ExamBuilder.validate_exam_file(filepath)
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'metadata': metadata
+        })
+    except Exception as e:
+        print(f"Error getting exam data: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam-validate-content', methods=['POST'])
+@login_required
+def validate_exam_content():
+    """Validate exam content from text (before upload)"""
+    try:
+        from services.exam_builder_service import ExamBuilder
+        
+        data = request.get_json()
+        content = data.get('content', '')
+        
+        if not content:
+            return jsonify({'success': False, 'message': 'No content provided'}), 400
+        
+        # Validate content
+        metadata = ExamBuilder.validate_exam_content(content)
+        
+        return jsonify({
+            'success': True,
+            'metadata': metadata
+        })
+    except Exception as e:
+        print(f"Error validating exam content: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam-preview-content', methods=['POST'])
+@login_required
+def preview_exam_content():
+    """Preview exam content from text (before upload)"""
+    try:
+        from services.exam_builder_service import ExamBuilder
+        
+        data = request.get_json()
+        content = data.get('content', '')
+        
+        if not content:
+            return jsonify({'success': False, 'message': 'No content provided'}), 400
+        
+        # Parse and preview content
+        questions = ExamBuilder.parse_exam_content(content, shuffle=False)
+        language = ExamBuilder.detect_language(content)
+        
+        return jsonify({
+            'success': True,
+            'language': language,
+            'questions': questions
+        })
+    except Exception as e:
+        print(f"Error previewing exam content: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/examples-list', methods=['GET'])
+@login_required
+def get_examples_list():
+    """Get list of example exams from Exams/ folder"""
+    try:
+        examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        
+        if not os.path.exists(examples_dir):
+            return jsonify({'success': True, 'examples': []})
+        
+        examples = [f for f in os.listdir(examples_dir) if f.endswith('.txt')]
+        examples.sort()
+        
+        return jsonify({
+            'success': True,
+            'examples': examples
+        })
+    except Exception as e:
+        print(f"Error getting examples list: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/copy-example', methods=['POST'])
+@login_required
+def copy_example():
+    """Copy example exam to teacher's exams folder"""
+    try:
+        import shutil
+        
+        data = request.get_json()
+        filename = data.get('filename', '')
+        
+        if not filename:
+            return jsonify({'success': False, 'message': 'No filename provided'}), 400
+        
+        # Security: sanitize filename
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        
+        examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        source_path = os.path.join(examples_dir, filename)
+        
+        if not os.path.exists(source_path):
+            return jsonify({'success': False, 'message': 'Example file not found'}), 404
+        
+        # Copy to teacher's exams folder
+        teacher_id = f"teacher_{session['user_id']}"
+        exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
+        os.makedirs(exam_dir, exist_ok=True)
+        
+        dest_path = os.path.join(exam_dir, filename)
+        
+        # Check if file already exists
+        if os.path.exists(dest_path):
+            return jsonify({
+                'success': False,
+                'message': 'File already exists in your exams',
+                'exists': True
+            }), 400
+        
+        shutil.copy2(source_path, dest_path)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Example exam copied successfully',
+            'filename': filename
+        })
+    except Exception as e:
+        print(f"Error copying example: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/exam-source-from-examples/<filename>', methods=['GET'])
+@login_required
+def get_exam_source_from_examples(filename):
+    """Get exam source content from Examples folder"""
+    try:
+        from services.exam_builder_service import ExamBuilder
+        
+        # Security: sanitize filename
+        filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
+        
+        examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        filepath = os.path.join(examples_dir, filename)
+        
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': 'Example file not found'}), 404
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        language = ExamBuilder.detect_language(content)
+        
+        return jsonify({
+            'success': True,
+            'content': content,
+            'language': language
+        })
+    except Exception as e:
+        print(f"Error reading example exam: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 # ==========================================
 # ROUTES - API - EXAM SESSION (NEW)
 # ==========================================
@@ -1266,10 +1520,13 @@ def api_get_exam_questions(exam_id):
             shuffle=shuffle
         )
         
+        questions = exam_data.get('questions', []) if isinstance(exam_data, dict) else []
+        text_direction = exam_data.get('text_direction', 'ltr') if isinstance(exam_data, dict) else 'ltr'
+        
         return jsonify({
             'success': True,
-            'questions': exam_data.get('questions', []),
-            'text_direction': exam_data.get('text_direction', 'ltr')
+            'questions': questions,
+            'text_direction': text_direction
         })
     
     except Exception as e:

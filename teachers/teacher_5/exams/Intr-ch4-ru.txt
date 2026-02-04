@@ -1,0 +1,190 @@
+1. Что необходимо установить перед началом сетевых коммуникаций (Network Communications)?
+   Физическое соединение с локальной сетью (Physical Connection to Local Area Network, LAN)
+   IP-адрес устройства (IP Address)
+   Настройки прикладного уровня (Application Layer Settings)
+   Маршрутизацию пакетов (Packet Routing)
+   Таблицу MAC-адресов (MAC Address Table)
+
+2. Какой тип соединения использует радиоволны (Radio Waves)?
+   Беспроводное соединение (Wireless Connection)
+   Оптоволоконное соединение (Fiber Optic Connection)
+   Медное проводное соединение (Copper Wired Connection)
+   Коаксиальное соединение (Coaxial Connection)
+   Последовательное соединение (Serial Connection)
+
+3. Как называется устройство, подключающее компьютер к сети?
+   Сетевая интерфейсная карта (Network Interface Card, NIC)
+   Материнская плата (Motherboard)
+   Процессор (Central Processing Unit, CPU)
+   Оперативная память (Random Access Memory, RAM)
+   Блок питания (Power Supply Unit, PSU)
+
+4. Какая сетевая карта используется для проводного соединения?
+   Ethernet сетевая карта (Ethernet NIC)
+   Беспроводная сетевая карта (WLAN NIC)
+   Bluetooth-адаптер (Bluetooth Adapter)
+   Точка доступа (Access Point, AP)
+   Модем (Modem)
+
+5. Какая сетевая карта используется для беспроводного соединения?
+   WLAN сетевая карта (Wireless LAN NIC)
+   Ethernet сетевая карта (Ethernet NIC)
+   Оптоволоконный адаптер (Fiber Adapter)
+   Коммутатор (Switch)
+   Маршрутизатор (Router)
+
+6. Какой уровень модели OSI (OSI Model) отвечает за передачу битов?
+   Физический уровень (Physical Layer)
+   Канальный уровень (Data Link Layer)
+   Сетевой уровень (Network Layer)
+   Транспортный уровень (Transport Layer)
+   Сеансовый уровень (Session Layer)
+
+7. Что физический уровень (Physical Layer) получает от канального уровня (Data Link Layer)?
+   Полный кадр (Frame)
+   Пакет (Packet)
+   Сегмент (Segment)
+   Данные приложения (Application Data)
+   Таблицу маршрутизации (Routing Table)
+
+8. Во что физический уровень (Physical Layer) кодирует данные?
+   Последовательность сигналов (Signal Sequence)
+   IP-адреса (IP Addresses)
+   MAC-адреса (MAC Addresses)
+   Логические кадры (Logical Frames)
+   Сетевые службы (Network Services)
+
+9. Из чего состоит физический уровень (Physical Layer)?
+   Электронные схемы, носители и разъемы (Electronic Circuits, Media, Connectors)
+   Протоколы маршрутизации (Routing Protocols)
+   Таблицы коммутации (Switching Tables)
+   Прикладные сервисы (Application Services)
+   Виртуальные каналы (Virtual Channels)
+
+
+11. Что характеризует пропускная способность (Bandwidth)?
+    Количество данных, передаваемых за время (Amount of Data per Time)
+    Количество устройств в сети (Number of Devices)
+    Длину кабеля (Cable Length)
+    Тип протокола (Protocol Type)
+    Адресацию узлов (Node Addressing)
+
+12. Что такое полезная пропускная способность (Throughput)?
+    Объем пригодных для использования данных за время (Usable Data Rate)
+    Максимальная скорость среды (Maximum Bandwidth)
+    Электрическое напряжение (Voltage)
+    Частота сигнала (Signal Frequency)
+    Размер кадра (Frame Size)
+
+13. Что означает задержка (Latency)?
+    Время передачи данных между точками (Transmission Delay)
+    Скорость передачи битов (Bit Rate)
+    Количество ошибок (Error Rate)
+    Размер пакета (Packet Size)
+    Тип кабеля (Cable Type)
+
+14. Почему в сетях часто используется медь (Copper)?
+    Низкая стоимость и простота установки (Low Cost and Easy Installation)
+    Полная защита от помех (Full Interference Protection)
+    Неограниченная длина (Unlimited Distance)
+    Большая скорость, чем у оптоволокна (Higher Speed than Fiber)
+    Отсутствие стандартов (No Standards Required)
+
+15. Какие помехи влияют на медные кабели (Copper Cables)?
+    Электромагнитные и перекрестные помехи (EMI and Crosstalk)
+    Оптические отражения (Optical Reflections)
+    Температура процессора (CPU Temperature)
+    Давление воздуха (Air Pressure)
+    Радиоактивность (Radioactivity)
+
+17. Какой кабель не использует экранирование (Shielding)?
+    UTP кабель (Unshielded Twisted Pair)
+    STP кабель (Shielded Twisted Pair)
+    Коаксиальный кабель (Coaxial Cable)
+    Оптоволоконный кабель (Fiber Optic Cable)
+    Консольный кабель (Console Cable)
+
+18. Какой кабель использует индивидуальное и общее экранирование?
+    STP кабель (Shielded Twisted Pair)
+    UTP кабель (Unshielded Twisted Pair)
+    Коаксиальный кабель (Coaxial Cable)
+    Оптоволоконный кабель (Fiber Optic Cable)
+    Патч-корд (Patch Cord)
+
+19. Почему коаксиальный кабель (Coaxial Cable) так называется?
+    Проводники имеют общую ось (Common Axis)
+    Использует одну жилу (Single Core)
+    Имеет двойную оболочку (Double Jacket)
+    Работает только с антеннами (Only for Antennas)
+    Использует витые пары (Twisted Pairs)
+
+20. Где часто используется коаксиальный кабель (Coaxial Cable)?
+    Антенны и кабельный интернет (Antennas and Cable Internet)
+    Магистральные сети (Backbone Networks)
+    Ethernet LAN
+    Консольные соединения (Console Connections)
+    Wi-Fi сети (Wi-Fi Networks)
+
+21. Сколько пар проводов содержит UTP кабель (UTP Cable)?
+    Четыре пары (Four Pairs)
+    Две пары (Two Pairs)
+    Шесть пар (Six Pairs)
+    Восемь пар (Eight Pairs)
+    Одна пара (One Pair)
+
+22. За счет чего уменьшаются перекрестные помехи (Crosstalk) в UTP?
+    Скрутка пар и разное число витков (Twisting and Different Twist Rates)
+    Металлический экран (Metal Shield)
+    Световые импульсы (Light Pulses)
+    Усилители сигнала (Signal Amplifiers)
+    Программная фильтрация (Software Filtering)
+
+23. Какая организация определяет стандарты UTP кабелей?
+    TIA/EIA (Telecommunications Industry Association / Electronic Industries Alliance)
+    ISO (International Organization for Standardization)
+    IEEE (Institute of Electrical and Electronics Engineers)
+    ITU (International Telecommunication Union)
+    ANSI (American National Standards Institute)
+
+24. Какой разъем используется для UTP кабеля?
+    RJ-45
+    RJ-11
+    USB
+    SC
+    LC
+
+25. Какой кабель соединяет одинаковые Ethernet-устройства?
+    Ethernet Crossover кабель
+    Ethernet Straight-through кабель
+    Rollover кабель
+    Оптоволоконный кабель (Fiber Cable)
+    Коаксиальный кабель (Coaxial Cable)
+
+26. Какой кабель Cisco использует для подключения к консольному порту (Console Port)?
+    Rollover кабель
+    Crossover кабель
+    Straight-through кабель
+    Коаксиальный кабель (Coaxial Cable)
+    Оптоволоконный кабель (Fiber Cable)
+
+27. Какой носитель передает данные с помощью света (Light Pulses)?
+    Оптоволоконный кабель (Fiber Optic Cable)
+    UTP кабель
+    STP кабель
+    Коаксиальный кабель
+    Медный кабель
+
+28. Где чаще всего используется оптоволокно (Fiber Optics) в корпорациях?
+    В магистральных соединениях (Backbone Links)
+    Для подключения рабочих станций (Workstations)
+    В телефонных линиях (Telephone Lines)
+    В консольных соединениях (Console Links)
+    В Bluetooth сетях (Bluetooth Networks)
+
+
+30. Что необходимо для работы беспроводной локальной сети (Wireless LAN, WLAN)?
+    Точка доступа и беспроводная NIC (Access Point and Wireless NIC)
+    Коммутатор и UTP кабель (Switch and UTP Cable)
+    Маршрутизатор и коаксиал (Router and Coaxial)
+    Сервер и оптоволокно (Server and Fiber)
+    Модем и консольный кабель (Modem and Console Cable)

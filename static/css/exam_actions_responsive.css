@@ -1,0 +1,74 @@
+/* ==========================================
+   EXAM ACTION BUTTONS - Mobile Responsive
+   ========================================== */
+
+/* Mobile - Stack buttons vertically */
+@media (max-width: 768px) {
+    .exam-action-btn {
+        display: block;
+        width: 100%;
+        margin: 5px 0 !important;
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    table td[style*="text-align: center"] {
+        display: block;
+        width: 100%;
+        padding: 10px !important;
+    }
+    
+    table td:first-child {
+        font-weight: bold;
+        padding-bottom: 5px !important;
+    }
+    
+    /* Modal adjustments for mobile */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 10% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 16px;
+    }
+    
+    #sourceContent,
+    #previewContent {
+        max-height: 400px !important;
+        font-size: 12px;
+    }
+    
+    /* Preview question styling for mobile */
+    .preview-question {
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .preview-question h3 {
+        font-size: 14px !important;
+    }
+}
+
+/* Tablets - Two buttons per row */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .exam-action-btn {
+        display: inline-block;
+        width: 48%;
+        margin: 2px 1% !important;
+        font-size: 13px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .exam-action-btn {
+        font-size: 12px;
+        padding: 8px;
+    }
+    
+    .modal-header h2 {
+        font-size: 14px;
+    }
+}
