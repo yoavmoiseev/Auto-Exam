@@ -5,6 +5,7 @@ Supports offline mode and web deployment
 """
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import json
 import os
@@ -20,6 +21,11 @@ from services.exam_builder_service import ExamBuilder
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(app_config)
+
+# Configure app to work behind nginx proxy
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 
 # Initialize services
 auth_service = AuthService()
