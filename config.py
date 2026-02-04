@@ -17,7 +17,8 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SESSION_COOKIE_SECURE = False  # False for offline mode (no HTTPS)
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = None  # Allow cookies through nginx proxy
+    SESSION_COOKIE_PATH = '/'  # Ensure cookie works for all paths
     
     # Database paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
