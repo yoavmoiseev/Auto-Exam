@@ -9,7 +9,17 @@
             <h1 class="text-center mb-0" data-i18n="login">Login</h1>
         </div>
         <div class="card-body">
-            <form id="login-form">
+            <form id="login-form" method="POST" action="/login">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
                 <div class="form-group">
                     <label for="username" data-i18n="username">Username</label>
                     <input type="text" id="username" name="username" required>
@@ -22,8 +32,6 @@
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="login_button">Login</button>
             </form>
-
-            <div id="login-message" class="mt-2" style="display: none;"></div>
             
             <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
                 <p data-i18n="already_registered">Already have an account?</p>
@@ -33,39 +41,5 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const messageDiv = document.getElementById('login-message');
 
-        try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ username, password })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                window.location.href = data.redirect;
-            } else {
-                messageDiv.style.display = 'block';
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = data.message || i18n.t('invalid_credentials');
-            }
-        } catch (error) {
-            messageDiv.style.display = 'block';
-            messageDiv.className = 'alert alert-danger';
-            messageDiv.textContent = 'Error logging in. Please try again.';
-            console.error('Login error:', error);
-        }
-    });
-</script>
 {% endblock %}

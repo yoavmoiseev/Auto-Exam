@@ -95,12 +95,12 @@ def index():
 def login():
     """User login page"""
     if request.method == 'POST':
-        data = request.get_json()
-        username = data.get('username', '').strip()
-        password = data.get('password', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
         
         if not username or not password:
-            return jsonify({'success': False, 'message': 'Username and password required'})
+            flash('Username and password required', 'error')
+            return render_template('login.html')
         
         result = auth_service.authenticate(username, password)
         
@@ -109,9 +109,10 @@ def login():
             session['username'] = result['user']['username']
             session['first_name'] = result['user']['first_name']
             session['last_name'] = result['user']['last_name']
-            return jsonify({'success': True, 'redirect': url_for('teacher_dashboard')})
+            session.permanent = True
+            return redirect(url_for('teacher_dashboard'))
         else:
-            return jsonify({'success': False, 'message': result['message']})
+            flash(result['message'], 'error')
     
     return render_template('login.html')
 
