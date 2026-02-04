@@ -13,12 +13,14 @@ class Config:
     DEBUG = False
     
     # Session configuration
+    SESSION_COOKIE_NAME = 'exam_session'
     SESSION_PERMANENT = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SESSION_COOKIE_SECURE = False  # False for offline mode (no HTTPS)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = None  # Allow cookies through nginx proxy
-    SESSION_COOKIE_PATH = '/'  # Ensure cookie works for all paths
+    SESSION_COOKIE_PATH = '/'
+    SESSION_COOKIE_DOMAIN = None  # Let Flask auto-detect
     
     # Database paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))

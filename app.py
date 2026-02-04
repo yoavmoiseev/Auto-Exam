@@ -94,6 +94,8 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """User login page"""
+    app.logger.info(f"Login GET/POST - Session before: {dict(session)}, Cookie: {request.cookies.get(app.config.get('SESSION_COOKIE_NAME', 'session'))}")
+    
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
@@ -105,12 +107,16 @@ def login():
         result = auth_service.authenticate(username, password)
         
         if result['success']:
+            session.clear()  # Clear any old session data
             session['user_id'] = result['user']['id']
             session['username'] = result['user']['username']
             session['first_name'] = result['user']['first_name']
             session['last_name'] = result['user']['last_name']
             session.permanent = True
-            return redirect(url_for('teacher_dashboard'))
+            app.logger.info(f"Login SUCCESS - Set session: {dict(session)}")
+            response = redirect(url_for('teacher_dashboard'))
+            app.logger.info(f"Redirecting to dashboard, session ID: {request.cookies.get(app.config.get('SESSION_COOKIE_NAME', 'session'))}")
+            return response
         else:
             flash(result['message'], 'error')
     
@@ -190,6 +196,7 @@ def logout():
 @login_required
 def teacher_dashboard():
     """Teacher dashboard"""
+    app.logger.info(f"Dashboard access - Session: {dict(session)}, User ID in session: {session.get('user_id')}")
     user = get_current_user()
     return render_template('teacher_dashboard.html', user=user, user_id=user['id'])
 
