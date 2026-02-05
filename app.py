@@ -57,12 +57,16 @@ def get_current_user():
 def ensure_directories():
     """Ensure all necessary directories exist"""
     directories = [
-        app_config.DATA_DIR,
         app_config.TEACHERS_DIR,
         app_config.LOGS_DIR,
         os.path.join(app_config.TEACHERS_DIR, 'teacher_1', 'exams'),
         os.path.join(app_config.TEACHERS_DIR, 'teacher_1', 'results'),
     ]
+    # Also ensure writable data directory exists (for database)
+    if hasattr(app_config, 'BASE_DIR'):
+        writable_data_dir = os.path.join(app_config.BASE_DIR, 'data')
+        directories.append(writable_data_dir)
+    
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
 
@@ -1465,7 +1469,10 @@ def preview_exam_content():
 def get_examples_list():
     """Get list of example exams from Exams/ folder"""
     try:
+        # Check BASE_DIR first, then BUNDLE_DIR (for PyInstaller)
         examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        if not os.path.exists(examples_dir) and hasattr(app_config, 'BUNDLE_DIR'):
+            examples_dir = os.path.join(app_config.BUNDLE_DIR, 'Exams')
         
         if not os.path.exists(examples_dir):
             return jsonify({'success': True, 'examples': []})
@@ -1498,7 +1505,10 @@ def copy_example():
         # Security: sanitize filename
         filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
         
+        # Check BASE_DIR first, then BUNDLE_DIR (for PyInstaller)
         examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        if not os.path.exists(examples_dir) and hasattr(app_config, 'BUNDLE_DIR'):
+            examples_dir = os.path.join(app_config.BUNDLE_DIR, 'Exams')
         source_path = os.path.join(examples_dir, filename)
         
         if not os.path.exists(source_path):
@@ -1541,7 +1551,10 @@ def get_exam_source_from_examples(filename):
         # Security: sanitize filename
         filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
         
+        # Check BASE_DIR first, then BUNDLE_DIR (for PyInstaller)
         examples_dir = os.path.join(app_config.BASE_DIR, 'Exams')
+        if not os.path.exists(examples_dir) and hasattr(app_config, 'BUNDLE_DIR'):
+            examples_dir = os.path.join(app_config.BUNDLE_DIR, 'Exams')
         filepath = os.path.join(examples_dir, filename)
         
         if not os.path.exists(filepath):
@@ -2228,9 +2241,8 @@ if __name__ == '__main__':
     print(f"Debug Mode: {app_config.DEBUG}")
     print("="*60 + "\n")
     
-    # Get port from environment variable or default to 5001
-    # REMARK: Changed from hardcoded 5000 to support multiple deployments on same VM
-    port = int(os.environ.get('FLASK_PORT', 5001))
+    # Get port from environment variable or default to 5000
+    port = int(os.environ.get('FLASK_PORT', 5000))
     
     # Start Flask development server
     app.run(

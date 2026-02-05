@@ -3,6 +3,7 @@ Configuration file for Exam System Flask App
 Supports both Web and Standalone offline modes
 """
 import os
+import sys
 from datetime import timedelta
 
 class Config:
@@ -16,20 +17,30 @@ class Config:
     SESSION_COOKIE_NAME = 'exam_session'
     SESSION_PERMANENT = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-    SESSION_COOKIE_SECURE = True  # True for HTTPS (production)
+    SESSION_COOKIE_SECURE = False  # False for offline mode (no HTTPS)
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'  # Lax for same-site HTTPS
+    SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_PATH = '/'
     SESSION_COOKIE_DOMAIN = None  # Auto-detect domain
     
-    # Database paths
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DATA_DIR = os.path.join(BASE_DIR, 'data')
+    # Database paths - FIXED for PyInstaller standalone mode
+    if getattr(sys, 'frozen', False):
+        # Running as compiled exe
+        # PyInstaller extracts bundled files to _internal folder
+        BUNDLE_DIR = os.path.join(os.path.dirname(sys.executable), '_internal')
+        BASE_DIR = os.path.dirname(sys.executable)
+    else:
+        # Running in development - base dir is script directory
+        BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    
+    # Read-only data (translations) from bundle, writable data (db, logs) from base
+    DATA_DIR = os.path.join(BUNDLE_DIR, 'data')
     TEACHERS_DIR = os.path.join(BASE_DIR, 'teachers')
     LOGS_DIR = os.path.join(BASE_DIR, 'logs')
     
-    # Database
-    DATABASE_PATH = os.path.join(DATA_DIR, 'users.db')
+    # Database - must be writable, so store next to exe not in bundle
+    DATABASE_PATH = os.path.join(BASE_DIR, 'data', 'users.db')
     
     # Upload settings
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max file size

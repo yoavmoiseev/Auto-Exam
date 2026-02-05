@@ -28,7 +28,7 @@
             
             <div class="form-group">
                 <label for="username" data-i18n="username">Username</label>
-                <input type="text" id="username" name="username" required 
+                <input type="text" id="username" name="username" autocomplete="username" required 
                        data-i18n="username_placeholder" placeholder="Choose a username"
                        pattern="[a-zA-Z0-9_]{3,}" 
                        data-i18n-title="username_hint" title="Username must contain only letters, numbers, and underscores">
@@ -37,7 +37,7 @@
             
             <div class="form-group">
                 <label for="password" data-i18n="password">Password</label>
-                <input type="password" id="password" name="password" required 
+                <input type="password" id="password" name="password" autocomplete="new-password" required 
                        data-i18n="password_placeholder" placeholder="Enter a password"
                        minlength="6" 
                        data-i18n-title="password_hint" title="Password must be at least 6 characters">
@@ -46,7 +46,7 @@
             
             <div class="form-group">
                 <label for="confirmPassword" data-i18n="confirm_password">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirm_password" required 
+                <input type="password" id="confirmPassword" name="confirm_password" autocomplete="new-password" required 
                        data-i18n="confirm_password_placeholder" placeholder="Confirm your password"
                        minlength="6" 
                        data-i18n-title="confirm_password_hint" title="Enter the same password again">
