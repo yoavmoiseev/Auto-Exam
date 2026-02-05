@@ -1,0 +1,119 @@
+############################################################################
+
+Student details: Name-1  Last name-1  Submitting time-13-45-38  Cheating attemps-0
+Device Info: IP-127.0.0.1  Device-eum6qa  Platform-Win32  Screen-1536x864x24
+
+What is the purpose of the CMOS battery on a motherboard?
+- Increases GPU performance
+
+----------------------------------------------------------------------------
+Which component processes graphics in a computer?
+- CPU
+
+----------------------------------------------------------------------------
+Which device stores the operating system on most modern computers?
+- SSD (Solid State Drive)
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-2  Last name-2  Submitting time-13-47-06  Cheating attemps-0
+Device Info: IP-127.0.0.1  Device-eum6qa  Platform-Win32  Screen-1536x864x24
+
+What is the primary purpose of a heatsink?
+- Stores electrical energy
+
+----------------------------------------------------------------------------
+Which type of power connector is used for internal hard drives?
+- HDMI Connector
+
+----------------------------------------------------------------------------
+What is the purpose of the CMOS battery on a motherboard?
+- Powers the CPU
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-3  Last name-3  Submitting time-13-48-34  Cheating attemps-0
+Device Info: IP-10.0.0.77  Device-evaoy3  Platform-Linux armv7l  Screen-360x720x24
+
+Which component determines the number of USB, SATA, and PCIe slots available on a motherboard?
+- CPU
+
+----------------------------------------------------------------------------
+What is the function of a power supply unit (PSU)?
+- Stores files permanently
+
+----------------------------------------------------------------------------
+Which bus connects the CPU to the RAM?
+- USB
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-4  Last name-5  Submitting time-13-53-33  Cheating attemps-0
+Device Info: IP-10.0.0.77  Device-evaoy3  Platform-Linux armv7l  Screen-360x720x24
+
+Which bus connects the CPU to the RAM?
+- Front Side Bus (FSB)
+
+----------------------------------------------------------------------------
+Which connector is used to transfer both video and audio signals?
+- PS/2
+
+----------------------------------------------------------------------------
+Which component is used to cool the CPU?
+- Fan or Liquid Cooling System
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-6  Last name-6  Submitting time-13-55-25  Cheating attemps-0
+Device Info: IP-10.0.0.79  Device-edy3r7  Platform-Win32  Screen-1920x1080x24
+
+What does SATA stand for?
+- System Automated Transfer Adapter
+
+----------------------------------------------------------------------------
+What does BIOS stand for?
+- Basic Input Output System
+
+----------------------------------------------------------------------------
+Which type of memory retains data even when the power is turned off?
+- Virtual Memory
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-7  Last name-7  Submitting time-13-57-00  Cheating attemps-0
+Device Info: IP-10.0.0.96  Device-edy3r7  Platform-Win32  Screen-1920x1080x24
+
+What is the primary function of a motherboard?
+- Stores data permanently
+
+----------------------------------------------------------------------------
+Which type of memory retains data even when the power is turned off?
+- RAM (Random Access Memory)
+
+----------------------------------------------------------------------------
+What is the primary purpose of a heatsink?
+- Increases data storage capacity
+
+----------------------------------------------------------------------------
+############################################################################
+
+Student details: Name-8  Last name-8  Submitting time-14-05-59  Cheating attemps-0
+Device Info: IP-127.0.0.1  Device-eum6qa  Platform-Win32  Screen-1536x864x24
+
+What is the primary purpose of a heatsink?
+- Increases data storage capacity
+
+----------------------------------------------------------------------------
+What is the primary function of a motherboard?
+- Cools the processor
+
+----------------------------------------------------------------------------
+Which type of expansion slot is commonly used for high-performance graphics cards?
+- PCIe (Peripheral Component Interconnect Express)
+
+----------------------------------------------------------------------------

@@ -31,6 +31,12 @@
     "already_registered": "Already have an account?",
     "login_link": "Login here",
     "passwords_not_match": "Passwords do not match",
+    "username_already_exists": "Username already exists",
+    "account_created_successfully": "Account created successfully",
+    "error_occurred_try_again": "An error occurred. Please try again.",
+    "all_fields_required": "All fields except email are required",
+    "username_too_short": "Username must be at least 3 characters",
+    "password_too_short": "Password must be at least 6 characters",
     
     "teacher_dashboard": "Teacher Dashboard",
     "my_exams": "My Exams",

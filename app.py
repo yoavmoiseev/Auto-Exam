@@ -12,6 +12,7 @@ import os
 import zipfile
 from io import BytesIO
 from datetime import datetime
+import time
 from config import app_config
 from services.auth_service import AuthService
 from services.file_service import FileService
@@ -94,6 +95,10 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """User login page"""
+    request_start = time.perf_counter()
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    user_agent = request.headers.get('User-Agent', 'unknown')
+    accept_language = request.headers.get('Accept-Language', 'unknown')
     app.logger.info(f"Login GET/POST - Session before: {dict(session)}, Cookie: {request.cookies.get(app.config.get('SESSION_COOKIE_NAME', 'session'))}")
     
     if request.method == 'POST':
@@ -101,6 +106,13 @@ def login():
         password = request.form.get('password', '').strip()
         
         if not username or not password:
+            app.logger.warning(
+                "Login missing fields - ip=%s user_agent=%s accept_language=%s username=%s",
+                client_ip,
+                user_agent,
+                accept_language,
+                username
+            )
             flash('Username and password required', 'error')
             return render_template('login.html')
         
@@ -116,8 +128,25 @@ def login():
             app.logger.info(f"Login SUCCESS - Set session: {dict(session)}")
             response = redirect(url_for('teacher_dashboard'))
             app.logger.info(f"Redirecting to dashboard, session ID: {request.cookies.get(app.config.get('SESSION_COOKIE_NAME', 'session'))}")
+            app.logger.info(
+                "Login success - ip=%s user_agent=%s accept_language=%s username=%s duration_ms=%.2f",
+                client_ip,
+                user_agent,
+                accept_language,
+                username,
+                (time.perf_counter() - request_start) * 1000
+            )
             return response
         else:
+            app.logger.warning(
+                "Login failed - ip=%s user_agent=%s accept_language=%s username=%s reason=%s duration_ms=%.2f",
+                client_ip,
+                user_agent,
+                accept_language,
+                username,
+                result.get('message'),
+                (time.perf_counter() - request_start) * 1000
+            )
             flash(result['message'], 'error')
     
     return render_template('login.html')
@@ -127,6 +156,10 @@ def login():
 def signup():
     """User signup/registration page"""
     if request.method == 'POST':
+        request_start = time.perf_counter()
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        user_agent = request.headers.get('User-Agent', 'unknown')
+        accept_language = request.headers.get('Accept-Language', 'unknown')
         data = request.get_json()
         username = data.get('username', '').strip()
         password = data.get('password', '').strip()
@@ -134,26 +167,67 @@ def signup():
         first_name = data.get('first_name', '').strip()
         last_name = data.get('last_name', '').strip()
         email = data.get('email', '').strip() or None
+
+        app.logger.info(
+            "Signup attempt - ip=%s user_agent=%s accept_language=%s username=%s",
+            client_ip,
+            user_agent,
+            accept_language,
+            username
+        )
         
         # Validation
         if not all([username, password, first_name, last_name]):
+            app.logger.warning(
+                "Signup validation failed - missing_fields - ip=%s username=%s",
+                client_ip,
+                username
+            )
             return jsonify({'success': False, 'message': 'All fields except email are required'})
         
         if len(username) < 3:
+            app.logger.warning(
+                "Signup validation failed - short_username - ip=%s username=%s",
+                client_ip,
+                username
+            )
             return jsonify({'success': False, 'message': 'Username must be at least 3 characters'})
         
         if len(password) < 6:
+            app.logger.warning(
+                "Signup validation failed - short_password - ip=%s username=%s",
+                client_ip,
+                username
+            )
             return jsonify({'success': False, 'message': 'Password must be at least 6 characters'})
         
         if password != confirm_password:
+            app.logger.warning(
+                "Signup validation failed - password_mismatch - ip=%s username=%s",
+                client_ip,
+                username
+            )
             return jsonify({'success': False, 'message': 'Passwords do not match'})
         
         # Create user
         result = auth_service.add_user(username, password, first_name, last_name, email)
         
         if result['success']:
+            app.logger.info(
+                "Signup success - ip=%s username=%s duration_ms=%.2f",
+                client_ip,
+                username,
+                (time.perf_counter() - request_start) * 1000
+            )
             return jsonify({'success': True, 'message': 'Account created successfully', 'redirect': url_for('login')})
         else:
+            app.logger.warning(
+                "Signup failed - ip=%s username=%s reason=%s duration_ms=%.2f",
+                client_ip,
+                username,
+                result.get('message'),
+                (time.perf_counter() - request_start) * 1000
+            )
             return jsonify({'success': False, 'message': result['message']})
     
     return render_template('signup.html')
@@ -162,11 +236,22 @@ def signup():
 @app.route('/api/auth/login', methods=['POST'])
 def api_login():
     """API endpoint for login (same as /login but always returns JSON)"""
+    request_start = time.perf_counter()
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    user_agent = request.headers.get('User-Agent', 'unknown')
+    accept_language = request.headers.get('Accept-Language', 'unknown')
     data = request.get_json()
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
     
     if not username or not password:
+        app.logger.warning(
+            "API login missing fields - ip=%s user_agent=%s accept_language=%s username=%s",
+            client_ip,
+            user_agent,
+            accept_language,
+            username
+        )
         return jsonify({'success': False, 'message': 'Username and password required'}), 400
     
     result = auth_service.authenticate(username, password)
@@ -176,8 +261,25 @@ def api_login():
         session['username'] = result['user']['username']
         session['first_name'] = result['user']['first_name']
         session['last_name'] = result['user']['last_name']
+        app.logger.info(
+            "API login success - ip=%s user_agent=%s accept_language=%s username=%s duration_ms=%.2f",
+            client_ip,
+            user_agent,
+            accept_language,
+            username,
+            (time.perf_counter() - request_start) * 1000
+        )
         return jsonify({'success': True, 'redirect': url_for('teacher_dashboard')})
     else:
+        app.logger.warning(
+            "API login failed - ip=%s user_agent=%s accept_language=%s username=%s reason=%s duration_ms=%.2f",
+            client_ip,
+            user_agent,
+            accept_language,
+            username,
+            result.get('message'),
+            (time.perf_counter() - request_start) * 1000
+        )
         return jsonify({'success': False, 'message': result['message']}), 401
 
 
@@ -1544,6 +1646,17 @@ def api_submit_exam(exam_id):
         last_name = data.get('last_name', '')
         answers = data.get('answers', {})
         questions_list = data.get('questions', [])  # Get questions student saw
+        device_info = data.get('device_info', {})  # Get device fingerprint
+        
+        # Collect IP and User-Agent from request
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if ',' in client_ip:
+            client_ip = client_ip.split(',')[0].strip()  # Get first IP if multiple
+        user_agent = request.headers.get('User-Agent', 'unknown')
+        
+        # Add IP and UA to device_info
+        device_info['ip_address'] = client_ip
+        device_info['user_agent_full'] = user_agent
         
         exam_session = exam_session_manager.get_session(exam_id)
         if not exam_session:
@@ -1633,7 +1746,7 @@ def api_submit_exam(exam_id):
         exam_session.submit_student_exam(student_session_id, answers, score)
         
         # Save results to files (HTML, GRADES.txt, All_Exams.txt)
-        save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list)
+        save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list, device_info)
         
         return jsonify({
             'success': True,
@@ -1889,7 +2002,49 @@ def calculate_exam_score(answers, exam_filename, teacher_id):
         return 0
 
 
-def save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list):
+def simplify_user_agent(user_agent):
+    """Simplify User-Agent string to 'Browser/OS' format for readability"""
+    try:
+        ua = user_agent.lower()
+        
+        # Detect browser
+        if 'edg' in ua:
+            browser = 'Edge'
+        elif 'chrome' in ua and 'edg' not in ua:
+            browser = 'Chrome'
+        elif 'firefox' in ua:
+            browser = 'Firefox'
+        elif 'safari' in ua and 'chrome' not in ua:
+            browser = 'Safari'
+        elif 'opera' in ua or 'opr' in ua:
+            browser = 'Opera'
+        else:
+            browser = 'Unknown'
+        
+        # Detect OS
+        if 'windows nt 10' in ua:
+            os_name = 'Win10'
+        elif 'windows nt 11' in ua:
+            os_name = 'Win11'
+        elif 'windows' in ua:
+            os_name = 'Windows'
+        elif 'mac os x' in ua or 'macintosh' in ua:
+            os_name = 'macOS'
+        elif 'android' in ua:
+            os_name = 'Android'
+        elif 'iphone' in ua or 'ipad' in ua:
+            os_name = 'iOS'
+        elif 'linux' in ua:
+            os_name = 'Linux'
+        else:
+            os_name = 'Unknown'
+        
+        return f"{browser}/{os_name}"
+    except:
+        return 'Unknown'
+
+
+def save_exam_results(exam_id, exam_session, student_session_id, student, score, answers, response_html, questions_list, device_info=None):
     """Save exam results to files (like old Exam.py system)"""
     try:
         from datetime import datetime as dt
@@ -1924,7 +2079,7 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
         # 2. Append to GRADES.txt
         # FIX v3: Improved format to handle names with numbers
         # REMARK: Previously format was "HH-MM-SS: Name-Score%" which confused names with numbers
-        # NEW FORMAT: "YYYY-MM-DD HH-MM-SS | FullName | Score: XX% | Cheat: X | Duration: X"
+        # NEW FORMAT: "YYYY-MM-DD HH-MM-SS | FullName | Score: XX% | Cheat: X | Duration: X | IP: xxx | UA: xxx | Device: xxx | Screen: xxx"
         grades_file = os.path.join(results_folder, 'GRADES.txt')
         cheating_attempts = student.get('cheating_attempts', 0)
         
@@ -1938,10 +2093,28 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
         else:
             exam_duration = "N/A"
         
+        # Extract device information for fraud detection
+        if device_info:
+            ip_address = device_info.get('ip_address', 'unknown')
+            device_id = device_info.get('device_id', 'unknown')
+            platform = device_info.get('platform', 'unknown')
+            screen = device_info.get('screen_resolution', 'unknown')
+            
+            # Simplify User-Agent (extract browser and OS)
+            user_agent = device_info.get('user_agent_full', 'unknown')
+            ua_short = simplify_user_agent(user_agent)
+        else:
+            ip_address = 'unknown'
+            device_id = 'unknown'
+            ua_short = 'unknown'
+            platform = 'unknown'
+            screen = 'unknown'
+        
         grade_text = f"{score}%" if score >= 0 else "Unknown yet"
         grades_entry = (
             f"{current_date} {current_time} | {first_name} {last_name} | "
-            f"Score: {grade_text} | Cheat: {cheating_attempts} | Duration: {exam_duration}\n"
+            f"Score: {grade_text} | Cheat: {cheating_attempts} | Duration: {exam_duration} | "
+            f"IP: {ip_address} | UA: {ua_short} | Device: {device_id} | Screen: {screen}\n"
         )
         
         with open(grades_file, 'a', encoding='utf-8') as f:
@@ -1950,10 +2123,13 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
         # 3. Append to All_Exams.txt (for ChatGPT evaluation)
         all_exams_file = os.path.join(results_folder, 'All_Exams.txt')
         
-        # Build text format like old system
+        # Build text format like old system + add device info
         exam_txt = "############################################################################\n\n"
         exam_txt += f"Student details: Name-{first_name}  Last name-{last_name}  "
-        exam_txt += f"Submitting time-{current_time}  Cheating attemps-{cheating_attempts}\n\n"
+        exam_txt += f"Submitting time-{current_time}  Cheating attemps-{cheating_attempts}\n"
+        if device_info:
+            exam_txt += f"Device Info: IP-{ip_address}  Device-{device_id}  Platform-{platform}  Screen-{screen}\n"
+        exam_txt += "\n"
         
         # Add all questions and answers
         for question in questions_list:

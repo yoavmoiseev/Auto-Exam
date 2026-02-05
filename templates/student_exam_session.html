@@ -552,6 +552,69 @@ function getExamIdFromURL() {
     return match ? parseInt(match[1]) : null;
 }
 
+// Collect device fingerprint for fraud detection
+async function collectDeviceInfo() {
+    try {
+        // Generate canvas fingerprint
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('ExamSystem', 2, 15);
+        ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+        ctx.fillText('fpjs.io', 4, 17);
+        const canvasData = canvas.toDataURL();
+        
+        // Create simple hash from canvas
+        let hash = 0;
+        for (let i = 0; i < canvasData.length; i++) {
+            const char = canvasData.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        const canvasHash = Math.abs(hash).toString(36).substring(0, 8);
+        
+        // Collect other identifiers
+        const screenInfo = `${screen.width}x${screen.height}x${screen.colorDepth}`;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const language = navigator.language || navigator.userLanguage;
+        const platform = navigator.platform;
+        const userAgent = navigator.userAgent;
+        
+        // Generate device ID from multiple sources
+        const deviceString = `${canvasHash}|${screenInfo}|${timezone}|${platform}`;
+        let deviceHash = 0;
+        for (let i = 0; i < deviceString.length; i++) {
+            deviceHash = ((deviceHash << 5) - deviceHash) + deviceString.charCodeAt(i);
+            deviceHash = deviceHash & deviceHash;
+        }
+        const deviceId = Math.abs(deviceHash).toString(36).substring(0, 12);
+        
+        return {
+            device_id: deviceId,
+            screen_resolution: screenInfo,
+            timezone: timezone,
+            language: language,
+            platform: platform,
+            user_agent: userAgent
+        };
+    } catch (e) {
+        console.error('Error collecting device info:', e);
+        return {
+            device_id: 'unknown',
+            screen_resolution: 'unknown',
+            timezone: 'unknown',
+            language: navigator.language || 'unknown',
+            platform: navigator.platform || 'unknown',
+            user_agent: navigator.userAgent || 'unknown'
+        };
+    }
+}
+
 // Handle pre-exam form submission (name entry)
 // Note: Form handling is done in proctoring.js to avoid duplicate student registration
 document.addEventListener('DOMContentLoaded', () => {
@@ -567,6 +630,9 @@ async function submitExam(answers) {
     }
     
     try {
+        // Collect device information for fraud detection
+        const deviceInfo = await collectDeviceInfo();
+        
         const response = await fetch(`/api/exam/${examId}/submit`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -575,13 +641,19 @@ async function submitExam(answers) {
                 first_name: window.studentFirstName,
                 last_name: window.studentLastName,
                 answers: answers,
-                questions: examQuestions  // Send questions list to preserve order
+                questions: examQuestions,  // Send questions list to preserve order
+                device_info: deviceInfo  // Add device fingerprint for tracking
             })
         });
         
         const data = await response.json();
         
         if (data.success) {
+            // Stop proctoring to prevent counting suspicious activity on results page
+            if (typeof stopProctoring === 'function') {
+                stopProctoring();
+            }
+            
             // Hide exam screen
             document.getElementById('exam-screen').style.display = 'none';
             

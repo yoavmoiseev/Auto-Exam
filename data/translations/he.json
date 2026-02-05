@@ -31,6 +31,12 @@
     "already_registered": "כבר יש לך חשבון?",
     "login_link": "התחבר כאן",
     "passwords_not_match": "הסיסמאות אינן תואמות",
+    "username_already_exists": "שם המשתמש כבר קיים",
+    "account_created_successfully": "החשבון נוצר בהצלחה",
+    "error_occurred_try_again": "אירעה שגיאה. אנא נסה שוב.",
+    "all_fields_required": "כל השדות חובה, למעט דוא״ל",
+    "username_too_short": "שם המשתמש חייב להיות לפחות 3 תווים",
+    "password_too_short": "הסיסמה חייבת להיות לפחות 6 תווים",
     
     "teacher_dashboard": "לוח המורה",
     "my_exams": "הבחינות שלי",

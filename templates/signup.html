@@ -107,15 +107,31 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         const result = await response.json();
         
         if (result.success) {
-            alert(result.message);
+            // Use translated message
+            const successMsg = window.i18n?.t('account_created_successfully') || result.message;
+            alert(successMsg);
             window.location.href = result.redirect;
         } else {
-            errorDiv.textContent = result.message;
+            // Translate common error messages
+            let errorMsg = result.message;
+            const errorTranslations = {
+                'Username already exists': 'username_already_exists',
+                'All fields except email are required': 'all_fields_required',
+                'Username must be at least 3 characters': 'username_too_short',
+                'Password must be at least 6 characters': 'password_too_short',
+                'Passwords do not match': 'passwords_not_match'
+            };
+            
+            if (errorTranslations[errorMsg]) {
+                errorMsg = window.i18n?.t(errorTranslations[errorMsg]) || errorMsg;
+            }
+            
+            errorDiv.textContent = errorMsg;
             errorDiv.style.display = 'block';
         }
     } catch (error) {
         console.error('Error:', error);
-        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.textContent = window.i18n?.t('error_occurred_try_again') || 'An error occurred. Please try again.';
         errorDiv.style.display = 'block';
     }
 });

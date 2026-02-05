@@ -9,6 +9,7 @@ let studentSessionId = null;
 let examFocusGained = false;
 let totalSeconds = 0;
 let timerInterval = null;
+let focusCheckInterval = null;
 
 // ============================================================================
 // STAGE 1: PRE-EXAM SCREEN - Initialization
@@ -111,7 +112,27 @@ function initializeProctoring() {
     document.addEventListener('contextmenu', handleContextMenu);
     
     // Periodic check for focus
-    setInterval(checkFocusStatus, 5000);
+    focusCheckInterval = setInterval(checkFocusStatus, 5000);
+}
+
+function stopProctoring() {
+    examStarted = false;
+    
+    // Remove all event listeners
+    window.removeEventListener('focus', handleWindowFocus);
+    window.removeEventListener('blur', handleWindowBlur);
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    document.removeEventListener('keydown', handleKeyboardEvent);
+    document.removeEventListener('contextmenu', handleContextMenu);
+    
+    // Stop timers and intervals
+    stopTimer();
+    if (focusCheckInterval) {
+        clearInterval(focusCheckInterval);
+        focusCheckInterval = null;
+    }
+    
+    console.log('Proctoring stopped - exam completed');
 }
 
 // ============================================================================
@@ -128,20 +149,20 @@ function handleWindowFocus() {
 }
 
 function handleWindowBlur() {
-    if (examFocusGained) {
+    if (examFocusGained && examStarted) {
         logCheatingAttempt('focus_lost');
         playWarningBeep();
     }
 }
 
 function handleBeforeUnload(e) {
-    if (examFocusGained) {
+    if (examFocusGained && examStarted) {
         logCheatingAttempt('page_unload');
     }
 }
 
 function checkFocusStatus() {
-    if (examFocusGained && document.hidden) {
+    if (examFocusGained && examStarted && document.hidden) {
         logCheatingAttempt('window_minimized');
     }
 }
@@ -151,6 +172,11 @@ function checkFocusStatus() {
 // ============================================================================
 
 function handleKeyboardEvent(e) {
+    // Do not block keyboard if exam is completed
+    if (!examStarted) {
+        return true;
+    }
+    
     // Block F12 (DevTools)
     if (e.key === 'F12') {
         e.preventDefault();
@@ -198,6 +224,11 @@ function handleKeyboardEvent(e) {
 }
 
 function handleContextMenu(e) {
+    // Do not block right-click if exam is completed
+    if (!examStarted) {
+        return true;
+    }
+    
     e.preventDefault();
     logCheatingAttempt('right_click');
     return false;
@@ -238,6 +269,11 @@ function stopTimer() {
 // ============================================================================
 
 function logCheatingAttempt(attemptType, details = null) {
+    // Do not log if exam is not started or already completed
+    if (!examStarted) {
+        return;
+    }
+    
     const examId = getExamIdFromURL();
     
     fetch(`/api/exam/${examId}/log-cheating`, {

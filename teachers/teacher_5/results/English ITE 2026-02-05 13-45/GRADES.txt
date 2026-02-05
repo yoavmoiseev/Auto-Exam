@@ -1,0 +1,7 @@
+2026 February 05 13-45-38 | 1 1 | Score: 33% | Cheat: 0 | Duration: 0m 8s | IP: 127.0.0.1 | UA: Chrome/Win10 | Device: eum6qa | Screen: 1536x864x24
+2026 February 05 13-47-06 | 2 2 | Score: 0% | Cheat: 0 | Duration: 0m 6s | IP: 127.0.0.1 | UA: Chrome/Win10 | Device: eum6qa | Screen: 1536x864x24
+2026 February 05 13-48-34 | 3 3 | Score: 0% | Cheat: 0 | Duration: 0m 9s | IP: 10.0.0.77 | UA: Chrome/Android | Device: evaoy3 | Screen: 360x720x24
+2026 February 05 13-53-33 | 4 5 | Score: 67% | Cheat: 0 | Duration: 0m 7s | IP: 10.0.0.77 | UA: Chrome/Android | Device: evaoy3 | Screen: 360x720x24
+2026 February 05 13-55-25 | 6 6 | Score: 33% | Cheat: 0 | Duration: 0m 8s | IP: 10.0.0.79 | UA: Chrome/Win10 | Device: edy3r7 | Screen: 1920x1080x24
+2026 February 05 13-57-00 | 7 7 | Score: 0% | Cheat: 0 | Duration: 0m 6s | IP: 10.0.0.96 | UA: Chrome/Win10 | Device: edy3r7 | Screen: 1920x1080x24
+2026 February 05 14-05-59 | 8 8 | Score: 33% | Cheat: 0 | Duration: 0m 6s | IP: 127.0.0.1 | UA: Chrome/Win10 | Device: eum6qa | Screen: 1536x864x24

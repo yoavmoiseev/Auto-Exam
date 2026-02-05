@@ -31,6 +31,12 @@
     "already_registered": "Уже есть учетная запись?",
     "login_link": "Войдите здесь",
     "passwords_not_match": "Пароли не совпадают",
+    "username_already_exists": "Имя пользователя уже существует",
+    "account_created_successfully": "Учетная запись успешно создана",
+    "error_occurred_try_again": "Произошла ошибка. Пожалуйста, попробуйте снова.",
+    "all_fields_required": "Все поля, кроме email, обязательны",
+    "username_too_short": "Имя пользователя должно содержать не менее 3 символов",
+    "password_too_short": "Пароль должен содержать не менее 6 символов",
     
     "teacher_dashboard": "Панель преподавателя",
     "my_exams": "Мои экзамены",

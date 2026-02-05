@@ -7,7 +7,10 @@ Uses SHA-256 hashing (like WEB-ScSc)
 import sqlite3
 import hashlib
 import os
+import logging
 from config import app_config
+
+logger = logging.getLogger(__name__)
 
 class AuthService:
     """Service for user authentication"""
@@ -23,24 +26,29 @@ class AuthService:
         """Initialize SQLite database with users table"""
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                first_name TEXT NOT NULL,
-                last_name TEXT NOT NULL,
-                email TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=10.0)
+            conn.execute('PRAGMA journal_mode=WAL')  # Enable WAL mode for better concurrency
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    first_name TEXT NOT NULL,
+                    last_name TEXT NOT NULL,
+                    email TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP
+                )
+            ''')
+            
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
     
     @staticmethod
     def _hash_password(password):
@@ -52,10 +60,14 @@ class AuthService:
         Add new user to database
         Returns: dict with success status
         """
+        conn = None
         try:
             password_hash = self._hash_password(password)
+
+            logger.info("Add user attempt - username=%s", username)
             
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self.db_path, timeout=10.0)
+            conn.execute('PRAGMA journal_mode=WAL')  # Enable WAL mode for better concurrency
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -63,34 +75,46 @@ class AuthService:
                 VALUES (?, ?, ?, ?, ?)
             ''', (username, password_hash, first_name, last_name, email))
             
+            user_id = cursor.lastrowid
             conn.commit()
-            conn.close()
+
+            logger.info("Add user success - username=%s user_id=%s", username, user_id)
             
             return {
                 'success': True,
                 'message': 'User created successfully',
-                'user_id': cursor.lastrowid
+                'user_id': user_id
             }
         except sqlite3.IntegrityError:
+            logger.warning("Add user failed - username_exists - username=%s", username)
             return {
                 'success': False,
                 'message': 'Username already exists'
             }
         except Exception as e:
+            logger.exception("Add user error - username=%s error=%s", username, e)
             return {
                 'success': False,
                 'message': f'Error creating user: {str(e)}'
             }
+        finally:
+            if conn:
+                conn.close()
+                logger.debug("Connection closed - add_user - username=%s", username)
     
     def authenticate(self, username, password):
         """
         Authenticate user with username and password
         Returns: dict with success status and user data
         """
+        conn = None
         try:
             password_hash = self._hash_password(password)
+
+            logger.info("Authenticate attempt - username=%s", username)
             
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self.db_path, timeout=10.0)
+            conn.execute('PRAGMA journal_mode=WAL')  # Enable WAL mode for better concurrency
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -109,7 +133,8 @@ class AuthService:
                     WHERE username = ?
                 ''', (username,))
                 conn.commit()
-                conn.close()
+
+                logger.info("Authenticate success - username=%s user_id=%s", username, user[0])
                 
                 return {
                     'success': True,
@@ -122,21 +147,27 @@ class AuthService:
                     }
                 }
             else:
-                conn.close()
+                logger.warning("Authenticate failed - invalid_credentials - username=%s", username)
                 return {
                     'success': False,
                     'message': 'Invalid username or password'
                 }
         except Exception as e:
+            logger.exception("Authenticate error - username=%s error=%s", username, e)
             return {
                 'success': False,
                 'message': f'Authentication error: {str(e)}'
             }
+        finally:
+            if conn:
+                conn.close()
+                logger.debug("Connection closed - authenticate - username=%s", username)
     
     def get_user(self, user_id):
         """Get user by ID"""
+        conn = None
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self.db_path, timeout=10.0)
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -146,7 +177,6 @@ class AuthService:
             ''', (user_id,))
             
             user = cursor.fetchone()
-            conn.close()
             
             if user:
                 return {
@@ -158,11 +188,15 @@ class AuthService:
                 }
             return None
         except Exception as e:
-            print(f"Error getting user: {e}")
+            logger.exception("Get user error - user_id=%s error=%s", user_id, e)
             return None
+        finally:
+            if conn:
+                conn.close()
     
     def change_password(self, username, old_password, new_password):
         """Change user password"""
+        conn = None
         try:
             # First verify old password
             auth_result = self.authenticate(username, old_password)
@@ -174,7 +208,7 @@ class AuthService:
             
             new_password_hash = self._hash_password(new_password)
             
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self.db_path, timeout=10.0)
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -184,14 +218,19 @@ class AuthService:
             ''', (new_password_hash, username))
             
             conn.commit()
-            conn.close()
+            
+            logger.info("Password changed - username=%s", username)
             
             return {
                 'success': True,
                 'message': 'Password changed successfully'
             }
         except Exception as e:
+            logger.exception("Change password error - username=%s error=%s", username, e)
             return {
                 'success': False,
                 'message': f'Error changing password: {str(e)}'
             }
+        finally:
+            if conn:
+                conn.close()
