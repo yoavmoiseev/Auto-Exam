@@ -82,14 +82,14 @@ class AuthService:
             
             return {
                 'success': True,
-                'message': 'User created successfully',
+                'message': 'account_created_successfully',
                 'user_id': user_id
             }
         except sqlite3.IntegrityError:
             logger.warning("Add user failed - username_exists - username=%s", username)
             return {
                 'success': False,
-                'message': 'Username already exists'
+                'message': 'username_already_exists'
             }
         except Exception as e:
             logger.exception("Add user error - username=%s error=%s", username, e)
@@ -150,7 +150,7 @@ class AuthService:
                 logger.warning("Authenticate failed - invalid_credentials - username=%s", username)
                 return {
                     'success': False,
-                    'message': 'Invalid username or password'
+                    'message': 'invalid_credentials'
                 }
         except Exception as e:
             logger.exception("Authenticate error - username=%s error=%s", username, e)

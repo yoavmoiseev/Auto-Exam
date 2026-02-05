@@ -621,7 +621,7 @@ function finalizeAddExam() {
     
     const statusDiv = document.getElementById('uploadStatus');
     statusDiv.style.display = 'block';
-    statusDiv.innerHTML = '<p style="color: #007bff;">⏳ Uploading exam...</p>';
+    statusDiv.innerHTML = `<p style="color: #007bff;">⏳ ${i18n.t('uploading_exam')}</p>`;
     
     fetch('/api/upload-exam', {
         method: 'POST',
@@ -630,7 +630,7 @@ function finalizeAddExam() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            statusDiv.innerHTML = '<p style="color: green;">✅ Exam added successfully!</p>';
+            statusDiv.innerHTML = `<p style="color: green;">✅ ${i18n.t('exam_added_successfully')}</p>`;
             setTimeout(() => {
                 closeAddExamModal();
                 // Optionally reload the page or redirect to exams list
@@ -638,7 +638,7 @@ function finalizeAddExam() {
             }, 1500);
         } else if (data.file_exists) {
             // File already exists, ask for overwrite
-            if (confirm(`File "${selectedFileName}" already exists. Overwrite?`)) {
+            if (confirm(i18n.t('overwrite_question'))) {
                 // Re-submit with overwrite endpoint
                 fetch('/api/upload-exam/overwrite', {
                     method: 'POST',
@@ -647,7 +647,7 @@ function finalizeAddExam() {
                 .then(response => response.json())
                 .then(overwriteData => {
                     if (overwriteData.success) {
-                        statusDiv.innerHTML = '<p style="color: green;">✅ Exam updated successfully!</p>';
+                        statusDiv.innerHTML = `<p style="color: green;">✅ ${i18n.t('exam_updated_successfully')}</p>`;
                         setTimeout(() => {
                             closeAddExamModal();
                             window.location.href = '/teacher/exams';
@@ -665,7 +665,7 @@ function finalizeAddExam() {
     })
     .catch(error => {
         console.error('Error:', error);
-        statusDiv.innerHTML = '<p style="color: red;">❌ Error uploading exam</p>';
+        statusDiv.innerHTML = `<p style="color: red;">❌ ${i18n.t('error_uploading')}</p>`;
     });
 }
 

@@ -80,7 +80,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     
     // Client-side validation
     if (password !== confirmPassword) {
-        errorDiv.textContent = document.querySelector('[data-i18n="passwords_not_match"]').getAttribute('data-i18n');
+        const errorMsg = window.i18n?.t('passwords_not_match') || 'Passwords do not match';
+        errorDiv.textContent = errorMsg;
         errorDiv.style.display = 'block';
         return;
     }
@@ -107,25 +108,13 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         const result = await response.json();
         
         if (result.success) {
-            // Use translated message
-            const successMsg = window.i18n?.t('account_created_successfully') || result.message;
+            // Translate the success message
+            const successMsg = window.i18n?.t(result.message) || result.message;
             alert(successMsg);
             window.location.href = result.redirect;
         } else {
-            // Translate common error messages
-            let errorMsg = result.message;
-            const errorTranslations = {
-                'Username already exists': 'username_already_exists',
-                'All fields except email are required': 'all_fields_required',
-                'Username must be at least 3 characters': 'username_too_short',
-                'Password must be at least 6 characters': 'password_too_short',
-                'Passwords do not match': 'passwords_not_match'
-            };
-            
-            if (errorTranslations[errorMsg]) {
-                errorMsg = window.i18n?.t(errorTranslations[errorMsg]) || errorMsg;
-            }
-            
+            // Translate the error message (all messages are now translation keys)
+            const errorMsg = window.i18n?.t(result.message) || result.message;
             errorDiv.textContent = errorMsg;
             errorDiv.style.display = 'block';
         }

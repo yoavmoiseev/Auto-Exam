@@ -117,7 +117,10 @@
     "go_to_my_exams": "עבור אל \"הבחינות שלי\" כדי לראות אותה",
     "please_select_file": "אנא בחר קובץ",
     "only_txt_accepted": "רק קבצי .txt מתקבלים",
+    "uploading_exam": "מעלה בחינה...",
     "error_uploading": "שגיאה בהעלאת בחינה",
+    "exam_added_successfully": "הבחינה נוספה בהצלחה!",
+    "exam_updated_successfully": "הבחינה עודכנה בהצלחה!",
     
     "file_already_exists": "הקובץ כבר קיים",
     "overwrite_question": "קובץ בשם זה כבר קיים. האם אתה רוצה להחליף אותו?",

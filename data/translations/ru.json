@@ -119,7 +119,10 @@
     "go_to_my_exams": "Перейдите в \"Мои экзамены\" чтобы увидеть его",
     "please_select_file": "Пожалуйста, выберите файл",
     "only_txt_accepted": "Принимаются только файлы .txt",
+    "uploading_exam": "Загрузка экзамена...",
     "error_uploading": "Ошибка при загрузке экзамена",
+    "exam_added_successfully": "Экзамен успешно добавлен!",
+    "exam_updated_successfully": "Экзамен успешно обновлен!",
     
     "file_already_exists": "Файл уже существует",
     "overwrite_question": "Файл с таким именем уже существует. Вы хотите его перезаписать?",

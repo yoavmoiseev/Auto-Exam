@@ -10,16 +10,6 @@
         </div>
         <div class="card-body">
             <form id="login-form" method="POST" action="/login">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                
                 <div class="form-group">
                     <label for="username" data-i18n="username">Username</label>
                     <input type="text" id="username" name="username" required>
@@ -31,6 +21,16 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="login_button">Login</button>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}" data-i18n="{{ message }}" style="margin-top: 15px;">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
             </form>
             
             <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">

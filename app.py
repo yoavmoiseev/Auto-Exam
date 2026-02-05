@@ -4,7 +4,7 @@ Main entry point for the exam management system
 Supports offline mode and web deployment
 """
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file, flash
 from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import json
@@ -183,7 +183,7 @@ def signup():
                 client_ip,
                 username
             )
-            return jsonify({'success': False, 'message': 'All fields except email are required'})
+            return jsonify({'success': False, 'message': 'all_fields_required'})
         
         if len(username) < 3:
             app.logger.warning(
@@ -191,7 +191,7 @@ def signup():
                 client_ip,
                 username
             )
-            return jsonify({'success': False, 'message': 'Username must be at least 3 characters'})
+            return jsonify({'success': False, 'message': 'username_too_short'})
         
         if len(password) < 6:
             app.logger.warning(
@@ -199,7 +199,7 @@ def signup():
                 client_ip,
                 username
             )
-            return jsonify({'success': False, 'message': 'Password must be at least 6 characters'})
+            return jsonify({'success': False, 'message': 'password_too_short'})
         
         if password != confirm_password:
             app.logger.warning(
@@ -207,7 +207,7 @@ def signup():
                 client_ip,
                 username
             )
-            return jsonify({'success': False, 'message': 'Passwords do not match'})
+            return jsonify({'success': False, 'message': 'passwords_not_match'})
         
         # Create user
         result = auth_service.add_user(username, password, first_name, last_name, email)
@@ -219,7 +219,7 @@ def signup():
                 username,
                 (time.perf_counter() - request_start) * 1000
             )
-            return jsonify({'success': True, 'message': 'Account created successfully', 'redirect': url_for('login')})
+            return jsonify({'success': True, 'message': 'account_created_successfully', 'redirect': url_for('login')})
         else:
             app.logger.warning(
                 "Signup failed - ip=%s username=%s reason=%s duration_ms=%.2f",
