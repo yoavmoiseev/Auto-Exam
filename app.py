@@ -167,13 +167,15 @@ def signup():
         first_name = data.get('first_name', '').strip()
         last_name = data.get('last_name', '').strip()
         email = data.get('email', '').strip() or None
+        agree_terms = data.get('agree_terms', False)
 
         app.logger.info(
-            "Signup attempt - ip=%s user_agent=%s accept_language=%s username=%s",
+            "Signup attempt - ip=%s user_agent=%s accept_language=%s username=%s terms_accepted=%s",
             client_ip,
             user_agent,
             accept_language,
-            username
+            username,
+            agree_terms
         )
         
         # Validation
@@ -209,8 +211,17 @@ def signup():
             )
             return jsonify({'success': False, 'message': 'passwords_not_match'})
         
+        # Check if terms were accepted
+        if not agree_terms:
+            app.logger.warning(
+                "Signup validation failed - terms_not_accepted - ip=%s username=%s",
+                client_ip,
+                username
+            )
+            return jsonify({'success': False, 'message': 'must_accept_terms'})
+        
         # Create user
-        result = auth_service.add_user(username, password, first_name, last_name, email)
+        result = auth_service.add_user(username, password, first_name, last_name, email, terms_accepted=agree_terms)
         
         if result['success']:
             app.logger.info(

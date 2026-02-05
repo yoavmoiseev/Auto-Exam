@@ -275,5 +275,49 @@
     "load_from_examples": "Load from Examples",
     "selected_file": "Selected File",
     "back": "Back",
-    "select_example_exam": "Select an example exam:"
+    "select_example_exam": "Select an example exam:",
+    
+    "terms_of_service": "Terms of Service",
+    "user_agreement": "User Agreement",
+    "i_agree_to_terms": "I have read and agree to the Terms of Service",
+    "must_accept_terms": "You must accept the Terms of Service to create an account",
+    "read_terms": "Read Terms of Service",
+    "close_terms": "Close",
+    "accept_and_continue": "Accept and Continue",
+    
+    "terms_title": "USER AGREEMENT AND TERMS OF SERVICE",
+    "terms_company": "YaM SOFT",
+    "terms_effective_date": "Effective Date: February 2026",
+    
+    "terms_section_1_title": "1. ACCEPTANCE OF TERMS",
+    "terms_section_1_content": "By registering and using this Exam System (the \"Service\"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use this Service.",
+    
+    "terms_section_2_title": "2. SERVICE DESCRIPTION",
+    "terms_section_2_content": "YaM SOFT provides an automated examination and testing platform. This Service is provided \"AS IS\" and \"AS AVAILABLE\" without warranties of any kind.",
+    
+    "terms_section_3_title": "3. DISCLAIMER OF LIABILITY",
+    "terms_section_3_content": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, YaM SOFT AND ITS OPERATORS DISCLAIM ALL LIABILITY FOR:\n\n• Loss of data, passwords, or any information stored in the system\n• Service interruptions, downtime, or system failures\n• Accuracy or reliability of exam results\n• Any damages, direct or indirect, arising from use of this Service\n• Unauthorized access to or alteration of your data\n• Any content uploaded by users\n\nYOU USE THIS SERVICE ENTIRELY AT YOUR OWN RISK.",
+    
+    "terms_section_4_title": "4. NO WARRANTIES",
+    "terms_section_4_content": "This Service is provided as FREEWARE. YaM SOFT makes no warranties, express or implied, including but not limited to:\n\n• MERCHANTABILITY\n• FITNESS FOR A PARTICULAR PURPOSE\n• NON-INFRINGEMENT\n• SECURITY OF DATA\n• UNINTERRUPTED OR ERROR-FREE OPERATION",
+    
+    "terms_section_5_title": "5. DATA AND PRIVACY",
+    "terms_section_5_content": "• Your data may be deleted at any time without notice\n• We make no guarantees about data retention or backup\n• You are solely responsible for maintaining your own backups\n• We are not responsible for any loss of data for any reason\n• Your use of this Service constitutes consent to our data handling practices",
+    
+    "terms_section_6_title": "6. USER RESPONSIBILITIES",
+    "terms_section_6_content": "You are responsible for:\n\n• Maintaining the confidentiality of your password\n• All activities that occur under your account\n• Ensuring compliance with applicable laws\n• The content you upload or submit\n• Any consequences arising from your use of the Service",
+    
+    "terms_section_7_title": "7. TERMINATION",
+    "terms_section_7_content": "YaM SOFT reserves the right to terminate or suspend your access at any time, for any reason, without notice or liability. Upon termination, all your data may be immediately deleted.",
+    
+    "terms_section_8_title": "8. LIMITATION OF LIABILITY",
+    "terms_section_8_content": "IN NO EVENT SHALL YaM SOFT, ITS OPERATORS, DEVELOPERS, OR AFFILIATES BE LIABLE FOR ANY CIVIL, CRIMINAL, OR LEGAL DAMAGES OF ANY KIND ARISING OUT OF OR IN CONNECTION WITH THIS SERVICE, INCLUDING BUT NOT LIMITED TO LOST PROFITS, DATA LOSS, OR ANY OTHER DAMAGES.",
+    
+    "terms_section_9_title": "9. CHANGES TO TERMS",
+    "terms_section_9_content": "YaM SOFT reserves the right to modify these terms at any time without notice. Continued use of the Service constitutes acceptance of modified terms.",
+    
+    "terms_section_10_title": "10. GOVERNING LAW",
+    "terms_section_10_content": "These terms shall be governed by applicable laws. Any disputes shall be resolved in accordance with local jurisdiction.",
+    
+    "terms_footer": "BY CLICKING \"I AGREE\", YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS OF SERVICE."
 }

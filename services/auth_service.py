@@ -41,7 +41,8 @@ class AuthService:
                     last_name TEXT NOT NULL,
                     email TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    last_login TIMESTAMP
+                    last_login TIMESTAMP,
+                    terms_accepted_at TIMESTAMP
                 )
             ''')
             
@@ -55,7 +56,7 @@ class AuthService:
         """Hash password using SHA-256 (same as WEB-ScSc)"""
         return hashlib.sha256(password.encode('utf-8')).hexdigest()
     
-    def add_user(self, username, password, first_name, last_name, email=None):
+    def add_user(self, username, password, first_name, last_name, email=None, terms_accepted=False):
         """
         Add new user to database
         Returns: dict with success status
@@ -70,9 +71,12 @@ class AuthService:
             conn.execute('PRAGMA journal_mode=WAL')  # Enable WAL mode for better concurrency
             cursor = conn.cursor()
             
-            cursor.execute('''
-                INSERT INTO users (username, password_hash, first_name, last_name, email)
-                VALUES (?, ?, ?, ?, ?)
+            # Set terms_accepted_at to current timestamp if terms were accepted
+            terms_timestamp = 'CURRENT_TIMESTAMP' if terms_accepted else 'NULL'
+            
+            cursor.execute(f'''
+                INSERT INTO users (username, password_hash, first_name, last_name, email, terms_accepted_at)
+                VALUES (?, ?, ?, ?, ?, {terms_timestamp})
             ''', (username, password_hash, first_name, last_name, email))
             
             user_id = cursor.lastrowid

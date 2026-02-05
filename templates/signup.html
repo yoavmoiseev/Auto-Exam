@@ -52,6 +52,17 @@
                        data-i18n-title="confirm_password_hint" title="Enter the same password again">
             </div>
             
+            <!-- Terms of Service Agreement -->
+            <div class="form-group terms-group">
+                <div class="terms-checkbox-wrapper">
+                    <input type="checkbox" id="agreeTerms" name="agree_terms" required>
+                    <label for="agreeTerms" class="terms-label">
+                        <span data-i18n="i_agree_to_terms">I have read and agree to the Terms of Service</span>
+                        <a href="#" id="readTermsLink" class="terms-link" data-i18n="read_terms">Read Terms of Service</a>
+                    </label>
+                </div>
+            </div>
+            
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             
             <button type="submit" class="btn btn-primary btn-block" data-i18n="signup_button">
@@ -66,7 +77,121 @@
     </div>
 </div>
 
+<!-- Terms of Service Modal -->
+<div id="termsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 data-i18n="terms_title">USER AGREEMENT AND TERMS OF SERVICE</h2>
+            <span class="modal-close" id="closeModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="terms-content">
+                <div class="terms-header">
+                    <h3 data-i18n="terms_company">YaM SOFT</h3>
+                    <p data-i18n="terms_effective_date">Effective Date: February 2026</p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_1_title">1. ACCEPTANCE OF TERMS</h4>
+                    <p data-i18n="terms_section_1_content"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_2_title">2. SERVICE DESCRIPTION</h4>
+                    <p data-i18n="terms_section_2_content"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_3_title">3. DISCLAIMER OF LIABILITY</h4>
+                    <p data-i18n="terms_section_3_content" style="white-space: pre-line;"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_4_title">4. NO WARRANTIES</h4>
+                    <p data-i18n="terms_section_4_content" style="white-space: pre-line;"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_5_title">5. DATA AND PRIVACY</h4>
+                    <p data-i18n="terms_section_5_content" style="white-space: pre-line;"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_6_title">6. USER RESPONSIBILITIES</h4>
+                    <p data-i18n="terms_section_6_content" style="white-space: pre-line;"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_7_title">7. TERMINATION</h4>
+                    <p data-i18n="terms_section_7_content"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_8_title">8. LIMITATION OF LIABILITY</h4>
+                    <p data-i18n="terms_section_8_content" style="white-space: pre-line;"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_9_title">9. CHANGES TO TERMS</h4>
+                    <p data-i18n="terms_section_9_content"></p>
+                </div>
+                
+                <div class="terms-section">
+                    <h4 data-i18n="terms_section_10_title">10. GOVERNING LAW</h4>
+                    <p data-i18n="terms_section_10_content"></p>
+                </div>
+                
+                <div class="terms-footer">
+                    <p data-i18n="terms_footer"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="closeModalBtn" data-i18n="close_terms">Close</button>
+            <button class="btn btn-primary" id="acceptTermsBtn" data-i18n="accept_and_continue">Accept and Continue</button>
+        </div>
+    </div>
+</div>
+
 <script>
+// Terms Modal Logic
+const modal = document.getElementById('termsModal');
+const readTermsLink = document.getElementById('readTermsLink');
+const closeModal = document.getElementById('closeModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const acceptTermsBtn = document.getElementById('acceptTermsBtn');
+const agreeTermsCheckbox = document.getElementById('agreeTerms');
+
+readTermsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+});
+
+closeModal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+closeModalBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+acceptTermsBtn.addEventListener('click', () => {
+    agreeTermsCheckbox.checked = true;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+// Close modal when clicking outside
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -74,9 +199,18 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const errorDiv = document.getElementById('errorMessage');
+    const agreeTerms = agreeTermsCheckbox.checked;
     
     // Clear previous error
     errorDiv.style.display = 'none';
+    
+    // Check terms acceptance
+    if (!agreeTerms) {
+        const errorMsg = window.i18n?.t('must_accept_terms') || 'You must accept the Terms of Service to create an account';
+        errorDiv.textContent = errorMsg;
+        errorDiv.style.display = 'block';
+        return;
+    }
     
     // Client-side validation
     if (password !== confirmPassword) {
@@ -93,7 +227,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         email: formData.get('email'),
         username: formData.get('username'),
         password: formData.get('password'),
-        confirm_password: formData.get('confirm_password')
+        confirm_password: formData.get('confirm_password'),
+        agree_terms: agreeTerms
     };
     
     try {
@@ -213,9 +348,229 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     text-decoration: underline;
 }
 
+/* Terms of Service Styles */
+.terms-group {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+}
+
+.terms-checkbox-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.terms-checkbox-wrapper input[type="checkbox"] {
+    width: auto;
+    margin-top: 3px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.terms-label {
+    margin: 0;
+    font-weight: 400;
+    color: #555;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.terms-link {
+    display: inline-block;
+    margin-left: 5px;
+    color: #667eea;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.terms-link:hover {
+    color: #5568d3;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.modal-close {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.modal-close:hover {
+    transform: scale(1.2);
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.terms-content {
+    color: #333;
+    line-height: 1.6;
+}
+
+.terms-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.terms-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.terms-header p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.terms-section {
+    margin-bottom: 25px;
+}
+
+.terms-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+}
+
+.terms-section p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.terms-footer {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff8dc;
+    border-left: 4px solid #ff9800;
+    border-radius: 5px;
+}
+
+.terms-footer p {
+    margin: 0;
+    font-weight: 600;
+    color: #d84315;
+    font-size: 14px;
+}
+
+.modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #f9f9f9;
+    border-radius: 0 0 10px 10px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
 @media (max-width: 600px) {
     .auth-box {
         padding: 30px 20px;
+    }
+    
+    .modal-content {
+        max-width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-header h2 {
+        font-size: 16px;
+    }
+    
+    .terms-header h3 {
+        font-size: 22px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer button {
+        width: 100%;
     }
 }
 </style>
