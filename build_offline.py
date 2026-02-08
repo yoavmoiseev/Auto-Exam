@@ -99,14 +99,26 @@ except subprocess.CalledProcessError as e:
     print(e.stderr)
     sys.exit(1)
 
-# Шаг 5: Копирование EXE в финальную папку
+# Шаг 5: Копирование всей папки dist/ExamSystem
 print("\n5. Сборка финального пакета...")
-exe_file = os.path.join("dist", "ExamSystem", "ExamSystem.exe")
-if os.path.exists(exe_file):
-    shutil.copy2(exe_file, os.path.join(dist_folder, "ExamSystem.exe"))
-    print("   ✓ ExamSystem.exe")
+dist_exam_folder = os.path.join("dist", "ExamSystem")
+if os.path.exists(dist_exam_folder):
+    # Копируем все файлы из dist/ExamSystem в ExamSystem-Offline
+    for item in os.listdir(dist_exam_folder):
+        s = os.path.join(dist_exam_folder, item)
+        d = os.path.join(dist_folder, item)
+        if os.path.isdir(s):
+            if os.path.exists(d):
+                shutil.rmtree(d)
+            shutil.copytree(s, d)
+            print(f"   ✓ {item}/ (библиотеки)")
+        else:
+            shutil.copy2(s, d)
+            if item == "ExamSystem.exe":
+                print(f"   ✓ {item}")
+    print("   ✓ Все файлы и зависимости скопированы")
 else:
-    print("   ✗ EXE файл не найден!")
+    print("   ✗ Папка dist/ExamSystem не найдена!")
     sys.exit(1)
 
 # Шаг 6: Создание README для пользователей
