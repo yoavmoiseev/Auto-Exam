@@ -702,15 +702,33 @@ class ExamBuilderClient {
     }
     
     detectLanguage() {
+        // FIXED: Use percentage-based detection (same logic as Python backend)
+        // Previously: first Hebrew char found = entire file Hebrew
+        // Now: at least 5% of characters must be in that language
         const hebrewRegex = /[\u0590-\u05FF]/;
         const russianRegex = /[\u0400-\u04FF]/;
         
-        for (const line of this.lines) {
-            if (hebrewRegex.test(line)) return 'he';
+        const fullText = this.content;
+        if (!fullText || fullText.length === 0) return 'en';
+        
+        let hebrewCount = 0;
+        let russianCount = 0;
+        const totalChars = fullText.length;
+        
+        for (const char of fullText) {
+            if (hebrewRegex.test(char)) {
+                hebrewCount++;
+            } else if (russianRegex.test(char)) {
+                russianCount++;
+            }
         }
-        for (const line of this.lines) {
-            if (russianRegex.test(line)) return 'ru';
-        }
+        
+        const hebrewPercent = (hebrewCount / totalChars) * 100;
+        const russianPercent = (russianCount / totalChars) * 100;
+        const THRESHOLD = 5.0;
+        
+        if (hebrewPercent >= THRESHOLD) return 'he';
+        if (russianPercent >= THRESHOLD) return 'ru';
         return 'en';
     }
     

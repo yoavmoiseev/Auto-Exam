@@ -62,6 +62,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
+    SESSION_COOKIE_SECURE = False  # HTTP for local development
     
 
 class ProductionConfig(Config):

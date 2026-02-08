@@ -23,7 +23,7 @@
             <thead>
                 <tr style="border-bottom: 2px solid #ddd;">
                     <th style="padding: 10px; text-align: left;" data-i18n="exam_name">Exam Name</th>
-                    <th style="padding: 10px; text-align: center; min-width: 500px;" data-i18n="actions">Actions</th>
+                    <th style="padding: 10px; text-align: center;" data-i18n="actions">Actions</th>
                 </tr>
             </thead>
             <tbody id="exams-list">
@@ -40,15 +40,17 @@
 
 <!-- View Source Modal -->
 <div id="viewSourceModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content" style="max-width: 90%; max-width: min(800px, 90vw);">
         <div class="modal-header">
             <h2><span data-i18n="view_source_title">View Source</span>: <span id="sourceModalTitle"></span></h2>
             <span class="close" onclick="closeModal('viewSourceModal')">&times;</span>
         </div>
         <div class="modal-body">
-            <pre id="sourceContent" style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; max-height: 500px;"></pre>
+            <textarea id="sourceContent" style="width: 100%; min-height: 400px; max-height: 70vh; background: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 14px; border: 1px solid #ddd; resize: vertical; box-sizing: border-box;"></textarea>
+            <div style="margin-top: 10px; font-size: 12px; color: #666;" data-i18n="edit_exam_hint">You can edit, delete, copy-paste the exam content directly here</div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+            <button class="btn btn-primary" onclick="saveExamSource()" data-i18n="save_changes">Save Changes</button>
             <button class="btn btn-secondary" onclick="closeModal('viewSourceModal')" data-i18n="close">Close</button>
         </div>
     </div>
@@ -176,7 +178,10 @@ function viewSource(examName) {
             if (data.success) {
                 document.getElementById('sourceModalTitle').textContent = examName;
                 const sourceContent = document.getElementById('sourceContent');
-                sourceContent.textContent = data.content;
+                sourceContent.value = data.content;
+                
+                // Store exam name for save function
+                sourceContent.dataset.examName = examName;
                 
                 // Set RTL ONLY for Hebrew, NOT Russian!
                 if (data.language === 'he') {
@@ -196,6 +201,46 @@ function viewSource(examName) {
             console.error('Error:', error);
             alert('Error loading source');
         });
+}
+
+function saveExamSource() {
+    const sourceContent = document.getElementById('sourceContent');
+    const examName = sourceContent.dataset.examName;
+    const newContent = sourceContent.value;
+    
+    if (!examName) {
+        alert('Error: Exam name not found');
+        return;
+    }
+    
+    // Confirm save
+    const confirmMsg = typeof i18n !== 'undefined' ? i18n.t('confirm_save_exam') : 'Save changes to exam file?';
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    fetch('/api/exam-source/' + encodeURIComponent(examName), {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: newContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const successMsg = typeof i18n !== 'undefined' ? i18n.t('exam_saved_successfully') : 'Exam saved successfully!';
+            alert(successMsg);
+            closeModal('viewSourceModal');
+            loadExams(); // Reload exam list
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving exam');
+    });
 }
 
 function studentPreview(examName) {
