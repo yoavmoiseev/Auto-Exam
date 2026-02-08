@@ -51,13 +51,37 @@ class ExamBuilder:
     @staticmethod
     def detect_language(text):
         """
-        Detect language of text
+        Detect language of text based on character distribution
+        FIXED: Previously used first-match logic (1 Hebrew char = whole file Hebrew)
+        NOW: Uses percentage-based detection (dominant language wins)
         Priority: Hebrew > Russian > English
-        If any Hebrew or Russian found, it's NOT English
+        Threshold: Language must have >5% of characters to be detected
         """
-        if ExamBuilder.is_hebrew_text(text):
+        if not text or len(text) == 0:
+            return 'en'
+        
+        # Count characters for each language
+        hebrew_count = 0
+        russian_count = 0
+        total_chars = len(text)
+        
+        for char in text:
+            if "\u0590" <= char <= "\u05FF":  # Hebrew
+                hebrew_count += 1
+            elif "\u0400" <= char <= "\u04FF":  # Cyrillic (Russian)
+                russian_count += 1
+        
+        # Calculate percentages
+        hebrew_percent = (hebrew_count / total_chars) * 100
+        russian_percent = (russian_count / total_chars) * 100
+        
+        # Threshold: at least 5% of text must be in that language
+        # This prevents single words/examples from changing the whole file's language
+        THRESHOLD = 5.0
+        
+        if hebrew_percent >= THRESHOLD:
             return 'he'
-        elif ExamBuilder.is_russian_text(text):
+        elif russian_percent >= THRESHOLD:
             return 'ru'
         else:
             return 'en'
@@ -86,28 +110,19 @@ class ExamBuilder:
     @staticmethod
     def format_exam(lines):
         """
-        Automatically finds and marks open questions by adding specific answer marker
-        Removes empty lines and handles question/answer pairs
+        Clean exam lines: remove empty lines and extra spaces
+        FIXED: DO NOT auto-insert 'Programming task:' markers
+        Only use markers explicitly present in the exam file
         """
         # Remove empty lines
         lines = [line for line in lines if line.strip()]
         
-        i = 0
-        while i < (len(lines) - 1):
-            lines[i] = ExamBuilder.remove_spaces(lines[i])
-            lines[i + 1] = ExamBuilder.remove_spaces(lines[i + 1])
-            
-            # Two sequential questions - no answer line between them
-            if (re.match(ExamBuilder.QUESTION_PATTERN, lines[i]) and
-                re.match(ExamBuilder.QUESTION_PATTERN, lines[i + 1])):
-                lines.insert(i + 1, ExamBuilder.OPEN_EXAM_MARKERS[0])
-            i += 1
+        # Remove leading spaces from all lines
+        cleaned_lines = []
+        for line in lines:
+            cleaned_lines.append(ExamBuilder.remove_spaces(line))
         
-        # If the last question has no answer line
-        if lines and re.match(ExamBuilder.QUESTION_PATTERN, lines[-1]):
-            lines.append(ExamBuilder.OPEN_EXAM_MARKERS[0])
-        
-        return lines
+        return cleaned_lines
     
     @staticmethod
     def build_question_answer_dict(lines):
@@ -152,8 +167,13 @@ class ExamBuilder:
         # Build answer dictionary
         question_answer_dict = ExamBuilder.build_question_answer_dict(lines)
         
-        # Determine text direction
-        text_direction = 'rtl' if ExamBuilder.is_hebrew_text(''.join(lines)) else 'ltr'
+        # Determine text direction based on detected language with percentage threshold
+        # FIXED v3: Use detect_language() with 5% threshold instead of is_hebrew_text()
+        # Previously: is_hebrew_text() returned True if ANY Hebrew char found (1 char = RTL entire file)
+        # Now: detect_language() requires 5% Hebrew to set RTL direction
+        full_text = ''.join(lines)
+        detected_language = ExamBuilder.detect_language(full_text)
+        text_direction = 'rtl' if detected_language == 'he' else 'ltr'
         
         # Build structured questions
         questions = ExamBuilder.build_questions_list(lines, question_answer_dict, max_questions)
@@ -183,17 +203,18 @@ class ExamBuilder:
             # Check if line is a question
             if re.match(ExamBuilder.QUESTION_PATTERN, line):
                 # Save previous question if exists
-                if current_question and current_answers:
+                if current_question:
                     # Remove number from question text for display
                     clean_question = ExamBuilder.remove_number(current_question)
                     
+                    # FIXED: Add question even if it has no answers (treat as open question)
                     questions.append({
                         'id': len(questions) + 1,
                         'number': question_counter,
                         'text': clean_question,  # Use cleaned version without number
                         'original_text': current_question,  # Keep original for matching
                         'answers': current_answers.copy(),
-                        'type': ExamBuilder.get_question_type(clean_question, question_answer_dict),
+                        'type': ExamBuilder.get_question_type(clean_question, question_answer_dict) if current_answers else 'open',
                         'correct_answer': ExamBuilder.get_correct_answer(clean_question, question_answer_dict)
                     })
                     
@@ -209,7 +230,8 @@ class ExamBuilder:
                 current_answers.append(line)
         
         # Add last question
-        if current_question and current_answers and len(questions) < max_questions:
+        # FIXED: Add last question even if it has no answers (treat as open question)
+        if current_question and len(questions) < max_questions:
             clean_question = ExamBuilder.remove_number(current_question)
             
             questions.append({
@@ -218,7 +240,7 @@ class ExamBuilder:
                 'text': clean_question,  # Use cleaned version
                 'original_text': current_question,  # Keep original for matching
                 'answers': current_answers.copy(),
-                'type': ExamBuilder.get_question_type(current_question, question_answer_dict),
+                'type': ExamBuilder.get_question_type(current_question, question_answer_dict) if current_answers else 'open',
                 'correct_answer': ExamBuilder.get_correct_answer(current_question, question_answer_dict)
             })
         

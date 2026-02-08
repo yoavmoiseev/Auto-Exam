@@ -848,11 +848,11 @@ def start_exam_with_settings():
                     print(f"Appending to existing folder: {results_folder}")
                 else:
                     # Fallback: create new if folder doesn't exist
-                    results_folder = create_exam_results_folder(teacher_id, exam_title)
+                    results_folder = create_exam_results_folder(teacher_id, exam_title, exam_session.exam_filename)
                     exam_session.results_folder = results_folder
             else:
                 # Create new results folder
-                results_folder = create_exam_results_folder(teacher_id, exam_title)
+                results_folder = create_exam_results_folder(teacher_id, exam_title, exam_session.exam_filename)
                 exam_session.results_folder = results_folder
         
         # Generate monitor URL
@@ -927,17 +927,12 @@ def student_exam_session(exam_id):
     exam_path = os.path.join(exam_dir, exam_session.exam_filename)
     
     try:
-        exam_data = ExamBuilder.parse_exam_file(exam_path)
-        text_direction = exam_data.get('text_direction', 'ltr')
-        
-        # Map text_direction to language code
-        if text_direction == 'rtl':
-            exam_language = 'he'  # Hebrew (right-to-left)
-        else:
-            # Detect if Russian or English by checking content
-            with open(exam_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            exam_language = detect_exam_language(content)  # Returns 'ru', 'en', or 'he'
+        # FIXED v3: Always use detect_exam_language() with percentage threshold
+        # Previously: Used text_direction from ExamBuilder which could be wrong
+        # Now: Direct language detection from content with 5% threshold
+        with open(exam_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        exam_language = detect_exam_language(content)  # Returns 'ru', 'en', or 'he' with 5% threshold
     except Exception as e:
         print(f"Error detecting exam language: {e}")
         exam_language = 'en'  # Fallback to English
@@ -982,18 +977,23 @@ def get_translations(language):
 
 def detect_exam_language(content):
     """
-    Detect exam language based on content analysis
-    TRANSLATION TRACKING: AUTO-DETECTION MECHANISM - FIXED v2
+    Detect exam language based on content analysis with percentage threshold
+    FIXED v3: Now uses percentage-based detection (same as ExamBuilder.detect_language)
     
-    Анализирует содержимое экзамена и определяет язык:
-    - СРАВНИВАЕТ количество символов каждого языка
-    - Выбирает язык с НАИБОЛЬШИМ количеством символов
-    - Пороги удалены - используется логика большинства
+    Previously: Used simple count comparison (1 Hebrew char could win over 1000s of Russian)
+    Now: Language must have at least 5% of total characters to be detected
+    
+    This prevents single words/examples from changing the entire file's language.
+    Example: Russian manual with Hebrew word "עברית" stays Russian, not Hebrew.
     
     Returns: 'he' for Hebrew, 'ru' for Russian, 'en' for English
     """
+    if not content or len(content) == 0:
+        return 'en'
+    
     hebrew_count = 0
     russian_count = 0
+    total_chars = len(content)
     
     for char in content:
         # Hebrew Unicode range: U+0590 to U+05FF
@@ -1003,11 +1003,16 @@ def detect_exam_language(content):
         elif "\u0400" <= char <= "\u04FF":
             russian_count += 1
     
-    # FIXED: Choose the language with the MOST characters
-    # This prevents false positives when one language name appears in another language text
-    if hebrew_count > russian_count and hebrew_count > 0:
+    # Calculate percentages
+    hebrew_percent = (hebrew_count / total_chars) * 100
+    russian_percent = (russian_count / total_chars) * 100
+    
+    # Threshold: at least 5% of text must be in that language
+    THRESHOLD = 5.0
+    
+    if hebrew_percent >= THRESHOLD:
         return 'he'  # RTL язык, требует CSS dir="rtl"
-    elif russian_count > hebrew_count and russian_count > 0:
+    elif russian_percent >= THRESHOLD:
         return 'ru'  # LTR язык
     else:
         return 'en'  # LTR язык (по умолчанию)
@@ -1308,34 +1313,63 @@ def upload_exam_overwrite():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
-@app.route('/api/exam-source/<filename>', methods=['GET'])
+@app.route('/api/exam-source/<filename>', methods=['GET', 'PUT'])
 @login_required
 def get_exam_source(filename):
-    """Get raw source of exam file"""
+    """Get or update raw source of exam file"""
     try:
         filename = filename.replace('\\', '').replace('/', '').replace('\0', '').replace('..', '')
         teacher_id = f"teacher_{session['user_id']}"
         exam_dir = os.path.join(app_config.TEACHERS_DIR, teacher_id, 'exams')
         filepath = os.path.join(exam_dir, filename)
         
-        if not os.path.exists(filepath):
-            return jsonify({'success': False, 'message': 'File not found'}), 404
+        if request.method == 'GET':
+            # Get exam source
+            if not os.path.exists(filepath):
+                return jsonify({'success': False, 'message': 'File not found'}), 404
+            
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Detect language
+            from services.exam_builder_service import ExamBuilder
+            language = ExamBuilder.detect_language(content)
+            
+            return jsonify({
+                'success': True,
+                'filename': filename,
+                'content': content,
+                'language': language
+            })
         
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Detect language
-        from services.exam_builder_service import ExamBuilder
-        language = ExamBuilder.detect_language(content)
-        
-        return jsonify({
-            'success': True,
-            'filename': filename,
-            'content': content,
-            'language': language
-        })
+        elif request.method == 'PUT':
+            # Save exam source
+            data = request.get_json()
+            if not data or 'content' not in data:
+                return jsonify({'success': False, 'message': 'No content provided'}), 400
+            
+            new_content = data['content']
+            
+            # Backup original file
+            import shutil
+            if os.path.exists(filepath):
+                backup_path = filepath + '.backup'
+                shutil.copy2(filepath, backup_path)
+            
+            # Save new content
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            
+            print(f"Exam file updated: {filename} by teacher_{session['user_id']}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Exam saved successfully',
+                'filename': filename
+            })
+            
     except Exception as e:
-        print(f"Error reading exam source: {e}")
+        print(f"Error with exam source: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
@@ -1685,15 +1719,13 @@ def api_submit_exam(exam_id):
         question_answer_dict = full_exam_data.get('question_answer_dict', {})
         text_direction = full_exam_data.get('text_direction', 'ltr')
         
-        # TRANSLATION FIX v2: Load translations for results page based on exam language
-        # REMARK: Previously results were hard-coded in English ("your exam was submitted successfully", "Your Answers:", "Your grade is")
-        if text_direction == 'rtl':
-            exam_language = 'he'
-        else:
-            # Detect Russian or English
-            with open(exam_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            exam_language = detect_exam_language(content)
+        # TRANSLATION FIX v3: Load translations for results page based on exam language
+        # FIXED v3: Always use detect_exam_language() with percentage threshold
+        # REMARK: Previously results were hard-coded in English, then used text_direction which could be wrong
+        # NOW: Direct language detection from content with 5% threshold
+        with open(exam_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        exam_language = detect_exam_language(content)  # Returns 'ru', 'en', or 'he' with 5% threshold
         
         # Load translations
         translations_path = os.path.join(app_config.DATA_DIR, 'translations', f'{exam_language}.json')
@@ -1745,7 +1777,7 @@ def api_submit_exam(exam_id):
         # TRANSLATION FIX v2: Use translated "Your grade is" text
         # REMARK: Previously "Your grade is" was hard-coded in English
         if score < 0:
-            grade_text = "Unknown yet, exam will be evaluated later"
+            grade_text = translations.get('open_exam_grade_pending', 'Unknown yet, exam will be evaluated later')
         else:
             grade_text = f"{score} %"
         
@@ -1919,10 +1951,11 @@ def api_get_exam_students(exam_id):
 # HELPER FUNCTIONS - EXAM LOGIC
 # ==========================================
 
-def create_exam_results_folder(teacher_id, exam_title):
+def create_exam_results_folder(teacher_id, exam_title, exam_filename=None):
     """Create results folder for exam at start. Returns folder path."""
     try:
         from datetime import datetime as dt
+        import shutil
         
         # Format: "ExamName YYYY-MM-DD HH-MM"
         current_datetime = dt.now().strftime("%Y-%m-%d %H-%M")
@@ -1938,6 +1971,19 @@ def create_exam_results_folder(teacher_id, exam_title):
         
         results_folder = os.path.join(teacher_results_dir, folder_name)
         os.makedirs(results_folder, exist_ok=True)
+        
+        # Copy exam file to results folder
+        if exam_filename:
+            exam_source_path = os.path.join(
+                app_config.TEACHERS_DIR,
+                teacher_id,
+                'exams',
+                exam_filename
+            )
+            if os.path.exists(exam_source_path):
+                exam_dest_path = os.path.join(results_folder, exam_filename)
+                shutil.copy2(exam_source_path, exam_dest_path)
+                print(f"Copied exam file to results: {exam_filename}")
         
         print(f"Created results folder: {results_folder}")
         return results_folder
@@ -2133,6 +2179,38 @@ def save_exam_results(exam_id, exam_session, student_session_id, student, score,
         
         # 3. Append to All_Exams.txt (for ChatGPT evaluation)
         all_exams_file = os.path.join(results_folder, 'All_Exams.txt')
+        
+        # If All_Exams.txt doesn't exist, create it and add exam content first
+        if not os.path.exists(all_exams_file):
+            try:
+                # Get exam file content
+                teacher_id = exam_session.teacher_id
+                exam_filename = exam_session.exam_filename
+                exam_file_path = os.path.join(
+                    app_config.TEACHERS_DIR,
+                    teacher_id,
+                    'exams',
+                    exam_filename
+                )
+                
+                if os.path.exists(exam_file_path):
+                    with open(exam_file_path, 'r', encoding='utf-8') as f:
+                        exam_content = f.read()
+                    
+                    # Write exam content to All_Exams.txt first
+                    with open(all_exams_file, 'w', encoding='utf-8') as f:
+                        f.write("=" * 80 + "\n")
+                        f.write("EXAM CONTENT\n")
+                        f.write("=" * 80 + "\n\n")
+                        f.write(exam_content)
+                        f.write("\n\n")
+                        f.write("=" * 80 + "\n")
+                        f.write("STUDENT RESULTS\n")
+                        f.write("=" * 80 + "\n\n")
+                    
+                    print(f"Created All_Exams.txt with exam content")
+            except Exception as e:
+                print(f"Error adding exam content to All_Exams.txt: {e}")
         
         # Build text format like old system + add device info
         exam_txt = "############################################################################\n\n"

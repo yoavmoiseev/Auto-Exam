@@ -350,6 +350,19 @@
 // NOW: Force exam language to match exam content language
 const EXAM_LANGUAGE = '{{ exam_language }}';  // Passed from Flask route
 
+// Helper function to get translation based on EXAM language (not system language)
+// CRITICAL: This ensures placeholders and exam UI use the exam's language
+function getExamTranslation(key) {
+    const examTranslations = {
+        'type_answer_placeholder': {
+            'en': 'Type your answer here',
+            'he': 'הקלד את התשובה שלך כאן',
+            'ru': 'Введите ваш ответ здесь'
+        }
+    };
+    return examTranslations[key]?.[EXAM_LANGUAGE] || examTranslations[key]?.['en'] || '';
+}
+
 // NEW v4: Exam protection settings
 const BLOCK_TRANSLATION = {{ 'true' if block_translation else 'false' }};
 const FULLSCREEN_MODE = {{ 'true' if fullscreen_mode else 'false' }};
@@ -468,7 +481,9 @@ function displayAllQuestions() {
                 );
                 
                 if (instructions.length > 0) {
-                    html += `<div style="color: #666; font-style: italic; margin-bottom: 10px;">${escapeHtml(instructions.join(' '))}</div>`;
+                    // FIXED: Preserve multi-line formatting using <br> instead of joining with space
+                    const instructionsHtml = instructions.map(line => escapeHtml(line)).join('<br>');
+                    html += `<div style="color: #666; font-style: italic; margin-bottom: 10px; white-space: pre-wrap;">${instructionsHtml}</div>`;
                 }
             }
             
@@ -476,7 +491,7 @@ function displayAllQuestions() {
                 <textarea 
                     name="question-${index}" 
                     id="answer-${index}"
-                    placeholder="Type your answer here..."
+                    placeholder="${getExamTranslation('type_answer_placeholder')}..."
                     style="width: 100%; min-height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;"
                     required></textarea>
             `;
