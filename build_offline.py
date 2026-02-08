@@ -8,6 +8,12 @@ import shutil
 import subprocess
 import sys
 
+# Настройка кодировки для Windows консоли
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 print("=" * 60)
 print("Exam System - Offline Standalone Builder")
 print("=" * 60)
@@ -77,37 +83,13 @@ print("   ✓ logs/ (пустая)")
 print("\n4. Создание EXE файла...")
 print("   Это может занять несколько минут...")
 
+# Используем готовый spec файл вместо создания команды вручную
 pyinstaller_cmd = [
     "pyinstaller",
-    "--name=ExamSystem",
-    "--onefile",
-    "--windowed",
-    "--icon=static/favicon.ico" if os.path.exists("static/favicon.ico") else "",
-    "--add-data=templates;templates",
-    "--add-data=static;static",
-    "--add-data=data;data",
-    "--add-data=services;services",
-    "--add-data=routes;routes",
-    "--add-data=video;video",
-    "--add-data=Exams;Exams",
-    "--add-data=app.py;.",
-    "--add-data=config.py;.",
-    "--add-data=consts.py;.",
-    "--add-data=Exam.py;.",
-    "--hidden-import=flask",
-    "--hidden-import=werkzeug",
-    "--hidden-import=jinja2",
-    "--hidden-import=click",
-    "--hidden-import=itsdangerous",
-    "--hidden-import=blinker",
-    "--collect-all=flask",
-    "--collect-all=werkzeug",
-    "--collect-all=jinja2",
-    "launcher.py"
+    "ExamSystem_Offline.spec",
+    "--clean",
+    "--noconfirm"
 ]
-
-# Убираем пустые элементы
-pyinstaller_cmd = [cmd for cmd in pyinstaller_cmd if cmd]
 
 try:
     result = subprocess.run(pyinstaller_cmd, check=True, capture_output=True, text=True)
@@ -119,7 +101,7 @@ except subprocess.CalledProcessError as e:
 
 # Шаг 5: Копирование EXE в финальную папку
 print("\n5. Сборка финального пакета...")
-exe_file = os.path.join("dist", "ExamSystem.exe")
+exe_file = os.path.join("dist", "ExamSystem", "ExamSystem.exe")
 if os.path.exists(exe_file):
     shutil.copy2(exe_file, os.path.join(dist_folder, "ExamSystem.exe"))
     print("   ✓ ExamSystem.exe")
