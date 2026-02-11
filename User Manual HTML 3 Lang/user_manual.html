@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Auto Exam - User Manual</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @bottom-right {
+                content: counter(page);
+                font-family: Arial, sans-serif;
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+        
+        .cover {
+            page-break-after: always;
+            height: 297mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .cover h1 {
+            font-size: 48pt;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .cover .subtitle {
+            font-size: 24pt;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .cover .version {
+            font-size: 14pt;
+            margin-top: 60px;
+            opacity: 0.8;
+        }
+        
+        .cover .icon {
+            font-size: 120pt;
+            margin-bottom: 30px;
+        }
+        
+        .toc {
+            page-break-after: always;
+            padding: 40px 20px;
+        }
+        
+        .toc h2 {
+            color: #667eea;
+            font-size: 32pt;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .toc li {
+            margin: 15px 0;
+            font-size: 14pt;
+        }
+        
+        .toc a {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .toc a:hover {
+            background: #f0f0f0;
+        }
+        
+        .toc .toc-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .toc .toc-dots {
+            flex-grow: 1;
+            border-bottom: 2px dotted #ccc;
+            margin: 0 10px;
+            align-self: flex-end;
+        }
+        
+        .toc .toc-page {
+            color: #764ba2;
+            font-weight: bold;
+        }
+        
+        .section {
+            page-break-before: always;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 28pt;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #764ba2;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #764ba2;
+            font-size: 20pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            color: #667eea;
+            font-size: 16pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        .highlight-box {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 10pt;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+        }
+        
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        
+        tr:hover {
+            background: #f0f0ff;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #667eea40;
+        }
+        
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        hr {
+            border: none;
+            border-top: 2px solid #e0e0e0;
+            margin: 30px 0;
+        }
+        
+        .no-break {
+            page-break-inside: avoid;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9pt;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+    <div class="icon">📚</div>
+    <h1>School Auto Exam</h1>
+    <div class="subtitle">Complete User Manual for Teachers</div>
+    <p style="font-size: 14pt; max-width: 600px; margin: 20px auto;">
+        A comprehensive guide to creating, managing, and monitoring online exams with built-in proctoring and cheating prevention
+    </p>
+    <div class="version">
+        Version 2.0 | February 2026<br>
+        Website: <a href="https://ex.yamsoft.org" style="color: white; text-decoration: underline;">ex.yamsoft.org</a><br>
+        <br>
+        <strong>Creator / Owner:</strong> Yoav Moiseev<br>
+        <a href="https://www.yamsoft.org" style="color: white; text-decoration: underline; font-size: 13pt;">www.yamsoft.org</a>
+    </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+    <h2>📋 Table of Contents</h2>
+    <ul>
+        <li>
+            <a href="#introduction">
+                <span><span class="toc-number">1</span>Introduction</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">3</span>
+            </a>
+        </li>
+        <li>
+            <a href="#getting-started">
+                <span><span class="toc-number">2</span>Getting Started</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">4</span>
+            </a>
+        </li>
+        <li>
+            <a href="#creating-exams">
+                <span><span class="toc-number">3</span>Creating Exam Files</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">5</span>
+            </a>
+        </li>
+        <li>
+            <a href="#question-types">
+                <span><span class="toc-number">4</span>Question Types</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">7</span>
+            </a>
+        </li>
+        <li>
+            <a href="#uploading-exams">
+                <span><span class="toc-number">5</span>Uploading Exams</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">11</span>
+            </a>
+        </li>
+        <li>
+            <a href="#proctoring">
+                <span><span class="toc-number">6</span>Proctoring & Cheating Control</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">13</span>
+            </a>
+        </li>
+        <li>
+            <a href="#student-experience">
+                <span><span class="toc-number">7</span>Student Experience</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">18</span>
+            </a>
+        </li>
+        <li>
+            <a href="#viewing-results">
+                <span><span class="toc-number">8</span>Viewing Results</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">19</span>
+            </a>
+        </li>
+        <li>
+            <a href="#best-practices">
+                <span><span class="toc-number">9</span>Best Practices & Tips</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">20</span>
+            </a>
+        </li>
+        <li>
+            <a href="#troubleshooting">
+                <span><span class="toc-number">10</span>Troubleshooting</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">22</span>
+            </a>
+        </li>
+        <li>
+            <a href="#quick-reference">
+                <span><span class="toc-number">11</span>Quick Reference Guide</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">23</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- SECTION 1: INTRODUCTION -->
+<div class="section" id="introduction">
+    <h1>1. Introduction</h1>
+    
+    <h2>What is this System?</h2>
+    <p>
+        This is a comprehensive <strong>online examination platform</strong> that allows teachers to create, distribute, 
+        and automatically grade exams. Students take exams directly in their web browser, and the system provides 
+        instant results for multiple-choice questions while allowing manual grading for open-ended responses.
+    </p>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>🎯 Easy to Use</h4>
+            <p>Simple text file format for creating exams - no complex software required</p>
+        </div>
+        <div class="feature-card">
+            <h4>⚡ Instant Results</h4>
+            <p>Automatic grading for multiple-choice questions with immediate feedback</p>
+        </div>
+        <div class="feature-card">
+            <h4>🌍 Multi-Language</h4>
+            <p>Supports English, Hebrew, Russian with automatic text direction detection</p>
+        </div>
+        <div class="feature-card">
+            <h4>🔒 Secure & Monitored</h4>
+            <p>Built-in proctoring system tracks and logs potential cheating attempts</p>
+        </div>
+    </div>
+    
+    <h2>Key Features</h2>
+    <div class="highlight-box">
+        <ul>
+            <li><strong>Multiple Question Types:</strong> Multiple choice, open questions, and programming tasks</li>
+            <li><strong>Automatic Proctoring:</strong> Detects tab switching, copy attempts, and suspicious behavior</li>
+            <li><strong>Real-Time Monitoring:</strong> Track student progress and exam activity as it happens</li>
+            <li><strong>Comprehensive Logging:</strong> Detailed logs of all exam sessions and cheating attempts</li>
+            <li><strong>No Installation Required:</strong> Access from any device with a web browser</li>
+            <li><strong>Flexible Exam Formats:</strong> Mix different question types in a single exam</li>
+        </ul>
+    </div>
+    
+    <h2>System Requirements</h2>
+    <div class="info-box">
+        <strong>For Teachers:</strong>
+        <ul>
+            <li>Modern web browser (Chrome, Firefox, Edge, Safari)</li>
+            <li>Internet connection</li>
+            <li>Text editor for creating exam files</li>
+        </ul>
+        
+        <strong>For Students:</strong>
+        <ul>
+            <li>Modern web browser with JavaScript enabled</li>
+            <li>Stable internet connection</li>
+            <li>No additional software installation needed</li>
+        </ul>
+    </div>
+    
+    <h2>Where to Access</h2>
+    <p style="font-size: 14pt; text-align: center; margin: 20px 0;">
+        <strong>Website:</strong> <code style="font-size: 16pt;">ex.yamsoft.org</code>
+    </p>
+    
+    <h2>📡 Offline / Standalone Version Available</h2>
+    <div class="success-box">
+        <p><strong>Need to use the system without internet?</strong> We offer a special <strong>offline/standalone version</strong> that works completely disconnected from the internet.</p>
+        
+        <h3>Perfect for:</h3>
+        <ul>
+            <li><strong>🕌 Religious institutions:</strong> Locations where internet access is restricted or prohibited</li>
+            <li><strong>🔒 Maximum security:</strong> Prevents students from searching answers online during exams</li>
+            <li><strong>🏔️ Remote areas:</strong> Places with unreliable or no internet connectivity</li>
+            <li><strong>💻 Local testing:</strong> Schools that prefer fully isolated exam environments</li>
+        </ul>
+        
+        <p><strong>Key advantages:</strong></p>
+        <ul>
+            <li>✅ No internet connection required during exams</li>
+            <li>✅ Students physically cannot search for answers online</li>
+            <li>✅ All data stored locally on your computer</li>
+            <li>✅ Same features as online version (proctoring, grading, reports)</li>
+            <li>✅ Ideal for high-security testing environments</li>
+        </ul>
+        
+        <p style="text-align: center; margin-top: 15px;">
+            <strong>Contact us for offline version:</strong> <a href="https://www.yamsoft.org" target="_blank">www.yamsoft.org</a>
+        </p>
+    </div>
+</div>
+
+<!-- SECTION 2: GETTING STARTED -->
+<div class="section" id="getting-started">
+    <h1>2. Getting Started</h1>
+    
+    <h2>Quick Start Guide</h2>
+    <p>Follow these simple steps to start using the exam system:</p>
+    
+    <div class="no-break">
+        <h3><span class="step-number">1</span>Sign Up</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Go to <strong>ex.yamsoft.org</strong></li>
+                <li>Click on <strong>"Sign Up"</strong> or <strong>"Create Account"</strong></li>
+                <li>Choose a unique username and secure password</li>
+                <li>Complete the registration form</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">2</span>Log In</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Enter your username and password</li>
+                <li>Click <strong>"Login"</strong></li>
+                <li>You'll be taken to your teacher dashboard</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">3</span>Create Your First Exam</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Prepare an exam file in text format (see Section 3)</li>
+                <li>Click <strong>"Add Exam"</strong> in your dashboard</li>
+                <li>Upload your exam file</li>
+                <li>Preview and verify your exam</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">4</span>Share With Students</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Get the exam link or code</li>
+                <li>Share with your students</li>
+                <li>Students can access the exam immediately</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">5</span>Monitor and Review</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Watch students take exams in real-time</li>
+                <li>Review automatic grading results</li>
+                <li>Manually grade open questions</li>
+                <li>Check proctoring logs for suspicious activity</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="success-box">
+        <strong>✅ Pro Tip:</strong> Start with a small practice exam to familiarize yourself with the system 
+        before creating your actual assessments.
+    </div>
+</div>
+
+<!-- SECTION 3: CREATING EXAMS -->
+<div class="section" id="creating-exams">
+    <h1>3. Creating Exam Files</h1>
+    
+    <h2>File Format Basics</h2>
+    <p>
+        Exams are created as simple <strong>.txt files</strong> using any text editor (Notepad, TextEdit, VS Code, etc.). 
+        The system automatically parses these files and converts them into interactive online exams.
+    </p>
+    
+    <h2>Essential Rules</h2>
+    
+    <div class="no-break">
+        <h3>Rule 1: Question Numbering</h3>
+        <div class="highlight-box">
+            <p><strong>Questions must start with a number followed by a dot and space:</strong></p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <div class="error-box">
+                    <strong>❌ Wrong:</strong>
+                    <pre><code>What is Python?
+Question 1 - What is Python?
+1 What is Python?</code></pre>
+                </div>
+                <div class="success-box">
+                    <strong>✅ Correct:</strong>
+                    <pre><code>1. What is Python?
+2. Which answer is correct?
+3. Explain the concept.</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>Rule 2: Answer Placement</h3>
+        <div class="highlight-box">
+            <p><strong>The FIRST answer is ALWAYS the CORRECT answer:</strong></p>
+            <pre><code>1. What is 2 + 2?
+4          ← Correct answer (first)
+5          ← Wrong answer
+3          ← Wrong answer
+6          ← Wrong answer</code></pre>
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> The system will automatically shuffle answers for students, 
+                so they won't see the correct answer first. You just need to place it first in your file.
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>Rule 3: Answer Format</h3>
+        <div class="highlight-box">
+            <p><strong>Answers should NOT have numbers or bullets:</strong></p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <div class="error-box">
+                    <strong>❌ Wrong:</strong>
+                    <pre><code>1. What is the capital?
+1. Paris
+2. London
+3. Berlin</code></pre>
+                </div>
+                <div class="success-box">
+                    <strong>✅ Correct:</strong>
+                    <pre><code>1. What is the capital?
+Paris
+London
+Berlin</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>Rule 4: Question Separation</h3>
+        <div class="highlight-box">
+            <p><strong>Use empty lines to separate questions (optional but recommended):</strong></p>
+            <pre><code>1. First question?
+Answer 1
+Answer 2
+
+2. Second question?
+Answer 1
+Answer 2</code></pre>
+        </div>
+    </div>
+    
+    <h2>Complete Example Exam</h2>
+    <pre><code>1. What is the capital of France?
+Paris
+London
+Berlin
+Madrid
+
+2. How many days are in a week?
+7
+5
+10
+6
+
+3. What color is the sky?
+Blue
+Red
+Green
+Yellow
+
+4. What is your favorite subject and why?
+
+5. Write a Python program that prints "Hello World"
+Programming task:
+Use the print() function
+Example: print("Hello World")</code></pre>
+    
+    <div class="info-box">
+        <strong>💡 Notice:</strong>
+        <ul>
+            <li>Questions 1-3 are multiple choice (they have answer options)</li>
+            <li>Question 4 is an open question (no answers provided)</li>
+            <li>Question 5 is a programming task (has "Programming task:" marker)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- SECTION 4: QUESTION TYPES -->
+<div class="section" id="question-types">
+    <h1>4. Question Types</h1>
+    
+    <p>The system supports three distinct question types, each suited for different assessment needs:</p>
+    
+    <h2>Type 1: Multiple Choice Questions</h2>
+    <div class="highlight-box">
+        <p><strong>Best for:</strong> Factual knowledge, definitions, and objective assessment</p>
+        <p><strong>Grading:</strong> Automatic (instant results)</p>
+        <p><strong>Format:</strong> Question + 2 or more answer options</p>
+    </div>
+    
+    <h3>How to Create:</h3>
+    <pre><code>1. What programming language is this system built with?
+Python
+Java
+JavaScript
+C++
+
+2. Which symbol is used for comments in Python?
+#
+//
+/* */
+--
+
+3. What is the output of: print(2 + 3)?
+5
+23
+2+3
+Error</code></pre>
+    
+    <div class="success-box">
+        <strong>✅ Best Practices:</strong>
+        <ul>
+            <li>Provide 3-5 answer options for each question</li>
+            <li>Make wrong answers plausible but clearly incorrect</li>
+            <li>Avoid "all of the above" or "none of the above" options</li>
+            <li>Keep answer length similar to avoid giving hints</li>
+        </ul>
+    </div>
+    
+    <h2>Type 2: Open Questions</h2>
+    <div class="highlight-box">
+        <p><strong>Best for:</strong> Essays, explanations, opinions, and critical thinking</p>
+        <p><strong>Grading:</strong> Manual (requires teacher review)</p>
+        <p><strong>Format:</strong> Question with NO answer options below it</p>
+    </div>
+    
+    <h3>How to Create:</h3>
+    <pre><code>1. What is your favorite programming language and why?
+
+2. Explain the difference between a list and a tuple in Python.
+
+3. Describe three advantages of online learning.
+
+4. What did you learn in this course that surprised you most?</code></pre>
+    
+    <div class="info-box">
+        <strong>💡 How it Works:</strong>
+        <ul>
+            <li>The system detects that no answers follow the question</li>
+            <li>Automatically creates a large text input box for students</li>
+            <li>You must grade these answers manually after exam submission</li>
+            <li>Great for assessing deeper understanding</li>
+        </ul>
+    </div>
+    
+    <h2>Type 3: Programming Tasks</h2>
+    <div class="highlight-box">
+        <p><strong>Best for:</strong> Code examples, detailed instructions, formatted content</p>
+        <p><strong>Grading:</strong> Manual (requires teacher review)</p>
+        <p><strong>Format:</strong> Question + "Programming task:" marker + content</p>
+    </div>
+    
+    <h3>How to Create:</h3>
+    <pre><code>1. What will be the output of this code?
+Programming task:
+x = "5"
+y = 2
+print(x + y)
+
+2. Fix the syntax error in this function:
+Programming task:
+def calculate_sum(a b):
+    result = a + b
+    return result
+
+3. Write a function that returns the larger of two numbers
+Programming task:
+Requirements:
+- Function name: max_number
+- Parameters: num1, num2
+- Returns: the larger number
+
+Example:
+max_number(5, 3) → returns 5
+max_number(2, 8) → returns 8</code></pre>
+    
+    <div class="warning-box">
+        <strong>⚠️ Important:</strong>
+        <ul>
+            <li>The text <code>Programming task:</code> must appear exactly as shown (case-sensitive)</li>
+            <li>Everything after this marker is displayed to students</li>
+            <li>The marker itself is hidden from students</li>
+            <li>Great for including code blocks, examples, and multi-line instructions</li>
+        </ul>
+    </div>
+    
+    <h2>Mixed Question Types Example</h2>
+    <p>You can combine all three types in a single exam:</p>
+    
+    <pre><code>1. What is Python primarily used for?
+Web scraping and data analysis
+Only making games
+Only creating websites
+Hardware programming
+
+2. Explain what a variable is in programming.
+
+3. What is the correct way to create a list in Python?
+my_list = [1, 2, 3]
+my_list = (1, 2, 3)
+my_list = {1, 2, 3}
+my_list = <1, 2, 3>
+
+4. Write a program that prints numbers from 1 to 5
+Programming task:
+Use a for loop or while loop
+Expected output:
+1
+2
+3
+4
+5
+
+5. Do you enjoy programming? Why or why not?
+
+6. What will this code print?
+Programming task:
+numbers = [1, 2, 3, 4, 5]
+print(numbers[2])
+
+7. Which data type is used for text in Python?
+string
+text
+char
+varchar</code></pre>
+    
+    <div class="success-box">
+        <strong>✅ Pro Tips for Mixed Exams:</strong>
+        <ul>
+            <li>Start with easier multiple-choice questions to build student confidence</li>
+            <li>Place open questions in the middle or end</li>
+            <li>Use programming tasks strategically to test practical skills</li>
+            <li>Balance automatic and manual grading for efficiency</li>
+        </ul>
+    </div>
+    
+    <h2>Question Type Summary</h2>
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Format</th>
+            <th>Student Sees</th>
+            <th>Grading</th>
+            <th>Best Use</th>
+        </tr>
+        <tr>
+            <td><strong>Multiple Choice</strong></td>
+            <td>Question + Answers</td>
+            <td>Radio buttons</td>
+            <td>Automatic</td>
+            <td>Facts, definitions</td>
+        </tr>
+        <tr>
+            <td><strong>Open Question</strong></td>
+            <td>Question only</td>
+            <td>Text box</td>
+            <td>Manual</td>
+            <td>Essays, opinions</td>
+        </tr>
+        <tr>
+            <td><strong>Programming Task</strong></td>
+            <td>Question + Marker + Code</td>
+            <td>Code + Text box</td>
+            <td>Manual</td>
+            <td>Code, examples</td>
+        </tr>
+    </table>
+</div>
+
+<!-- SECTION 5: UPLOADING EXAMS -->
+<div class="section" id="uploading-exams">
+    <h1>5. Uploading Exams</h1>
+    
+    <h2>Upload Process</h2>
+    
+    <div class="no-break">
+        <h3><span class="step-number">1</span>Prepare Your Exam File</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Create your exam following the format rules from Section 3</li>
+                <li>Save it as a <code>.txt</code> file</li>
+                <li>Use a descriptive filename (e.g., "Python_Basics_Exam.txt")</li>
+                <li>Ensure proper encoding (UTF-8 for special characters)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">2</span>Click "Add Exam"</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Log in to your teacher account</li>
+                <li>Navigate to your dashboard</li>
+                <li>Click the <strong>"Add Exam"</strong> button</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">3</span>Select Your File</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Click <strong>"Browse Computer"</strong></li>
+                <li>Navigate to your exam file</li>
+                <li>Select the file and click "Open"</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Preview Options</h2>
+    <p>Before finalizing your exam upload, use these three preview buttons to verify everything is correct:</p>
+    
+    <div class="no-break">
+        <h3>📄 View Source</h3>
+        <div class="info-box">
+            <p><strong>What it shows:</strong> The raw text of your exam file exactly as you wrote it</p>
+            <p><strong>Use it to:</strong></p>
+            <ul>
+                <li>Verify formatting is correct</li>
+                <li>Check question numbering</li>
+                <li>Ensure answers are in the right order</li>
+                <li>Look for typos or errors</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>👁️ Student Preview</h3>
+        <div class="info-box">
+            <p><strong>What it shows:</strong> How the exam will appear to students when they take it</p>
+            <p><strong>Use it to:</strong></p>
+            <ul>
+                <li>See the actual exam interface</li>
+                <li>Verify answers are shuffled correctly</li>
+                <li>Check that programming tasks display properly</li>
+                <li>Ensure text direction is correct (LTR/RTL)</li>
+                <li>Test the student experience</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>📊 Exam Data</h3>
+        <div class="info-box">
+            <p><strong>What it shows:</strong> Statistical and structural information about your exam</p>
+            <p><strong>Information displayed:</strong></p>
+            <ul>
+                <li>Total number of questions</li>
+                <li>Number of multiple-choice questions</li>
+                <li>Number of open questions</li>
+                <li>Number of programming tasks</li>
+                <li>Detected language (English/Hebrew/Russian)</li>
+                <li>Text direction (LTR/RTL)</li>
+                <li>Any errors or warnings found</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Finalizing Upload</h2>
+    <div class="success-box">
+        <p><strong>After reviewing all previews:</strong></p>
+        <ol>
+            <li>If everything looks correct, click <strong>"Add Exam"</strong> or <strong>"Upload"</strong></li>
+            <li>Wait for confirmation message</li>
+            <li>Your exam is now available in your exam library</li>
+            <li>You can share the exam link/code with students</li>
+        </ol>
+    </div>
+    
+    <div class="warning-box">
+        <p><strong>⚠️ Common Upload Issues:</strong></p>
+        <ul>
+            <li><strong>File too large:</strong> Keep exam files under 1MB</li>
+            <li><strong>Wrong encoding:</strong> Save as UTF-8 for special characters</li>
+            <li><strong>Formatting errors:</strong> Check "Exam Data" for error messages</li>
+            <li><strong>Missing questions:</strong> Ensure proper number + dot format</li>
+        </ul>
+    </div>
+    
+    <h2>🎯 Load from Examples - Quick Start Templates</h2>
+    <div class="success-box">
+        <p><strong>New to the system? Not sure how to format exams?</strong></p>
+        <p>We provide <strong>ready-made example exams</strong> that you can use immediately or modify for your needs!</p>
+    </div>
+    
+    <div class="no-break">
+        <h3>How to Use Example Exams</h3>
+        <div class="highlight-box">
+            <ol>
+                <li>In your dashboard, click <strong>"Add Exam"</strong></li>
+                <li>Instead of "Browse Computer", click <strong>"Load from Examples"</strong></li>
+                <li>Browse the collection of pre-made exams</li>
+                <li>Select an example that matches your needs</li>
+                <li>The exam is instantly added to your library!</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>📚 What You Can Do With Example Exams</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📖 Learn the Format</h4>
+                <p>See exactly how to structure questions, answers, and programming tasks</p>
+            </div>
+            <div class="feature-card">
+                <h4>🎓 Practice Teaching</h4>
+                <p>Familiarize yourself with the system using real example exams</p>
+            </div>
+            <div class="feature-card">
+                <h4>✏️ Create Templates</h4>
+                <p>Copy example formats and adapt them to your course content</p>
+            </div>
+            <div class="feature-card">
+                <h4>🚀 Instant Testing</h4>
+                <p>Use examples immediately for quick practice tests or demos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>Available Example Categories</h3>
+        <div class="info-box">
+            <p>Our example library includes:</p>
+            <ul>
+                <li><strong>Programming exams:</strong> Python basics, loops, functions (English & Hebrew)</li>
+                <li><strong>Language exams:</strong> English grammar, vocabulary, comprehension</li>
+                <li><strong>Technical exams:</strong> Networking (CCNA ITE), Computer Science topics</li>
+                <li><strong>System tutorials:</strong> Learn how the exam system itself works</li>
+                <li><strong>Mixed formats:</strong> Examples combining multiple question types</li>
+                <li><strong>Multi-language demos:</strong> See Hebrew, English, and Russian exam formats</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="warning-box">
+        <p><strong>💡 Pro Tip:</strong> Start by loading 2-3 example exams, take them as a student would, then use "View Source" to see exactly how they're formatted. This is the fastest way to learn!</p>
+    </div>
+</div>
+
+<!-- SECTION 6: PROCTORING -->
+<div class="section" id="proctoring">
+    <h1>6. Proctoring & Cheating Control 🔒</h1>
+    
+    <h2>What is Proctoring?</h2>
+    <p>
+        <strong>Proctoring</strong> means monitoring students during exams to ensure academic integrity. 
+        This system uses <strong>automatic digital proctoring</strong> - the computer continuously monitors 
+        student behavior and logs any suspicious activity without requiring a webcam or additional software.
+    </p>
+    
+    <div class="highlight-box">
+        <h3>Key Benefits:</h3>
+        <ul>
+            <li><strong>Automatic Monitoring:</strong> No need to watch students manually</li>
+            <li><strong>Detailed Logs:</strong> Every suspicious action is recorded with timestamps</li>
+            <li><strong>Non-Intrusive:</strong> No webcam or screen recording required</li>
+            <li><strong>Fair Testing:</strong> All students are monitored equally</li>
+            <li><strong>Evidence-Based:</strong> Review concrete data about cheating attempts</li>
+        </ul>
+    </div>
+    
+    <h2>How Protection Works</h2>
+    <p>When a student starts an exam, the proctoring system automatically activates and monitors:</p>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>👁️ Focus Tracking</h4>
+            <p>Detects when students leave the exam page or switch to other tabs/windows</p>
+        </div>
+        <div class="feature-card">
+            <h4>📋 Copy Prevention</h4>
+            <p>Blocks copying of questions and answers (Ctrl+C completely disabled)</p>
+        </div>
+        <div class="feature-card">
+            <h4>📝 Paste Prevention</h4>
+            <p>Prevents pasting from external sources (Ctrl+V blocked)</p>
+        </div>
+        <div class="feature-card">
+            <h4>🖱️ Right-Click Block</h4>
+            <p>Disables context menu to prevent copying/inspecting</p>
+        </div>
+        <div class="feature-card">
+            <h4>🛠️ DevTools Block</h4>
+            <p>Prevents opening browser developer tools and viewing source code</p>
+        </div>
+        <div class="feature-card">
+            <h4>🔊 Audio Warnings</h4>
+            <p>Plays beep sounds when suspicious activity is detected</p>
+        </div>
+    </div>
+    
+    <h2>Detected Cheating Types</h2>
+    
+    <table>
+        <tr>
+            <th>Event Type</th>
+            <th>What It Detects</th>
+            <th>Severity</th>
+            <th>Student Impact</th>
+        </tr>
+        <tr>
+            <td><code>focus_lost</code></td>
+            <td>Student switched to another tab/window/application</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+            <td>Warning beep plays</td>
+        </tr>
+        <tr>
+            <td><code>window_minimized</code></td>
+            <td>Exam window was minimized or hidden</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+            <td>Logged silently</td>
+        </tr>
+        <tr>
+            <td><code>copy_blocked</code></td>
+            <td>Attempted to copy text with Ctrl+C</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+            <td>Action blocked</td>
+        </tr>
+        <tr>
+            <td><code>paste_attempt</code></td>
+            <td>Attempted to paste with Ctrl+V</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+            <td>Action blocked</td>
+        </tr>
+        <tr>
+            <td><code>right_click</code></td>
+            <td>Right-clicked on exam page</td>
+            <td><span class="badge badge-info">Low</span></td>
+            <td>Context menu disabled</td>
+        </tr>
+        <tr>
+            <td><code>devtools_f12</code></td>
+            <td>Pressed F12 to open developer tools</td>
+            <td><span class="badge badge-danger">High</span></td>
+            <td>Key press blocked</td>
+        </tr>
+        <tr>
+            <td><code>devtools_keyboard</code></td>
+            <td>Pressed Ctrl+Shift+I/J/K (developer shortcuts)</td>
+            <td><span class="badge badge-danger">High</span></td>
+            <td>Key press blocked</td>
+        </tr>
+        <tr>
+            <td><code>view_source</code></td>
+            <td>Pressed Ctrl+U to view page source</td>
+            <td><span class="badge badge-danger">High</span></td>
+            <td>Key press blocked</td>
+        </tr>
+        <tr>
+            <td><code>page_unload</code></td>
+            <td>Attempted to close or reload the exam page</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+            <td>Logged + browser warning</td>
+        </tr>
+    </table>
+    
+    <h2>What Students Experience</h2>
+    
+    <div class="no-break">
+        <h3>Students WILL Notice:</h3>
+        <div class="warning-box">
+            <ul>
+                <li><strong>Warning beep sounds</strong> when they lose focus (switch tabs)</li>
+                <li><strong>Copy/paste doesn't work</strong> (Ctrl+C and Ctrl+V disabled)</li>
+                <li><strong>Right-click is disabled</strong> (context menu won't appear)</li>
+                <li><strong>Developer tools won't open</strong> (F12 and shortcuts blocked)</li>
+                <li><strong>Browser may show warning</strong> when trying to leave the page</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>Students WON'T See:</h3>
+        <div class="info-box">
+            <ul>
+                <li>❌ Pop-up messages about being monitored</li>
+                <li>❌ Warnings when violations are logged</li>
+                <li>❌ Count of how many times they've been caught</li>
+                <li>❌ Real-time alerts about proctoring</li>
+            </ul>
+            <p><strong>Result:</strong> Monitoring is effective but non-intrusive</p>
+        </div>
+    </div>
+    
+    <h2>Reviewing Cheating Logs</h2>
+    
+    <p>After students complete exams, you can review all logged activity to identify potential academic dishonesty:</p>
+    
+    <div class="no-break">
+        <h3>📁 Log Files</h3>
+        <div class="highlight-box">
+            <p>The system automatically stores logs in the <code>logs/</code> folder:</p>
+            <ul>
+                <li><strong>cheating_alerts.log:</strong> All detected cheating attempts</li>
+                <li><strong>exam_sessions.log:</strong> When students started exams</li>
+                <li><strong>exam_submissions.log:</strong> Final scores and violation counts</li>
+                <li><strong>login_history.log:</strong> Teacher and student login events</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>📊 Log Information Includes:</h3>
+        <div class="info-box">
+            <ul>
+                <li>Student name and session ID</li>
+                <li>Exam ID and name</li>
+                <li>Type of cheating attempt</li>
+                <li>Exact timestamp (date and time)</li>
+                <li>Total violations per student</li>
+                <li>IP address and browser information</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Interpreting Violations</h2>
+    
+    <div class="no-break">
+        <h3>🟢 Low Concern (1-3 violations)</h3>
+        <div class="success-box">
+            <p><strong>Likely causes:</strong></p>
+            <ul>
+                <li>Accidental tab switching due to notifications</li>
+                <li>Browser pop-ups or system alerts</li>
+                <li>Student unfamiliar with proctoring</li>
+                <li>Technical issues (slow computer/internet)</li>
+            </ul>
+            <p><strong>Action:</strong> Monitor but usually not a concern</p>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>🟡 Medium Concern (4-10 violations)</h3>
+        <div class="warning-box">
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Student looking for answers in other tabs</li>
+                <li>Multiple attempts to copy questions</li>
+                <li>Trying to access external resources</li>
+                <li>Pattern of suspicious behavior</li>
+            </ul>
+            <p><strong>Action:</strong> Review logs carefully, may warrant a conversation</p>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>🔴 High Concern (10+ violations)</h3>
+        <div class="error-box">
+            <p><strong>Strong indicators of:</strong></p>
+            <ul>
+                <li>Deliberate cheating attempts</li>
+                <li>Persistent searching for answers</li>
+                <li>Trying to circumvent proctoring</li>
+                <li>Academic dishonesty</li>
+            </ul>
+            <p><strong>Action:</strong> Investigate thoroughly, follow school policy</p>
+        </div>
+    </div>
+    
+    <h2>Proctoring Limitations</h2>
+    
+    <div class="warning-box">
+        <h3>⚠️ What Proctoring CAN Detect:</h3>
+        <ul>
+            <li>✅ Leaving exam window or switching tabs</li>
+            <li>✅ Copying/pasting attempts within the browser</li>
+            <li>✅ Right-clicking and trying to access source code</li>
+            <li>✅ Opening developer tools</li>
+            <li>✅ Minimizing exam window</li>
+        </ul>
+    </div>
+    
+    <div class="error-box">
+        <h3>❌ What Proctoring CANNOT Detect:</h3>
+        <ul>
+            <li>❌ Using a mobile phone to search answers</li>
+            <li>❌ Having notes on paper nearby</li>
+            <li>❌ Someone else sitting next to the student providing help</li>
+            <li>❌ Using a second computer or monitor</li>
+            <li>❌ Taking photos of the screen with a camera</li>
+            <li>❌ Having someone else take the exam</li>
+        </ul>
+    </div>
+    
+    <div class="info-box">
+        <p><strong>💡 Important:</strong> Digital proctoring is a <strong>helpful tool</strong>, but it's 
+        <strong>not perfect</strong>. Use it as one component of your exam security strategy, not as the 
+        only defense against cheating. Combine with other methods like:</p>
+        <ul>
+            <li>Randomized question order</li>
+            <li>Time limits</li>
+            <li>Unique questions for each student</li>
+            <li>Honor code agreements</li>
+            <li>Follow-up oral examinations for suspicious cases</li>
+        </ul>
+    </div>
+    
+    <h2>Privacy & Data Protection</h2>
+    
+    <div class="success-box">
+        <h3>✅ What We DO Collect:</h3>
+        <ul>
+            <li>Student name (as entered by student)</li>
+            <li>Exam interaction data (clicks, focus events)</li>
+            <li>Keyboard events during exam (for proctoring only)</li>
+            <li>Timestamps of all activities</li>
+            <li>IP address and browser information</li>
+        </ul>
+    </div>
+    
+    <div class="error-box">
+        <h3>❌ What We DO NOT Collect:</h3>
+        <ul>
+            <li>❌ Webcam images or video</li>
+            <li>❌ Microphone or audio recordings</li>
+            <li>❌ Screen recordings or screenshots</li>
+            <li>❌ Personal files from student's computer</li>
+            <li>❌ Browsing history outside the exam</li>
+            <li>❌ Any personally identifiable information beyond name</li>
+        </ul>
+    </div>
+    
+    <p style="margin-top: 20px;"><strong>Data Security:</strong> All logs are stored securely on your server and are 
+    accessible only to authorized teachers. Students cannot view or access proctoring logs.</p>
+</div>
+
+<!-- SECTION 7: STUDENT EXPERIENCE -->
+<div class="section" id="student-experience">
+    <h1>7. Student Experience</h1>
+    
+    <h2>How Students Take Exams</h2>
+    
+    <div class="no-break">
+        <h3><span class="step-number">1</span>Access the Exam</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Student goes to <strong>ex.yamsoft.org</strong></li>
+                <li>Enters the exam code you provided</li>
+                <li>No account registration required</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">2</span>Pre-Exam Screen</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Student sees warnings about proctoring</li>
+                <li>Enters their first and last name</li>
+                <li>Reads instructions and exam rules</li>
+                <li>Clicks "Start Exam" when ready</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">3</span>Taking the Exam</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Timer starts automatically</li>
+                <li>Proctoring system activates</li>
+                <li>Student answers questions one by one</li>
+                <li>Can review and change answers before submitting</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">4</span>Submission</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Student clicks "Submit Exam"</li>
+                <li>May see confirmation dialog</li>
+                <li>Multiple-choice questions graded instantly</li>
+                <li>Student sees their score immediately (for auto-graded questions)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Question Display</h2>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>📝 Multiple Choice</h4>
+            <p>Radio buttons with shuffled answer options</p>
+        </div>
+        <div class="feature-card">
+            <h4>✍️ Open Questions</h4>
+            <p>Large text box for typing answers</p>
+        </div>
+        <div class="feature-card">
+            <h4>💻 Programming Tasks</h4>
+            <p>Code/instructions displayed + text box for solution</p>
+        </div>
+        <div class="feature-card">
+            <h4>⏱️ Timer</h4>
+            <p>Visible timer showing elapsed time (if enabled)</p>
+        </div>
+    </div>
+    
+    <h2>Student Interface Features</h2>
+    
+    <div class="info-box">
+        <ul>
+            <li><strong>Clean Design:</strong> Distraction-free interface focused on exam content</li>
+            <li><strong>RTL Support:</strong> Automatic right-to-left layout for Hebrew exams</li>
+            <li><strong>Mobile Friendly:</strong> Works on tablets and smartphones</li>
+            <li><strong>Keyboard Navigation:</strong> Students can use Tab and Enter keys</li>
+            <li><strong>Auto-Save:</strong> Answers saved automatically as students type</li>
+        </ul>
+    </div>
+    
+    <div class="success-box">
+        <h3>✅ Best Practices for Students:</h3>
+        <ul>
+            <li>Use a desktop or laptop computer (not phone)</li>
+            <li>Ensure stable internet connection</li>
+            <li>Close all other tabs and applications</li>
+            <li>Read all instructions before starting</li>
+            <li>Don't refresh the page during the exam</li>
+            <li>Don't try to switch tabs (will be logged)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- SECTION 8: VIEWING RESULTS -->
+<div class="section" id="viewing-results">
+    <h1>8. Viewing Results</h1>
+    
+    <h2>Accessing Results</h2>
+    
+    <div class="no-break">
+        <h3><span class="step-number">1</span>Navigate to Results</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>Log in to your teacher account</li>
+                <li>Go to your dashboard</li>
+                <li>Click <strong>"View Results"</strong> or <strong>"Exam Results"</strong></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">2</span>Results Overview</h3>
+        <div class="info-box">
+            <p><strong>You will see a table with:</strong></p>
+            <ul>
+                <li>Student names</li>
+                <li>Exam names</li>
+                <li>Scores (percentage for auto-graded questions)</li>
+                <li>Submission date and time</li>
+                <li>Time spent on exam</li>
+                <li>Cheating attempt count</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">3</span>Detailed View</h3>
+        <div class="highlight-box">
+            <p><strong>Click on any result to see:</strong></p>
+            <ul>
+                <li>All questions and student answers</li>
+                <li>Correct/incorrect indicators</li>
+                <li>Open question responses (for manual grading)</li>
+                <li>Proctoring log for that student</li>
+                <li>Full exam session details</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Grading Open Questions</h2>
+    
+    <div class="warning-box">
+        <p><strong>⚠️ Remember:</strong> Open questions and programming tasks require manual grading.</p>
+        <ol>
+            <li>Click on a student result</li>
+            <li>Scroll to open questions</li>
+            <li>Read the student's answer</li>
+            <li>Assign points or marks based on your rubric</li>
+            <li>Optionally add feedback comments</li>
+            <li>Save the updated grade</li>
+        </ol>
+    </div>
+    
+    <h2>Analyzing Proctoring Data</h2>
+    
+    <div class="highlight-box">
+        <h3>For Each Student, Check:</h3>
+        <ul>
+            <li><strong>Total Violations:</strong> How many cheating attempts were logged?</li>
+            <li><strong>Violation Types:</strong> What kind of suspicious behavior?</li>
+            <li><strong>Timing Patterns:</strong> When did violations occur during the exam?</li>
+            <li><strong>Score Correlation:</strong> Do high-scoring students have many violations?</li>
+        </ul>
+    </div>
+    
+    <div class="info-box">
+        <h3>💡 Red Flags to Look For:</h3>
+        <ul>
+            <li>Unusually high number of <code>focus_lost</code> events</li>
+            <li>Multiple <code>devtools</code> or <code>view_source</code> attempts</li>
+            <li>Perfect score with many violations</li>
+            <li>Long periods of inactivity (may indicate getting help elsewhere)</li>
+            <li>Patterns of violations clustered around difficult questions</li>
+        </ul>
+    </div>
+    
+    <h2>Exporting Results</h2>
+    
+    <div class="success-box">
+        <p><strong>Export options (if available):</strong></p>
+        <ul>
+            <li>Download results as CSV spreadsheet</li>
+            <li>Export proctoring logs as text files</li>
+            <li>Print individual student reports</li>
+            <li>Generate class statistics and analytics</li>
+        </ul>
+    </div>
+</div>
+
+<!-- SECTION 9: BEST PRACTICES -->
+<div class="section" id="best-practices">
+    <h1>9. Best Practices & Tips</h1>
+    
+    <h2>Creating Effective Exams</h2>
+    
+    <div class="success-box">
+        <h3>✅ DO:</h3>
+        <ul>
+            <li><strong>Mix question types:</strong> Combine multiple-choice, open, and programming tasks</li>
+            <li><strong>Test your exam:</strong> Use "Student Preview" before sharing with students</li>
+            <li><strong>Provide clear instructions:</strong> Explain what students should do</li>
+            <li><strong>Balance difficulty:</strong> Start with easier questions to build confidence</li>
+            <li><strong>Use descriptive filenames:</strong> Easy to identify exams later</li>
+            <li><strong>Keep backups:</strong> Save exam files on your computer</li>
+            <li><strong>Review question quality:</strong> Ensure answers are clear and unambiguous</li>
+        </ul>
+    </div>
+    
+    <div class="error-box">
+        <h3>❌ DON'T:</h3>
+        <ul>
+            <li><strong>Forget the correct answer order:</strong> Always place correct answer first</li>
+            <li><strong>Use ambiguous questions:</strong> Make sure there's only one correct answer</li>
+            <li><strong>Mix languages:</strong> Keep exams in a single language</li>
+            <li><strong>Create overly long exams:</strong> Students may lose focus or run out of time</li>
+            <li><strong>Skip testing:</strong> Always preview before deploying</li>
+            <li><strong>Ignore formatting:</strong> Proper structure ensures correct parsing</li>
+        </ul>
+    </div>
+    
+    <h2>Proctoring Best Practices</h2>
+    
+    <div class="no-break">
+        <h3>Before the Exam:</h3>
+        <div class="highlight-box">
+            <ul>
+                <li><strong>Inform students:</strong> Tell them proctoring is active</li>
+                <li><strong>Explain rules:</strong> What's allowed and what's not</li>
+                <li><strong>Technical check:</strong> Ensure students can access the system</li>
+                <li><strong>Set expectations:</strong> Consequences for cheating</li>
+                <li><strong>Practice run:</strong> Consider a practice exam first</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>During the Exam:</h3>
+        <div class="highlight-box">
+            <ul>
+                <li><strong>Be available:</strong> Monitor for technical issues</li>
+                <li><strong>Check activity:</strong> See who's actively taking the exam</li>
+                <li><strong>Respond to questions:</strong> Help with technical problems only</li>
+                <li><strong>Don't intervene unnecessarily:</strong> Let proctoring work automatically</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>After the Exam:</h3>
+        <div class="highlight-box">
+            <ul>
+                <li><strong>Review logs promptly:</strong> Check proctoring data while it's fresh</li>
+                <li><strong>Grade open questions:</strong> Don't delay manual grading</li>
+                <li><strong>Investigate anomalies:</strong> Look into suspicious patterns</li>
+                <li><strong>Follow policies:</strong> Apply your school's academic integrity rules</li>
+                <li><strong>Provide feedback:</strong> Let students know their results</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Exam Security Tips</h2>
+    
+    <div class="info-box">
+        <h3>💡 Enhance Security By:</h3>
+        <ul>
+            <li><strong>Time limits:</strong> Set appropriate exam duration</li>
+            <li><strong>Question pools:</strong> Randomize questions for different students</li>
+            <li><strong>Unique exams:</strong> Create variations of the same exam</li>
+            <li><strong>Scheduled access:</strong> Only allow exam access during specific times</li>
+            <li><strong>One attempt policy:</strong> Prevent multiple submissions</li>
+            <li><strong>IP restrictions:</strong> Limit access to specific locations (if needed)</li>
+        </ul>
+    </div>
+    
+    <h2>Technical Tips</h2>
+    
+    <div class="success-box">
+        <h3>✅ For Best Performance:</h3>
+        <ul>
+            <li>Save exam files as UTF-8 encoded text</li>
+            <li>Use consistent spacing and formatting</li>
+            <li>Test exams on different browsers</li>
+            <li>Keep exam files under 1MB in size</li>
+            <li>Use descriptive exam names</li>
+            <li>Organize exams by subject or date</li>
+            <li>Regular backup of important exams</li>
+        </ul>
+    </div>
+    
+    <h2>Communication Tips</h2>
+    
+    <div class="highlight-box">
+        <h3>Communicating With Students:</h3>
+        <ul>
+            <li><strong>Clear instructions:</strong> Provide written exam guidelines</li>
+            <li><strong>Technical requirements:</strong> Tell students what they need</li>
+            <li><strong>Exam link/code:</strong> Share in advance with clear deadline</li>
+            <li><strong>Support contact:</strong> Provide way to reach you for help</li>
+            <li><strong>Proctoring notice:</strong> Inform about monitoring in advance</li>
+            <li><strong>Results timeline:</strong> When will they see their grades?</li>
+        </ul>
+    </div>
+</div>
+
+<!-- SECTION 10: TROUBLESHOOTING -->
+<div class="section" id="troubleshooting">
+    <h1>10. Troubleshooting</h1>
+    
+    <h2>Common Issues & Solutions</h2>
+    
+    <div class="no-break">
+        <h3>❓ Exam Not Uploading</h3>
+        <div class="warning-box">
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>File is not in .txt format → Save as plain text</li>
+                <li>File is too large → Keep under 1MB</li>
+                <li>Wrong encoding → Save as UTF-8</li>
+                <li>Network issue → Check internet connection</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>❓ Questions Not Displaying Correctly</h3>
+        <div class="warning-box">
+            <p><strong>Check formatting:</strong></p>
+            <ul>
+                <li>Questions must start with number + dot (e.g., "1.")</li>
+                <li>Answers should not have numbers or bullets</li>
+                <li>Correct answer must be first</li>
+                <li>Use "Exam Data" preview to see errors</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>❓ Proctoring Not Working</h3>
+        <div class="warning-box">
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Student using very old browser → Update browser</li>
+                <li>JavaScript disabled → Enable JavaScript</li>
+                <li>Browser extension interfering → Disable extensions</li>
+                <li>Incognito/private mode → Use normal browser mode</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>❓ Student Can't Access Exam</h3>
+        <div class="warning-box">
+            <p><strong>Check:</strong></p>
+            <ul>
+                <li>Is the exam link/code correct?</li>
+                <li>Is the exam activated and published?</li>
+                <li>Is exam scheduled for the current time?</li>
+                <li>Did student enter the correct code?</li>
+                <li>Network firewall blocking access?</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3>❓ Excessive Focus Loss Events</h3>
+        <div class="info-box">
+            <p><strong>May not indicate cheating if caused by:</strong></p>
+            <ul>
+                <li>Browser notifications or pop-ups</li>
+                <li>Operating system updates/alerts</li>
+                <li>Slow computer causing UI lag</li>
+                <li>Unstable internet connection</li>
+                <li>Antivirus or security software alerts</li>
+            </ul>
+        </div>
+    </div>
+    
+    <h2>Getting Help</h2>
+    
+    <div class="highlight-box">
+        <h3>If problems persist:</h3>
+        <ul>
+            <li>Check system documentation and FAQs</li>
+            <li>Review log files for error messages</li>
+            <li>Test with different browser or device</li>
+            <li>Contact technical support with details:
+                <ul>
+                    <li>What you were trying to do</li>
+                    <li>What happened instead</li>
+                    <li>Error messages (if any)</li>
+                    <li>Browser and operating system</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- SECTION 11: QUICK REFERENCE -->
+<div class="section" id="quick-reference">
+    <h1>11. Quick Reference Guide</h1>
+    
+    <h2>Exam File Format Cheat Sheet</h2>
+    
+    <table>
+        <tr>
+            <th>Element</th>
+            <th>Format</th>
+            <th>Example</th>
+        </tr>
+        <tr>
+            <td><strong>Question</strong></td>
+            <td><code>Number. Question text?</code></td>
+            <td><code>1. What is Python?</code></td>
+        </tr>
+        <tr>
+            <td><strong>Multiple Choice</strong></td>
+            <td>Question + Answers (correct first)</td>
+            <td><code>1. What is 2+2?<br>4<br>5<br>3</code></td>
+        </tr>
+        <tr>
+            <td><strong>Open Question</strong></td>
+            <td>Question only (no answers)</td>
+            <td><code>1. Explain recursion.</code></td>
+        </tr>
+        <tr>
+            <td><strong>Programming Task</strong></td>
+            <td>Question + <code>Programming task:</code> + content</td>
+            <td><code>1. Fix this code:<br>Programming task:<br>def add(a b):<br>  return a+b</code></td>
+        </tr>
+    </table>
+    
+    <h2>Proctoring Events Quick Reference</h2>
+    
+    <table>
+        <tr>
+            <th>Event Code</th>
+            <th>Meaning</th>
+            <th>Severity</th>
+        </tr>
+        <tr>
+            <td><code>focus_lost</code></td>
+            <td>Tab/window switch</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+        </tr>
+        <tr>
+            <td><code>copy_blocked</code></td>
+            <td>Tried to copy (Ctrl+C)</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+        </tr>
+        <tr>
+            <td><code>paste_attempt</code></td>
+            <td>Tried to paste (Ctrl+V)</td>
+            <td><span class="badge badge-warning">Medium</span></td>
+        </tr>
+        <tr>
+            <td><code>devtools_*</code></td>
+            <td>Tried developer tools</td>
+            <td><span class="badge badge-danger">High</span></td>
+        </tr>
+        <tr>
+            <td><code>right_click</code></td>
+            <td>Right-clicked</td>
+            <td><span class="badge badge-info">Low</span></td>
+        </tr>
+    </table>
+    
+    <h2>Common Tasks Checklist</h2>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>✅ Creating Exam</h4>
+            <ol style="font-size: 10pt;">
+                <li>Write questions in .txt file</li>
+                <li>Number questions (1., 2., 3.)</li>
+                <li>Put correct answer first</li>
+                <li>Save file</li>
+            </ol>
+        </div>
+        <div class="feature-card">
+            <h4>✅ Uploading Exam</h4>
+            <ol style="font-size: 10pt;">
+                <li>Click "Add Exam"</li>
+                <li>Browse & select file</li>
+                <li>Preview (all 3 tabs)</li>
+                <li>Confirm upload</li>
+            </ol>
+        </div>
+        <div class="feature-card">
+            <h4>✅ Sharing Exam</h4>
+            <ol style="font-size: 10pt;">
+                <li>Get exam link/code</li>
+                <li>Send to students</li>
+                <li>Provide deadline</li>
+                <li>Mention proctoring</li>
+            </ol>
+        </div>
+        <div class="feature-card">
+            <h4>✅ Reviewing Results</h4>
+            <ol style="font-size: 10pt;">
+                <li>Go to "View Results"</li>
+                <li>Check auto-graded scores</li>
+                <li>Grade open questions</li>
+                <li>Review proctoring logs</li>
+            </ol>
+        </div>
+    </div>
+    
+    <h2>Keyboard Shortcuts Blocked During Exam</h2>
+    
+    <table>
+        <tr>
+            <th>Shortcut</th>
+            <th>Normal Function</th>
+            <th>Status</th>
+        </tr>
+        <tr>
+            <td><code>F12</code></td>
+            <td>Developer Tools</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Ctrl+Shift+I</code></td>
+            <td>Inspect Element</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Ctrl+Shift+J</code></td>
+            <td>Console</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Ctrl+U</code></td>
+            <td>View Source</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Ctrl+C</code></td>
+            <td>Copy</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Ctrl+V</code></td>
+            <td>Paste</td>
+            <td>🔒 Blocked</td>
+        </tr>
+        <tr>
+            <td><code>Right Click</code></td>
+            <td>Context Menu</td>
+            <td>🔒 Blocked</td>
+        </tr>
+    </table>
+    
+    <h2>Important URLs</h2>
+    
+    <div class="highlight-box" style="text-align: center; font-size: 12pt;">
+        <p><strong>Main Website:</strong> <code>ex.yamsoft.org</code></p>
+        <p><strong>Teacher Login:</strong> <code>ex.yamsoft.org/login</code></p>
+        <p><strong>Sign Up:</strong> <code>ex.yamsoft.org/signup</code></p>
+    </div>
+    
+    <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; text-align: center;">
+        <h2 style="color: white; border: none; margin-bottom: 10px;">Thank You!</h2>
+        <p style="font-size: 12pt;">
+            This User Manual was created to help teachers like you make the most of the Online Exam System. 
+            We hope it serves as a valuable resource throughout your teaching journey.
+        </p>
+        <p style="font-size: 11pt; margin-top: 20px; opacity: 0.9;">
+            For questions, support, or feedback, please visit our website or contact your system administrator.
+        </p>
+        <p style="font-size: 11pt; margin-top: 20px;">
+            <strong>Creator / Owner:</strong> Yoav Moiseev<br>
+            <a href="https://www.yamsoft.org" style="color: white; text-decoration: underline;">www.yamsoft.org</a>
+        </p>
+        <p style="font-size: 10pt; margin-top: 20px; opacity: 0.8;">
+            Version 2.0 | February 2026 | © Online Exam System<br>
+            <a href="https://ex.yamsoft.org" style="color: white;">ex.yamsoft.org</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Auto Exam - מדריך משתמש</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @bottom-left {
+                content: counter(page);
+                font-family: Arial, sans-serif;
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Arial';
+            line-height: 1.8;
+            color: #333;
+            background: white;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .cover {
+            page-break-after: always;
+            height: 297mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .cover h1 {
+            font-size: 48pt;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .cover .subtitle {
+            font-size: 24pt;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .cover .version {
+            font-size: 14pt;
+            margin-top: 60px;
+            opacity: 0.8;
+        }
+        
+        .cover .icon {
+            font-size: 120pt;
+            margin-bottom: 30px;
+        }
+        
+        .toc {
+            page-break-after: always;
+            padding: 40px 20px;
+        }
+        
+        .toc h2 {
+            color: #667eea;
+            font-size: 32pt;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .toc li {
+            margin: 15px 0;
+            font-size: 14pt;
+        }
+        
+        .toc a {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .toc a:hover {
+            background: #f0f0f0;
+        }
+        
+        .toc .toc-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .toc .toc-dots {
+            flex-grow: 1;
+            border-bottom: 2px dotted #ccc;
+            margin: 0 10px;
+            align-self: flex-end;
+        }
+        
+        .toc .toc-page {
+            color: #764ba2;
+            font-weight: bold;
+        }
+        
+        .section {
+            page-break-before: always;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 28pt;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #764ba2;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #764ba2;
+            font-size: 20pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            color: #667eea;
+            font-size: 16pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        .highlight-box {
+            background: #f8f9ff;
+            border-right: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-right: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            border-right: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border-right: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 10pt;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+        }
+        
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: right;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        
+        tr:hover {
+            background: #f0f0ff;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #667eea40;
+        }
+        
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        hr {
+            border: none;
+            border-top: 2px solid #e0e0e0;
+            margin: 30px 0;
+        }
+        
+        .no-break {
+            page-break-inside: avoid;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9pt;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- עמוד שער -->
+<div class="cover">
+    <div class="icon">📚</div>
+    <h1>מערכת בחינות אוטומטית לבתי ספר<br><span style="font-size: 18pt; opacity: 0.9;">(School Auto Exam)</span></h1>
+    <div class="subtitle">מדריך מלא למורים</div>
+    <p style="font-size: 14pt; max-width: 600px; margin: 20px auto;">
+        מדריך מקיף ליצירה, ניהול ומעקב אחר בחינות מקוונות עם מערכת פיקוח מובנית ומניעת רמאות
+    </p>
+    <div class="version">
+        גרסה 2.0 | פברואר 2026<br>
+        אתר: <a href="https://ex.yamsoft.org" style="color: white; text-decoration: underline;">ex.yamsoft.org</a><br>
+        <br>
+        <strong>יוצר / בעלים:</strong> יואב מוייסייב<br>
+        <a href="https://www.yamsoft.org" style="color: white; text-decoration: underline; font-size: 13pt;">www.yamsoft.org</a>
+    </div>
+</div>
+
+<!-- תוכן עניינים -->
+<div class="toc">
+    <h2>📋 תוכן עניינים</h2>
+    <ul>
+        <li>
+            <a href="#introduction">
+                <span><span class="toc-number">1</span>מבוא</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">3</span>
+            </a>
+        </li>
+        <li>
+            <a href="#getting-started">
+                <span><span class="toc-number">2</span>תחילת עבודה</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">4</span>
+            </a>
+        </li>
+        <li>
+            <a href="#creating-exams">
+                <span><span class="toc-number">3</span>יצירת קבצי בחינות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">5</span>
+            </a>
+        </li>
+        <li>
+            <a href="#question-types">
+                <span><span class="toc-number">4</span>סוגי שאלות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">7</span>
+            </a>
+        </li>
+        <li>
+            <a href="#uploading-exams">
+                <span><span class="toc-number">5</span>העלאת בחינות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">11</span>
+            </a>
+        </li>
+        <li>
+            <a href="#proctoring">
+                <span><span class="toc-number">6</span>פיקוח ובקרת רמאות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">13</span>
+            </a>
+        </li>
+        <li>
+            <a href="#student-experience">
+                <span><span class="toc-number">7</span>חווית הסטודנט</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">18</span>
+            </a>
+        </li>
+        <li>
+            <a href="#viewing-results">
+                <span><span class="toc-number">8</span>צפייה בתוצאות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">19</span>
+            </a>
+        </li>
+        <li>
+            <a href="#best-practices">
+                <span><span class="toc-number">9</span>שיטות עבודה מומלצות וטיפים</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">20</span>
+            </a>
+        </li>
+        <li>
+            <a href="#troubleshooting">
+                <span><span class="toc-number">10</span>פתרון בעיות</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">22</span>
+            </a>
+        </li>
+        <li>
+            <a href="#quick-reference">
+                <span><span class="toc-number">11</span>מדריך עזר מהיר</span>
+                <span class="toc-dots"></span>
+                <span class="toc-page">23</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- פרק 1: מבוא -->
+<div class="section" id="introduction">
+    <h1>1. מבוא</h1>
+    
+    <h2>מהי המערכת הזו?</h2>
+    <p>
+        זוהי <strong>פלטפורמה מקיפה לבחינות מקוונות</strong> המאפשרת למורים ליצור, להפיץ ולתת ציונים אוטומטיים לבחינות. התלמידים עושים את הבחינות ישירות בדפדפן האינטרנט, והמערכת מספקת תוצאות מיידיות עבור שאלות אמריקאיות תוך מתן אפשרות לבדיקה ידנית של תשובות פתוחות.
+    </p>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>🎯 קל לשימוש</h4>
+            <p>פורמט קובץ טקסט פשוט ליצירת בחינות - אין צורך בתוכנה מורכבת</p>
+        </div>
+        <div class="feature-card">
+            <h4>⚡ תוצאות מיידיות</h4>
+            <p>בדיקה אוטומטית לשאלות אמריקאיות עם משוב מיידי</p>
+        </div>
+        <div class="feature-card">
+            <h4>🌍 רב-לשוני</h4>
+            <p>תומך בעברית, אנגלית ורוסית עם זיהוי אוטומטי של כיוון הטקסט</p>
+        </div>
+        <div class="feature-card">
+            <h4>🔒 מאובטח ומפוקח</h4>
+            <p>מערכת פיקוח מובנית העוקבת ומתעדת ניסיונות רמאות פוטנציאליים</p>
+        </div>
+    </div>
+    
+    <h2>תכונות עיקריות</h2>
+    <div class="highlight-box">
+        <ul>
+            <li><strong>סוגי שאלות מרובים:</strong> שאלות אמריקאיות, שאלות פתוחות ומשימות תכנות</li>
+            <li><strong>פיקוח אוטומטי:</strong> מזהה מעבר בין כרטיסיות, ניסיונות העתקה והתנהגות חשודה</li>
+            <li><strong>מעקב בזמן אמת:</strong> עקוב אחר התקדמות התלמידים ופעילות הבחינה תוך כדי</li>
+            <li><strong>תיעוד מקיף:</strong> לוגים מפורטים של כל מפגשי הבחינה וניסיונות רמאות</li>
+            <li><strong>אין צורך בהתקנה:</strong> גישה מכל מכשיר עם דפדפן אינטרנט</li>
+            <li><strong>פורמטים גמישים:</strong> ערבב סוגי שאלות שונים בבחינה אחת</li>
+        </ul>
+    </div>
+    
+    <h2>דרישות מערכת</h2>
+    <div class="info-box">
+        <strong>עבור מורים:</strong>
+        <ul>
+            <li>דפדפן מודרני (Chrome, Firefox, Edge, Safari)</li>
+            <li>חיבור לאינטרנט</li>
+            <li>עורך טקסט ליצירת קבצי בחינות</li>
+        </ul>
+        
+        <strong>עבור תלמידים:</strong>
+        <ul>
+            <li>דפדפן מודרני עם JavaScript מופעל</li>
+            <li>חיבור יציב לאינטרנט</li>
+            <li>אין צורך בהתקנת תוכנה נוספת</li>
+        </ul>
+    </div>
+    
+    <h2>היכן לגשת</h2>
+    <p style="font-size: 14pt; text-align: center; margin: 20px 0;">
+        <strong>אתר:</strong> <code style="font-size: 16pt;">ex.yamsoft.org</code>
+    </p>
+    
+    <h2>📡 גרסה אופליין / עצמאית זמינה</h2>
+    <div class="success-box">
+        <p><strong>צריך להשתמש במערכת ללא אינטרנט?</strong> אנו מציעים <strong>גרסה אופליין/עצמאית</strong> מיוחדת שעובדת בצורה מנותקת לחלוטין מהאינטרנט.</p>
+        
+        <h3>מושלם עבור:</h3>
+        <ul>
+            <li><strong>🕌 מוסדות דתיים:</strong> מקומות שבהם גישה לאינטרנט מוגבלת או אסורה</li>
+            <li><strong>🔒 אבטחה מקסימלית:</strong> מונע מתלמידים לחפש תשובות באינטרנט במהלך הבחינה</li>
+            <li><strong>🏔️ אזורים מרוחקים:</strong> מקומות עם חיבור אינטרנט לא יציב או ללא חיבור</li>
+            <li><strong>💻 בדיקות מקומיות:</strong> בתי ספר המעדיפים סביבות בחינה מבודדות לחלוטין</li>
+        </ul>
+        
+        <p><strong>יתרונות מרכזיים:</strong></p>
+        <ul>
+            <li>✅ אין צורך בחיבור אינטרנט במהלך הבחינות</li>
+            <li>✅ תלמידים פיזית לא יכולים לחפש תשובות באינטרנט</li>
+            <li>✅ כל המידע נשמר באופן מקומי במחשב שלך</li>
+            <li>✅ אותן תכונות כמו הגרסה המקוונת (פיקוח, בדיקה, דוחות)</li>
+            <li>✅ אידיאלי לסביבות בדיקה באבטחה גבוהה</li>
+        </ul>
+        
+        <p style="text-align: center; margin-top: 15px;">
+            <strong>צור קשר לגרסה אופליין:</strong> <a href="https://www.yamsoft.org" target="_blank">www.yamsoft.org</a>
+        </p>
+    </div>
+</div>
+
+<!-- פרק 2: תחילת עבודה -->
+<div class="section" id="getting-started">
+    <h1>2. תחילת עבודה</h1>
+    
+    <h2>מדריך התחלה מהיר</h2>
+    <p>עקוב אחר השלבים הפשוטים הבאים להתחיל להשתמש במערכת הבחינות:</p>
+    
+    <div class="no-break">
+        <h3><span class="step-number">1</span>הרשמה</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>עבור ל-<strong>ex.yamsoft.org</strong></li>
+                <li>לחץ על <strong>"הרשמה"</strong> או <strong>"צור חשבון"</strong></li>
+                <li>בחר שם משתמש ייחודי וסיסמה מאובטחת</li>
+                <li>השלם את טופס ההרשמה</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">2</span>כניסה לחשבון</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>הזן את שם המשתמש והסיסמה שלך</li>
+                <li>לחץ <strong>"התחבר"</strong></li>
+                <li>תועבר ללוח הבקרה של המורה</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">3</span>צור את הבחינה הראשונה שלך</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>הכן קובץ בחינה בפורמט טקסט (ראה פרק 3)</li>
+                <li>לחץ <strong>"הוסף בחינה"</strong> בלוח הבקרה</li>
+                <li>העלה את קובץ הבחינה שלך</li>
+                <li>צפה ואמת את הבחינה</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">4</span>שתף עם תלמידים</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>קבל את הקישור או הקוד לבחינה</li>
+                <li>שתף עם התלמידים שלך</li>
+                <li>התלמידים יכולים לגשת לבחינה מיידית</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="no-break">
+        <h3><span class="step-number">5</span>עקוב וסקור</h3>
+        <div class="highlight-box">
+            <ul>
+                <li>צפה בתלמידים עושים בחינות בזמן אמת</li>
+                <li>סקור תוצאות בדיקה אוטומטית</li>
+                <li>בדוק ידנית שאלות פתוחות</li>
+                <li>בדוק לוגי פיקוח לפעילות חשודה</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="success-box">
+        <strong>✅ טיפ מקצועי:</strong> התחל עם בחינת תרגול קטנה כדי להתרגל למערכת לפני יצירת המבחנים האמיתיים.
+    </div>
+</div>
+
+<!-- פרק 3: יצירת קבצי בחינה -->
+<div class="section" id="creating-exams">
+    <h1>3. יצירת קבצי בחינה</h1>
+    <p>בחינות נוצרות כקבצי <strong>.txt פשוטים</strong> באמצעות כל עורך טקסט. המערכת ממירה אותם באופן אוטומטי לבחינות אינטראקטיביות מקוונות.</p>
+    <div class="info-box">
+        <p><strong>💡 לפרטים מלאים ראה את המדריך המלא באנגלית.</strong> להלן עקרונות בסיסיים:</p>
+        <ul>
+            <li>שאלות חייבות להתחיל במספר + נקודה (1. 2. 3.)</li>
+            <li>התשובה הנכונה <strong>תמיד ראשונה</strong> ברשימה</li>
+            <li>תשובות ללא מספרים או תבליטים</li>
+            <li>שאלות פתוחות = שאלה ללא אפשרויות תשובה</li>
+        </ul>
+    </div>
+</div>
+
+<!-- פרק 4: סוגי שאלות -->
+<div class="section" id="question-types">
+    <h1>4. סוגי שאלות</h1>
+    <p>המערכת תומכת בשלושה סוגי שאלות:</p>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>📝 רב ברירה</h4>
+            <p>שאלה + מספר אפשרויות תשובה. בדיקה אוטומטית.</p>
+        </div>
+        <div class="feature-card">
+            <h4>✍️ שאלות פתוחות</h4>
+            <p>שאלה ללא תשובות. בדיקה ידנית על ידי המורה.</p>
+        </div>
+        <div class="feature-card">
+            <h4>💻 משימות תכנות</h4>
+            <p>שאלה + "Programming task:" + קוד. בדיקה ידנית.</p>
+        </div>
+    </div>
+</div>
+
+<!-- פרק 5: העלאת בחינות -->
+<div class="section" id="uploading-exams">
+    <h1>5. העלאת בחינות</h1>
+    <h2>תהליך העלאה</h2>
+    <div class="highlight-box">
+        <ol>
+            <li>הכן את קובץ הבחינה (.txt)</li>
+            <li>לחץ <strong>"הוסף בחינה"</strong> בלוח הבקרה</li>
+            <li>בחר את הקובץ מהמחשב או <strong>"טען מדוגמאות"</strong></li>
+            <li>השתמש בכפתורי התצוגה המקדימה:
+                <ul>
+                    <li><strong>View Source</strong> - צפה בקוד המקור הגולמי</li>
+                    <li><strong>Student Preview</strong> - צפה כפי שהתלמיד יראה</li>
+                    <li><strong>Exam Data</strong> - סטטיסטיקות ומידע מפורט</li>
+                </ul>
+            </li>
+            <li>לחץ "העלה" או "הוסף בחינה" לסיום</li>
+        </ol>
+    </div>
+    
+    <h2>🎯 טען מדוגמאות - תבניות מהירות</h2>
+    <div class="success-box">
+        <p><strong>חדש במערכת?</strong> אנו מספקים <strong>בחינות לדוגמה מוכנות</strong> שתוכל להשתמש בהן מיד!</p>
+        <ul>
+            <li>לחץ <strong>"Load from Examples"</strong> במקום "Browse Computer"</li>
+            <li>עיין באוסף הבחינות המוכנות מראש</li>
+            <li>השתמש בהן כתבניות או למידה</li>
+            <li>קטגוריות: Python, אנגלית, CCNA, הדרכות מערכת</li>
+        </ul>
+    </div>
+</div>
+
+<!-- פרק 6: פיקוח ובקרת רמאות -->
+<div class="section" id="proctoring">
+    <h1>6. פיקוח ובקרת רמאות 🔒</h1>
+    
+    <h2>מהו פיקוח?</h2>
+    <p>
+        <strong>פיקוח</strong> פירושו מעקב אחר תלמידים במהלך הבחינה כדי להבטיח יושרה אקדמית. מערכת זו משתמשת ב-<strong>פיקוח דיגיטלי אוטומטי</strong> - המחשב עוקב באופן רצוף אחר התנהגות התלמיד ומתעד כל פעילות חשודה ללא צורך במצלמה או תוכנה נוספת.
+    </p>
+    
+    <div class="highlight-box">
+        <h3>יתרונות מרכזיים:</h3>
+        <ul>
+            <li><strong>מעקב אוטומטי:</strong> אין צורך לצפות בתלמידים באופן ידני</li>
+            <li><strong>לוגים מפורטים:</strong> כל פעולה חשודה נרשמת עם חותמות זמן</li>
+            <li><strong>לא פולשני:</strong> אין צורך במצלמה או הקלטת מסך</li>
+            <li><strong>בדיקה הוגנת:</strong> כל התלמידים מפוקחים באופן שווה</li>
+            <li><strong>מבוסס ראיות:</strong> סקור נתונים קונקרטיים על ניסיונות רמאות</li>
+        </ul>
+    </div>
+    
+    <h2>כיצד ההגנה עובדת</h2>
+    <p>כאשר תלמיד מתחיל בחינה, מערכת הפיקוח מופעלת אוטומטית ועוקבת אחר:</p>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h4>👁️ מעקב פוקוס</h4>
+            <p>מזהה כאשר תלמידים עוזבים את דף הבחינה או עוברים לכרטיסיות/חלונות אחרים</p>
+        </div>
+        <div class="feature-card">
+            <h4>📋 מניעת העתקה</h4>
+            <p>חוסמת העתקה של שאלות ותשובות (Ctrl+C חסומה לחלוטין)</p>
+        </div>
+        <div class="feature-card">
+            <h4>📝 מניעת הדבקה</h4>
+            <p>מונעת הדבקה ממקורות חיצוניים (Ctrl+V חסומה)</p>
+        </div>
+        <div class="feature-card">
+            <h4>🖱️ חסימת לחצן ימני</h4>
+            <p>משבית תפריט הקשר למניעת העתקה/בדיקה</p>
+        </div>
+        <div class="feature-card">
+            <h4>🛠️ חסימת כלי מפתח</h4>
+            <p>מונע פתיחת כלי פיתוח דפדפן וצפייה בקוד מקור</p>
+        </div>
+        <div class="feature-card">
+            <h4>🔊 אזהרות קוליות</h4>
+            <p>משמיע צפצופי אזהרה כאשר מזוהה פעילות חשודה</p>
+        </div>
+    </div>
+    
+    <h2>סוגי רמאות שמזוהים</h2>
+    
+    <table>
+        <tr>
+            <th>סוג אירוע</th>
+            <th>מה זה מזהה</th>
+            <th>רמת חומרה</th>
+            <th>השפעה על תלמיד</th>
+        </tr>
+        <tr>
+            <td><code>focus_lost</code></td>
+            <td>תלמיד עבר לכרטיסייה/חלון/אפליקציה אחרת</td>
+            <td><span class="badge badge-warning">בינונית</span></td>
+            <td>צפצוף אזהרה מושמע</td>
+        </tr>
+        <tr>
+            <td><code>window_minimized</code></td>
+            <td>חלון הבחינה מוזער או מוסתר</td>
+            <td><span class="badge badge-warning">בינונית</span></td>
+            <td>נרשם בשקט</td>
+        </tr>
+        <tr>
+            <td><code>copy_blocked</code></td>
+            <td>ניסה להעתיק טקסט עם Ctrl+C</td>
+            <td><span class="badge badge-warning">בינונית</span></td>
+            <td>פעולה חסומה</td>
+        </tr>
+        <tr>
+            <td><code>paste_attempt</code></td>
+            <td>ניסה להדביק עם Ctrl+V</td>
+            <td><span class="badge badge-warning">בינונית</span></td>
+            <td>פעולה חסומה</td>
+        </tr>
+        <tr>
+            <td><code>right_click</code></td>
+            <td>לחץ ימני על דף הבחינה</td>
+            <td><span class="badge badge-info">נמוכה</span></td>
+            <td>תפריט הקשר מושבת</td>
+        </tr>
+        <tr>
+            <td><code>devtools_f12</code></td>
+            <td>לחץ F12 לפתיחת כלי מפתח</td>
+            <td><span class="badge badge-danger">גבוהה</span></td>
+            <td>לחיצת מקש חסומה</td>
+        </tr>
+        <tr>
+            <td><code>devtools_keyboard</code></td>
+            <td>לחץ Ctrl+Shift+I/J/K (קיצורי דרך מפתח)</td>
+            <td><span class="badge badge-danger">גבוהה</span></td>
+            <td>לחיצת מקש חסומה</td>
+        </tr>
+        <tr>
+            <td><code>view_source</code></td>
+            <td>לחץ Ctrl+U לצפייה בקוד מקור הדף</td>
+            <td><span class="badge badge-danger">גבוהה</span></td>
+            <td>לחיצת מקש חסומה</td>
+        </tr>
+        <tr>
+            <td><code>page_unload</code></td>
+            <td>ניסה לסגור או לרענן את דף הבחינה</td>
+            <td><span class="badge badge-warning">בינונית</span></td>
+            <td>נרשם + אזהרת דפדפן</td>
+        </tr>
+    </table>
+    
+    <h2>סיכום תכונות הפיקוח</h2>
+    <p>מערכת בחינות זו מספקת <strong>הגנה אוטומטית נגד רמאות</strong> הכוללת:</p>
+    
+    <div class="success-box">
+        <ul>
+            <li>🔒 <strong>מעקב בזמן אמת</strong> אחר פעילות התלמיד בבחינה</li>
+            <li>🔒 <strong>חסימה אוטומטית</strong> של העתקה, הדבקה, לחיצה ימנית</li>
+            <li>🔒 <strong>מניעת כלי מפתח</strong> (F12, Ctrl+Shift+I וכו')</li>
+            <li>🔒 <strong>זיהוי מעבר כרטיסיות</strong> עם אזהרות קוליות</li>
+            <li>🔒 <strong>תיעוד מלא</strong> של כל הניסיונות החשודים</li>
+            <li>🔒 <strong>כלי סקירה למורים</strong> לבדיקת הפרות לאחר הבחינה</li>
+        </ul>
+    </div>
+    
+    <div class="info-box">
+        <p><strong>💡 חשוב:</strong> השתמש במערכת זו כדי לעזור לשמור על יושרת הבחינה, אך זכור: טכנולוגיה תומכת בשיטות הוראה טובות, היא לא מחליפה אותן.</p>
+    </div>
+</div>
+
+<!-- פרק 7: חוויית התלמיד -->
+<div class="section" id="student-experience">
+    <h1>7. חוויית התלמיד</h1>
+    <h2>איך תלמידים ניגשים לבחינה</h2>
+    <div class="highlight-box">
+        <ol>
+            <li>התלמיד עובר ל-<strong>ex.yamsoft.org</strong></li>
+            <li>מזין את קוד הבחינה</li>
+            <li>רואה אזהרות פיקוח והוראות</li>
+            <li>מזין שם פרטי ושם משפחה</li>
+            <li>לוחץ "התחל בחינה"</li>
+            <li>עונה על השאלות</li>
+            <li>שולח את הבחינה</li>
+            <li>רואה תוצאות מיידיות (לשאלות רב-ברירה)</li>
+        </ol>
+    </div>
+    <div class="info-box">
+        <p><strong>תצוגת שאלות:</strong> רב-ברירה = כפתורי בחירה | פתוחות = תיבת טקסט | תכנות = קוד + תיבת תשובה</p>
+    </div>
+</div>
+
+<!-- פרק 8: צפייה בתוצאות -->
+<div class="section" id="viewing-results">
+    <h1>8. צפייה בתוצאות</h1>
+    <h2>גישה לתוצאות</h2>
+    <div class="highlight-box">
+        <ul>
+            <li>היכנס ללוח הבקרה שלך</li>
+            <li>לחץ על הבחינה שברצונך לסקור</li>
+            <li>ראה רשימת תלמידים ותוצאותיהם</li>
+            <li>לחץ על תלמיד ספציפי לפרטים מלאים</li>
+        </ul>
+    </div>
+    <h2>מה תוכל לראות</h2>
+    <div class="info-box">
+        <ul>
+            <li><strong>תשובות לשאלות רב-ברירה</strong> - נבדקו אוטומטית</li>
+            <li><strong>תשובות לשאלות פתוחות</strong> - דורשות בדיקה ידנית</li>
+            <li><strong>לוגי פיקוח</strong> - כל הניסיונות החשודים עם חותמות זמן</li>
+            <li><strong>זמן התחלה וסיום</strong> - כמה זמן לקח לתלמיד</li>
+        </ul>
+    </div>
+</div>
+
+<!-- פרק 9: שיטות עבודה מומלצות -->
+<div class="section" id="best-practices">
+    <h1>9. שיטות עבודה מומלצות וטיפים</h1>
+    <div class="success-box">
+        <h3>✅ עצות ליצירת בחינות טובות:</h3>
+        <ul>
+            <li>התחל עם שאלות קלות, התקדם לקשות יותר</li>
+            <li>שלב סוגי שאלות שונים (רב-ברירה, פתוחות, תכנות)</li>
+            <li>השתמש בשאלות פתוחות למחשבה ביקורתית</li>
+            <li>בדוק את הבחינה בעצמך לפני שליחה לתלמידים</li>
+            <li>ספק הוראות ברורות לתלמידים</li>
+            <li>הודע לתלמידים על מערכת הפיקוח מראש</li>
+        </ul>
+    </div>
+</div>
+
+<!-- פרק 10: פתרון בעיות -->
+<div class="section" id="troubleshooting">
+    <h1>10. פתרון בעיות</h1>
+    <h2>בעיות נפוצות ופתרונות</h2>
+    <div class="warning-box">
+        <p><strong>❓ הבחינה לא מעלה:</strong></p>
+        <ul>
+            <li>הקובץ אינו בפורמט .txt → שמור כטקסט רגיל</li>
+            <li>הקובץ גדול מדי → שמור מתחת ל-1MB</li>
+            <li>קידוד שגוי → שמור כ-UTF-8</li>
+        </ul>
+    </div>
+    <div class="warning-box">
+        <p><strong>❓ שאלות לא מוצגות נכון:</strong></p>
+        <ul>
+            <li>בדוק שהשאלות מתחילות במספר + נקודה (1. 2. 3.)</li>
+            <li>וודא שהתשובה הנכונה ראשונה ברשימה</li>
+            <li>השתמש ב-"Exam Data" לראות שגיאות</li>
+        </ul>
+    </div>
+    <div class="warning-box">
+        <p><strong>❓ תלמיד לא יכול לגשת לבחינה:</strong></p>
+        <ul>
+            <li>בדוק שקוד הבחינה נכון</li>
+            <li>ודא שהבחינה מפורסמת ופעילה</li>
+            <li>בדוק חיבור לאינטרנט</li>
+        </ul>
+    </div>
+</div>
+
+<!-- פרק 11: מדריך מהיר -->
+<div class="section" id="quick-reference">
+    <h1>11. מדריך מהיר</h1>
+    <h2>📋 רשימת בדיקה מהירה</h2>
+    <div class="highlight-box">
+        <h3>יצירת בחינה:</h3>
+        <ol>
+            <li>צור קובץ .txt בעורך טקסט</li>
+            <li>שאלות מתחילות ב-1. 2. 3.</li>
+            <li>תשובה נכונה תמיד ראשונה</li>
+            <li>תשובות ללא מספרים</li>
+            <li>שאלות פתוחות = ללא תשובות</li>
+        </ol>
+    </div>
+    <div class="info-box">
+        <h3>העלאה:</h3>
+        <p>לוח בקרה → הוסף בחינה → בחר קובץ → תצוגה מקדימה → העלה</p>
+    </div>
+    <div class="success-box">
+        <h3>מונחים חשובים:</h3>
+        <ul>
+            <li><strong>View Source</strong> - צפה בקוד המקור</li>
+            <li><strong>Student Preview</strong> - צפה כתלמיד</li>
+            <li><strong>Exam Data</strong> - סטטיסטיקות</li>
+            <li><strong>Load from Examples</strong> - טען דוגמאות מוכנות</li>
+            <li><strong>Proctoring</strong> - מערכת פיקוח אוטומטית</li>
+        </ul>
+    </div>
+</div>
+
+<!-- עמוד אחרון - תודה -->
+<div class="section">
+    <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; text-align: center;">
+        <h2 style="color: white; border: none; margin-bottom: 10px;">תודה רבה!</h2>
+        <p style="font-size: 12pt;">
+            מדריך משתמש זה נוצר כדי לעזור למורים כמוך להפיק את המיטב ממערכת הבחינות המקוונת. אנו מקווים שהוא ישמש כמשאב חשוב לאורך מסע ההוראה שלך.
+        </p>
+        <p style="font-size: 11pt; margin-top: 20px; opacity: 0.9;">
+            לשאלות, תמיכה או משוב, אנא בקר באתר שלנו או צור קשר עם מנהל המערכת.
+        </p>
+        <p style="font-size: 11pt; margin-top: 20px;">
+            <strong>יוצר / בעלים:</strong> יואב מוייסייב<br>
+            <a href="https://www.yamsoft.org" style="color: white; text-decoration: underline;">www.yamsoft.org</a>
+        </p>
+        <p style="font-size: 10pt; margin-top: 20px; opacity: 0.8;">
+            גרסה 2.0 | פברואר 2026 | © מערכת בחינות מקוונת<br>
+            <a href="https://ex.yamsoft.org" style="color: white;">ex.yamsoft.org</a>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
