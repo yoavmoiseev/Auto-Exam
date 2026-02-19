@@ -1,0 +1,49 @@
+
+ 1. What is the output of the following Python code  `print(2 + 3 *  4)`?   
+   	14
+   	20
+   	24
+   	9
+
+  2. What is the data type returned by the `input()` function?
+String   	
+Number
+   	List
+   	Boolean (True/False)
+
+3. What will happen if we run the following code?
+   Programming task:
+python
+x = "5"
+y = 2
+print(x + y)
+
+
+ 4. Which of the following is a valid variable name in Python?
+my_value   	
+2value
+my-var
+class
+
+ 5. In your opinion, what are the main advantages of the Python programming language compared to other programming languages?
+
+
+6.   Write a Python program that asks the user for a number, and if the number is even – prints "Even", otherwise – "Odd".
+
+ 7. What is a project you would like to build using Python, and what tools/libraries would you need for it?
+8. In your opinion, what are the most efficient fields in which Python can be used (e.g., Data Science, Web, Artificial Intelligence)?
+9. How can proper use of functions improve the structure and quality of Python code?
+10. Explain in simple words the difference between `=` and `==` in Python.
+11. What is the purpose of the `if` statement in programming, Provide a basic example?
+
+   12. Write a Python program that asks the user for their name and prints: "Hello [name]!"?
+    Programming task:
+    Example:
+    Input: Dan
+    Output: Hello Dan!
+
+  13.     Write a Python program that asks the user for a number and prints its square.
+
+
+   14.  Write a Python program that prints all the numbers from 1 to 10 using a 'for' loop.
+

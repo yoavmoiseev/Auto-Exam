@@ -46,7 +46,7 @@ Multipule lines questions should include
 # The pattern matches lines that start with a number followed by:
 # a period, a space, and then a question mark.
 # Current question format-  '1. What is a motherboard?'
-question_pattern = r"^\d+\.\s.*"   #r"^\d+\.\s.*\?"
+question_pattern = r"^[\u200E\u200F\u202A-\u202E]*\d+\.\s.*"   # allow optional bidi marks before number
 
 grades_file_name = 'GRADES.txt'
 

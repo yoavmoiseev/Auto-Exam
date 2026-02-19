@@ -221,6 +221,9 @@ function renderPreview(questions, language) {
                 html += `<div style="margin: 5px 0; padding: 5px;">${escapeHtml(opt)}</div>`;
             });
         } else {
+            if (q.task_content) {
+                html += `<pre style="background: #f5f5f5; padding: 10px; border-radius: 3px; margin: 10px 0; white-space: pre-wrap;">${escapeHtml(q.task_content)}</pre>`;
+            }
             html += `<div style="margin: 10px 0; padding: 10px; background: white; border: 1px dashed #ccc; min-height: 60px;">
                 <i>(Open question - student writes answer here)</i>
             </div>`;
@@ -346,7 +349,11 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    if (typeof text !== 'string') return text;
+    text = text.replace(/\${/g, '&#36;{');
+    text = text.replace(/`/g, '&#96;');
+    text = text.replace(/\\/g, '\\');
+    return text.replace(/[&<>"'`]/g, m => map[m] || m);
 }
 </script>
 

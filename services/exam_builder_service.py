@@ -14,7 +14,7 @@ class ExamBuilder:
     """
     
     # Pattern for identifying questions: "1. What is..."
-    QUESTION_PATTERN = r"^\d+\.\s.*"
+    QUESTION_PATTERN = r"^[\u200E\u200F\u202A-\u202E]*\d+\.\s.*"
     START_OF_QUESTION_MARK = "."
     
     # Open question markers
@@ -89,12 +89,10 @@ class ExamBuilder:
     @staticmethod
     def remove_number(question):
         """Remove question number: '1. What is...' -> 'What is...'"""
+        # Remove optional leading bidi marks and the leading number + dot + spaces
         try:
-            idx = question.index(ExamBuilder.START_OF_QUESTION_MARK)
-            # Skip the dot and any spaces after it
-            result = question[idx + 1:].strip()
-            return result
-        except ValueError:
+            return re.sub(r'^[\u200E\u200F\u202A-\u202E]*\d+\.\s*', '', question)
+        except Exception:
             return question
     
     @staticmethod
@@ -374,12 +372,12 @@ class ExamBuilder:
                 
                 # Check if this is a question line
                 if re.match(ExamBuilder.QUESTION_PATTERN, line):
-                    # Save previous question if exists
-                    if current_question_line and current_answers:
+                    # Save previous question if exists (include questions with no answers)
+                    if current_question_line:
                         questions.append(ExamBuilder._build_question_obj(
                             current_question_line, current_answers, qa_dict
                         ))
-                    
+
                     # Start new question
                     current_question_line = line
                     current_answers = []
@@ -387,8 +385,8 @@ class ExamBuilder:
                     # This is an answer line
                     current_answers.append(line)
             
-            # Add last question
-            if current_question_line and current_answers:
+            # Add last question (include if it has no answers)
+            if current_question_line:
                 questions.append(ExamBuilder._build_question_obj(
                     current_question_line, current_answers, qa_dict
                 ))
@@ -416,12 +414,15 @@ class ExamBuilder:
         # Get question text without number
         question_text = ExamBuilder.remove_number(question_line)
         
-        # Determine question type
-        q_type = 'multiple_choice'
-        if question_text in qa_dict:
-            first_answer = qa_dict[question_text]
-            if ExamBuilder.is_open_question_marker(first_answer):
-                q_type = 'open'
+        # Determine question type: if no answers -> open; else consult qa_dict for open markers
+        if not answers:
+            q_type = 'open'
+        else:
+            q_type = 'multiple_choice'
+            if question_text in qa_dict:
+                first_answer = qa_dict[question_text]
+                if ExamBuilder.is_open_question_marker(first_answer):
+                    q_type = 'open'
         
         # Build question object
         question_obj = {
@@ -444,9 +445,26 @@ class ExamBuilder:
                     question_obj['options'].append(answer)
         else:
             # For open questions, keep any additional info (like "Programming task:")
-            for answer in answers:
-                if ExamBuilder.is_open_question_marker(answer):
-                    question_obj['options'].append(answer)  # Keep the marker text
+            question_obj['task_content'] = ''
+            if answers:
+                # Find the first open-question marker index
+                marker_idx = None
+                for i, a in enumerate(answers):
+                    if ExamBuilder.is_open_question_marker(a):
+                        marker_idx = i
+                        break
+
+                if marker_idx is not None:
+                    # Keep the lines after the marker as options/task content
+                    remaining = answers[marker_idx + 1:]
+                    question_obj['options'] = remaining.copy()
+                    question_obj['task_content'] = '\n'.join(remaining).strip()
+                else:
+                    # No explicit marker; treat all answers as task content
+                    question_obj['options'] = answers.copy()
+                    question_obj['task_content'] = '\n'.join(answers).strip()
+            else:
+                question_obj['task_content'] = ''
         
         return question_obj
     

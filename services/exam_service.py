@@ -14,7 +14,8 @@ class ExamService:
     
     def __init__(self):
         self.exams_dir = app_config.TEACHERS_DIR
-        self.question_pattern = r"^\d+\.\s.*"
+        # Use bidi-tolerant pattern to match questions at start of line
+        self.question_pattern = r"^[\u200E\u200F\u202A-\u202E]*\d+\.\s.*"
     
     def load_exam_file(self, teacher_id, exam_filename):
         """Load exam file for teacher"""

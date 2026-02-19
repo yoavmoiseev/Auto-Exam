@@ -525,7 +525,11 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    if (typeof text !== 'string') return text;
+    text = text.replace(/\${/g, '&#36;{');
+    text = text.replace(/`/g, '&#96;');
+    text = text.replace(/\\/g, '\\');
+    return text.replace(/[&<>"'`]/g, m => map[m] || m);
 }
 
 // ========================================================================

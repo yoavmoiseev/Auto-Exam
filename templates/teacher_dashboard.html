@@ -457,34 +457,30 @@ function studentPreviewContent() {
     container.style.direction = '';
     container.style.textAlign = '';
     
-    let html = `<div style="direction: ${direction}; text-align: ${direction === 'rtl' ? 'right' : 'left'};">`;
-    
+    let html = `<form style="direction: ${direction}; text-align: ${direction === 'rtl' ? 'right' : 'left'};">`;
+
     questions.forEach((q, index) => {
         html += `
-            <div style="margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
-                <div style="font-weight: bold; margin-bottom: 10px;">
-                    ${index + 1}. ${escapeHtml(q.question)}
-                </div>
+            <fieldset style="margin-bottom:25px;padding:15px;border:1px solid #ddd;border-radius:5px;background:#f9f9f9;">
+                <legend><b>${index + 1}. ${escapeHtml(q.question)}</b></legend>
         `;
-        
+
         if (q.type === 'multiple_choice') {
-            q.options.forEach(opt => {
-                html += `<div style="margin: 5px 0; padding: 5px;">${escapeHtml(opt)}</div>`;
+            q.options.forEach((opt, i) => {
+                html += `<div style="margin:5px 0;"><label><input type="radio" name="q${index}" value="${escapeHtml(opt)}"> ${escapeHtml(opt)}</label></div>`;
             });
         } else {
             // Show task content (code/examples) if exists
             if (q.task_content) {
-                html += `<pre style="background: #f5f5f5; padding: 10px; border-radius: 3px; margin: 10px 0; white-space: pre-wrap;">${escapeHtml(q.task_content)}</pre>`;
+                html += `<pre style="background:#f5f5f5;padding:10px;border-radius:3px;margin:10px 0;white-space:pre-wrap;">${escapeHtml(q.task_content)}</pre>`;
             }
-            html += `<div style="margin: 10px 0; padding: 10px; background: white; border: 1px dashed #ccc; min-height: 60px;">
-                <i>(Open question - student writes answer here)</i>
-            </div>`;
+            html += `<div style="margin:10px 0;"><textarea name="q${index}" rows="4" cols="80" style="width:100%;"></textarea></div>`;
         }
-        
-        html += `</div>`;
+
+        html += `</fieldset>`;
     });
-    
-    html += '</div>';
+
+    html += `</form>`;
     container.innerHTML = html;
     document.getElementById('previewStudentModal').style.display = 'block';
 }
@@ -734,7 +730,7 @@ class ExamBuilderClient {
     
     parseQuestions() {
         const questions = [];
-        const questionRegex = /^\d+\.\s/;
+        const questionRegex = /^[\u200E\u200F\u202A-\u202E]*\d+\.\s/;
         let currentQuestion = null;
         let currentAnswers = [];
         
@@ -828,7 +824,12 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    if (typeof text !== 'string') return text;
+    // Prevent template literal injection and script-breaking characters
+    text = text.replace(/\${/g, '&#36;{');
+    text = text.replace(/`/g, '&#96;');
+    text = text.replace(/\\/g, '\\');
+    return text.replace(/[&<>"'`]/g, m => map[m] || m);
 }
 
 </script>
