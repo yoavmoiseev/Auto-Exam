@@ -1,296 +1,257 @@
-# 📚 Exam System - Многоязычная система прокторинга для экзаменов
+# 📚 Exam System – Multilingual Online Exam & Proctoring Platform
 
-Полнофункциональная система управления онлайн-экзаменами с встроенной противодействием списыванию (прокторингом), поддержкой нескольких языков и мобильной адаптацией.
+A full-featured online examination management system with built-in anti-cheating (proctoring), multi-language support, and responsive design.
 
-## ✨ Основные возможности
+---
 
-### 👨‍🏫 Для учителей
-- ✅ Создание и управление экзаменами
-- ✅ Просмотр результатов студентов в реальном времени
-- ✅ Мониторинг активных экзаменов
-- ✅ Скачивание результатов в формате ZIP
-- ✅ Просмотр попыток списывания
+## ✨ Key Features
 
-### 👨‍🎓 Для студентов
-- ✅ Прохождение экзаменов с различными типами вопросов
-- ✅ Поддержка открытых вопросов (textarea)
-- ✅ Поддержка множественного выбора (radio buttons)
-- ✅ Таймер экзамена
-- ✅ Автосохранение ответов
-- ✅ Просмотр оценки после завершения
+### 👨‍🏫 For Teachers
 
-### 🔒 Безопасность и прокторинг
-- ✅ Блокировка Ctrl+C (копирование)
-- ✅ Блокировка Google Translate (опциально)
-- ✅ Полноэкранный режим (опциально)
-- ✅ Запись попыток списывания
-- ✅ Отслеживание времени прохождения
-- ✅ HTML отчеты с попытками списывания
+* Create and manage exams
+* View student results in real time
+* Monitor active exam sessions
+* Download results as ZIP archives
+* Review cheating attempts
 
-### 🌍 Локализация
-- ✅ Английский (en)
-- ✅ Русский (ru)
-- ✅ Иврит (he) с RTL поддержкой
-- ✅ Расширяемая система переводов
+---
 
-### 📱 Адаптивный дизайн
-- ✅ Десктоп (>768px) - полная таблица результатов
-- ✅ Планшет (480-768px) - оптимизированный вид
-- ✅ Смартфон (<480px) - карточный макет с видимыми кнопками
+### 👨‍🎓 For Students
 
-## 🚀 Быстрый старт
+* Take exams with multiple question types
+* Support for open-ended questions (textarea)
+* Support for multiple-choice questions (radio buttons)
+* Exam timer
+* Auto-save answers
+* View final score after completion
 
-### Локально (Windows/Mac/Linux)
+---
+
+## 🔒 Security & Proctoring
+
+* Blocking **Ctrl+C (copying)**
+* Blocking **Google Translate** (optional)
+* Fullscreen mode (optional)
+* Logging cheating attempts
+* Tracking exam duration
+* HTML reports with cheating activity
+
+---
+
+## 🌍 Localization
+
+* English (en)
+* Russian (ru)
+* Hebrew (he) with RTL support
+* Easily extensible translation system
+
+---
+
+## 📱 Responsive Design
+
+* Desktop (>768px): full results table
+* Tablet (480–768px): optimized layout
+* Mobile (<480px): card-based UI with accessible buttons
+
+---
+
+## 🚀 Quick Start
+
+### Local Setup (Windows / Mac / Linux)
 
 ```bash
-# 1. Клонировать репозиторий
+# 1. Clone repository
 git clone https://github.com/yoavmoiseev/Auto-Exam.git
 cd Ex
 
-# 2. Создать виртуальное окружение
+# 2. Create virtual environment
 python -m venv venv
 
-# Активировать (Windows)
+# Activate (Windows)
 .\venv\Scripts\activate
-# или (Mac/Linux)
+# or (Mac/Linux)
 source venv/bin/activate
 
-# 3. Установить зависимости
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Запустить приложение
+# 4. Run application
 python app.py
-
-# Откройте в браузере: http://127.0.0.1:5000
 ```
 
-### Логин по умолчанию
-- **Учитель:** teacher1 / password123
-- **Студент:** просто введите имя на странице экзамена
+Open in browser:
+[http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-## 📁 Структура проекта
+---
 
-```
-Ex/
-├── app.py                    # Главное Flask приложение
-├── config.py                 # Конфигурация
-├── consts.py                 # Константы и настройки
-├── Exam.py                   # Парсер экзаменов
-├── requirements.txt          # Python зависимости
-├── RUN_EXAM_SYSTEM.bat       # Запуск на Windows
-├── START server.py           # Запуск сервера
-│
-├── services/                 # Бизнес-логика
-│   ├── exam_builder_service.py
-│   ├── exam_session_service.py
-│   ├── exam_service.py
-│   ├── file_service.py
-│   ├── auth_service.py
-│   └── proctoring_service.py
-│
-├── templates/                # HTML шаблоны
-│   ├── base.html            # Базовый шаблон (учителя)
-│   ├── base_student.html    # Базовый шаблон (студента)
-│   ├── student_exam_session.html
-│   ├── teacher_results.html
-│   ├── teacher_dashboard.html
-│   ├── exam_settings_modal.html
-│   └── ...
-│
-├── static/                   # CSS, JS, медиа
-│   ├── css/
-│   │   ├── base.css
-│   │   ├── responsive.css
-│   │   └── rtl.css           # Для иврита
-│   ├── js/
-│   │   ├── exam_script.js
-│   │   ├── i18n.js           # Интернационализация
-│   │   └── ...
-│   └── proctoring.js         # Противодействие списыванию
-│
-├── data/                     # Данные
-│   └── translations/         # Файлы переводов
-│       ├── en.json
-│       ├── ru.json
-│       ├── he.json
-│       └── TRANSLATIONS_INDEX.md
-│
-├── Exams/                    # Примеры файлов экзаменов
-│   ├── Basic Pyhon.txt
-│   ├── English ITE.txt
-│   └── ...
-│
-├── teachers/                 # Результаты учителей
-│   ├── teacher_1/
-│   │   ├── exams/           # Загруженные экзамены
-│   │   └── results/         # Результаты студентов
-│   └── ...
-│
-└── DEPLOYMENT.md             # Инструкция по развертыванию
-```
+### Default Login
 
-## 🛠️ Технологический стек
+* Teacher: `teacher1 / password123`
+* Student: enter name on exam page
 
-- **Backend:** Python 3.8+, Flask
-- **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
-- **Кодировка:** UTF-8 (поддержка Unicode для иврита/русского)
-- **i18n:** JSON файлы с переводами
-- **Хранилище:** Файловая система (текстовые файлы)
+---
 
-## 📋 Формат файла экзамена
+## 📁 Project Structure
 
-Экзамены хранятся в текстовых файлах (`.txt`). Формат:
+* **app.py** – main Flask application
+* **services/** – business logic layer
+* **templates/** – HTML templates
+* **static/** – CSS, JS, media
+* **data/translations/** – i18n files
+* **Exams/** – sample exam files
+* **teachers/** – exam results storage
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend:** Python 3.8+, Flask
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript
+* **Encoding:** UTF-8 (full Unicode support)
+* **i18n:** JSON-based translations
+* **Storage:** File-based (text files)
+
+---
+
+## 📋 Exam File Format
+
+Exams are stored as `.txt` files:
 
 ```
-1. Первый вопрос?
-A) Ответ 1
-B) Ответ 2
-C) Правильный ответ
-D) Ответ 4
+1. Question?
+A) Answer 1
+B) Answer 2
+C) Correct answer
+D) Answer 4
 
-2. Второй вопрос с открытым ответом?
+2. Open question?
 Open Question
 Programming task:
 Write a Python function
-
-3. Третий вопрос
-Multiple lines question/task:
-Type your answer here
 ```
 
-## 🎨 Локализация
+---
 
-Добавить новый язык:
+## 🎨 Localization
+
+To add a new language:
 
 ```bash
-# 1. Скопировать en.json в новый язык
 cp data/translations/en.json data/translations/xx.json
-
-# 2. Отредактировать переводы
-nano data/translations/xx.json
-
-# 3. Добавить язык в consts.py
-# SUPPORTED_LANGUAGES = ['en', 'ru', 'he', 'xx']
 ```
 
-## 📊 Результаты и отчеты
-
-### GRADES.txt
-Автоматически генерируется после каждого экзамена:
-```
-2026 February 03 16-05-49 | Yoav_Moiseev | Score: 85% | Cheat: 0 | Duration: 5m 23s
-2026 February 03 16-06-12 | New_Student | Score: 92% | Cheat: 1 | Duration: 4m 15s
-```
-
-### HTML файлы студентов
-Полный отчет с вопросами, ответами и оценкой.
-
-### Cheat_Attempts.html
-Попытки списывания (Ctrl+C блокировка и т.д.)
-
-## 🔧 Конфигурация
-
-**Основные настройки в `consts.py`:**
+Then update:
 
 ```python
-# Языки
+SUPPORTED_LANGUAGES = ['en', 'ru', 'he', 'xx']
+```
+
+---
+
+## 📊 Results & Reports
+
+**GRADES.txt**
+
+```
+2026 February 03 16-05-49 | Yoav_Moiseev | Score: 85% | Cheat: 0 | Duration: 5m 23s
+```
+
+Includes:
+
+* Score
+* Cheating attempts
+* Duration
+
+Additional reports:
+
+* Student HTML reports
+* Cheat_Attempts.html
+
+---
+
+## 🔧 Configuration (consts.py)
+
+```python
 SUPPORTED_LANGUAGES = ['en', 'ru', 'he']
 DEFAULT_LANGUAGE = 'en'
 
-# Безопасность
 ENABLE_PROCTORING = True
-BLOCK_TRANSLATION = False  # По умолчанию отключено
-FULLSCREEN_MODE = False    # По умолчанию отключено
+BLOCK_TRANSLATION = False
+FULLSCREEN_MODE = False
 
-# Порты и хосты
 FLASK_HOST = '127.0.0.1'
 FLASK_PORT = 5000
 ```
 
-## 🚀 Развертывание на сервере
+---
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) для полной инструкции.
+## 🚀 Deployment
 
-### Быстрое развертывание на VM:
-
-```bash
-# На VM (Oracle Cloud, Ubuntu 22.04)
-ssh ubuntu@151.145.84.100 -i ~/.ssh/oracle_cloud_key
-
-# Клонировать и установить
-cd ~/apps
-git clone https://github.com/yoavmoiseev/Auto-Exam.git Ex
-cd Ex
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Создать systemd сервис
-sudo nano /etc/systemd/system/flask-exam.service
-# (скопировать конфиг из DEPLOYMENT.md)
-
-# Запустить
-sudo systemctl daemon-reload
-sudo systemctl enable flask-exam
-sudo systemctl start flask-exam
-```
-
-## 🐛 Troubleshooting
-
-### "Port already in use"
-```bash
-# Найти процесс на порту
-lsof -i :5000
-# Убить процесс
-kill -9 <PID>
-```
-
-### "Module not found"
-```bash
-# Активировать venv
-.\venv\Scripts\activate
-# Переустановить зависимости
-pip install -r requirements.txt
-```
-
-### Проблемы с кодировкой (иврит/русский)
-```bash
-# Убедиться что файлы в UTF-8
-file -i exam_file.txt
-# Переконвертировать если нужно
-iconv -f CP1252 -t UTF-8 exam_file.txt -o exam_file_utf8.txt
-```
-
-## 📝 История изменений
-
-See [FIXES_REPORT.md](FIXES_REPORT.md) для полного списка изменений.
-
-### Последние обновления (3 февраля 2026)
-- ✅ Мобильная версия Results (карточки на смартфонах)
-- ✅ Блокировка Google Translate (опциональная)
-- ✅ Режим полного экрана (опциональный)
-- ✅ Улучшенная блокировка копирования
-- ✅ Исправлен формат GRADES.txt с датой
-
-## 🤝 Вклад в проект
-
-1. Fork репозиторий
-2. Создайте feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit изменения (`git commit -m 'Add some AmazingFeature'`)
-4. Push в branch (`git push origin feature/AmazingFeature`)
-5. Откройте Pull Request
-
-## 📧 Контакт
-
-- **GitHub:** [yoavmoiseev](https://github.com/yoavmoiseev)
-- **Repository:** [Auto-Exam](https://github.com/yoavmoiseev/Auto-Exam)
-
-## 📄 Лицензия
-
-Этот проект лицензирован под MIT License - смотрите файл LICENSE для деталей.
+Supports deployment on VM (e.g., Ubuntu 22.04, Oracle Cloud).
+See `DEPLOYMENT.md` for full instructions.
 
 ---
 
-**Статус:** ✅ Версия 1.0 готова к развертыванию  
-**Последнее обновление:** 3 февраля 2026  
-**Поддерживаемые ОС:** Windows, macOS, Linux (Ubuntu 22.04+)
+## 🐛 Troubleshooting
+
+**Port already in use**
+
+```bash
+lsof -i :5000
+kill -9 <PID>
+```
+
+**Module not found**
+
+```bash
+pip install -r requirements.txt
+```
+
+**Encoding issues**
+
+```bash
+iconv -f CP1252 -t UTF-8 file.txt -o file_utf8.txt
+```
+
+---
+
+## 📝 Recent Updates (Feb 3, 2026)
+
+* Mobile results UI
+* Google Translate blocking (optional)
+* Fullscreen mode (optional)
+* Improved copy protection
+* Fixed GRADES.txt format
+
+---
+
+## 🤝 Contributing
+
+* Fork repository
+* Create feature branch
+* Commit changes
+* Open Pull Request
+
+---
+
+## 📧 Contact
+
+* GitHub: yoavmoiseev
+* Repository: Auto-Exam
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## ✅ Status
+
+Production-ready (v1.0)
+Last updated: February 3, 2026
+Supported OS: Windows, macOS, Linux
+
+
+Скажи 👍
