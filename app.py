@@ -67,6 +67,15 @@ def ensure_directories():
         os.makedirs(directory, exist_ok=True)
 
 
+def get_duplicate_question_errors(exam_path):
+    """Return duplicate-question validation errors for an exam file."""
+    metadata = ExamBuilder.validate_exam_file(exam_path)
+    return [
+        error for error in metadata.get('errors', [])
+        if error.get('type') == 'duplicate_question'
+    ]
+
+
 # ==========================================
 # ROUTES - STATIC FILES
 # ==========================================
@@ -813,6 +822,18 @@ def start_exam_with_settings():
         
         user = get_current_user()
         teacher_id = f"teacher_{user['id']}"
+
+        exam_path = os.path.join(
+            app_config.TEACHERS_DIR, teacher_id, 'exams', exam_filename
+        )
+        if os.path.isfile(exam_path):
+            duplicate_errors = get_duplicate_question_errors(exam_path)
+            if duplicate_errors:
+                return jsonify({
+                    'success': False,
+                    'message': 'Cannot start exam: duplicate question text found. Review Exam Data for details.',
+                    'errors': duplicate_errors
+                }), 400
         
         # Get exam title (filename without .txt)
         exam_title = exam_filename.replace('.txt', '')
@@ -876,6 +897,18 @@ def start_exam_session(filename):
     """Teacher starts a new exam session (fallback without settings)"""
     user = get_current_user()
     teacher_id = f"teacher_{user['id']}"
+
+    exam_path = os.path.join(
+        app_config.TEACHERS_DIR, teacher_id, 'exams', filename
+    )
+    if os.path.isfile(exam_path):
+        duplicate_errors = get_duplicate_question_errors(exam_path)
+        if duplicate_errors:
+            return jsonify({
+                'success': False,
+                'message': 'Cannot start exam: duplicate question text found. Review Exam Data for details.',
+                'errors': duplicate_errors
+            }), 400
     
     # Get exam title (filename without .txt)
     exam_title = filename.replace('.txt', '')

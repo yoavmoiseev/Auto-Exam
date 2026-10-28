@@ -5,6 +5,7 @@ Exam Builder Service - based on original Exam.py
 import re
 import random
 import os
+import unicodedata
 
 
 class ExamBuilder:
@@ -582,6 +583,36 @@ class ExamBuilder:
             
             # Extract raw question blocks for error reporting
             question_blocks = ExamBuilder.extract_question_blocks(content)
+
+            # Duplicate question text is currently used as a dictionary key by
+            # answer collection and scoring. Reject duplicates before they can
+            # silently overwrite one another.
+            seen_questions = {}
+            heading_number = 0
+            for line in lines:
+                line = line.strip()
+                if not re.match(ExamBuilder.QUESTION_PATTERN, line):
+                    continue
+
+                heading_number += 1
+                number_match = re.match(r'^[\u200E\u200F\u202A-\u202E]*(\d+)\.', line)
+                question_number = int(number_match.group(1)) if number_match else heading_number
+                question_text = ExamBuilder.remove_number(line)
+                normalized_text = unicodedata.normalize('NFKC', question_text)
+                normalized_text = re.sub(r'[\u200E\u200F\u202A-\u202E]', '', normalized_text)
+                normalized_text = ' '.join(normalized_text.split()).casefold()
+
+                if normalized_text in seen_questions:
+                    first_number, first_text = seen_questions[normalized_text]
+                    metadata['errors'].append({
+                        'question_num': question_number,
+                        'duplicate_of': first_number,
+                        'type': 'duplicate_question',
+                        'message': f'Question {question_number} repeats question {first_number}: duplicate question text',
+                        'text': f'{first_text}\n{line}'
+                    })
+                else:
+                    seen_questions[normalized_text] = (question_number, line)
             
             # Parse all questions
             current_question_line = ""
